@@ -32,6 +32,7 @@ from mjlab.viewer import ViewerConfig
 
 import src.tasks.amp_loco.mdp as mdp
 from src.tasks.amp_loco.mdp.terrain import RANDOM_ROUGH_TERRAINS_CFG
+from src.tasks.velocity.mdp.curriculums import terrain_levels_vel, commands_vel
 
 def make_amp_env_cfg() -> ManagerBasedRlEnvCfg:
   """Create AMP Locomotion task configuration."""
@@ -78,6 +79,12 @@ def make_amp_env_cfg() -> ManagerBasedRlEnvCfg:
       noise=Unoise(n_min=-0.5, n_max=0.5),
     ),
     "actions": ObservationTermCfg(func=mdp.last_action),
+    "height_scan": ObservationTermCfg(
+      func=envs_mdp.height_scan,
+      params={"sensor_name": "terrain_scan"},
+      noise=Unoise(n_min=-0.1, n_max=0.1),
+      scale=1 / terrain_scan.max_distance,
+    ),
   }
 
   critic_terms = {
@@ -85,6 +92,11 @@ def make_amp_env_cfg() -> ManagerBasedRlEnvCfg:
     "base_lin_vel": ObservationTermCfg(
       func=mdp.builtin_sensor,
       params={"sensor_name": "robot/imu_lin_vel"},
+    ),
+    "height_scan": ObservationTermCfg(
+      func=envs_mdp.height_scan,
+      params={"sensor_name": "terrain_scan"},
+      scale=1 / terrain_scan.max_distance,
     ),
     "body_pos_b": ObservationTermCfg(
     func=mdp.robot_body_pos_b,
@@ -361,6 +373,27 @@ def make_amp_env_cfg() -> ManagerBasedRlEnvCfg:
   }
 
   ##
+  # Curriculum
+  ##
+
+  curriculum = {
+    "terrain_levels": CurriculumTermCfg(
+      func=terrain_levels_vel,
+      params={"command_name": "twist"},
+    ),
+    "command_vel": CurriculumTermCfg(
+      func=commands_vel,
+      params={
+        "command_name": "twist",
+        "velocity_stages": [
+          {"step": 0, "lin_vel_x": (-0.5, 1.0), "lin_vel_y": (-0.5, 0.5), "ang_vel_z": (-1.0, 1.0)},
+          {"step": 5000 * 24, "lin_vel_x": (-1.0, 2.0), "lin_vel_y": (-1.0, 1.0)},
+        ],
+      },
+    ),
+  }
+
+  ##
   # Assemble and return
   ##
 
@@ -381,7 +414,7 @@ def make_amp_env_cfg() -> ManagerBasedRlEnvCfg:
     events=events,
     rewards=rewards,
     terminations=terminations,
-    curriculum={},
+    curriculum=curriculum,
     metrics=metrics,
     viewer=ViewerConfig(
       origin_type=ViewerConfig.OriginType.ASSET_BODY,

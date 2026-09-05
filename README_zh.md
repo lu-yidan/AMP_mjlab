@@ -44,6 +44,8 @@
 conda activate mjlab
 cd AMP_mjlab
 python -m pip install -e .
+cd rsl_rl
+python -m pip install -e .
 ```
 
 ### 2. 应用 mjlab 补丁（可选）
