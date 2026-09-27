@@ -67,11 +67,22 @@ POSTURE_QUATS: dict[str, tuple[float, float, float, float]] = {
 }
 
 
+#: Settled pelvis (root) heights in metres for each posture, measured with
+#: ``probe_settle.py``. Setting the reset height to these values starts every
+#: episode already resting on the floor instead of dropping from 0.5 m.
+POSTURE_SETTLED_HEIGHTS: dict[str, float] = {
+  "prone": 0.17,
+  "supine": 0.134,
+  "left_side": 0.139,
+  "right_side": 0.1425,
+}
+
+
 def reset_root_state_posture(
   env: ManagerBasedRlEnv,
   env_ids: torch.Tensor | None,
   posture: Literal["prone", "supine", "left_side", "right_side"] | None = "prone",
-  height: float = DEFAULT_HEIGHT,
+  height: float | None = DEFAULT_HEIGHT,
   xy_range: float = 1.0,
   asset_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
 ) -> None:
@@ -88,7 +99,6 @@ def reset_root_state_posture(
   asset: Entity = env.scene[asset_cfg.name]
 
   positions = env.scene.env_origins[env_ids].clone()
-  positions[:, 2] += height
   positions[:, :2] += torch.empty(len(env_ids), 2, device=env.device).uniform_(
     -xy_range, xy_range
   )
@@ -102,10 +112,26 @@ def reset_root_state_posture(
       device=env.device,
       dtype=positions.dtype,
     )[choice]
+    if height is None:
+      heights = torch.tensor(
+        [POSTURE_SETTLED_HEIGHTS[n] for n in names],
+        device=env.device,
+        dtype=positions.dtype,
+      )[choice]
+    else:
+      heights = torch.full((num_reset,), height, device=env.device, dtype=positions.dtype)
   else:
     quats = torch.tensor(
       POSTURE_QUATS[posture], device=env.device, dtype=positions.dtype
     ).expand(num_reset, 4)
+    if height is None:
+      heights = torch.full(
+        (num_reset,), POSTURE_SETTLED_HEIGHTS[posture], device=env.device, dtype=positions.dtype
+      )
+    else:
+      heights = torch.full((num_reset,), height, device=env.device, dtype=positions.dtype)
+
+  positions[:, 2] += heights
 
   asset.write_root_link_pose_to_sim(
     torch.cat([positions, quats], dim=-1), env_ids=env_ids
