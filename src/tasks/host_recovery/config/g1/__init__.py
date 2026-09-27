@@ -13,3 +13,15 @@ register_mjlab_task(
   rl_cfg=unitree_g1_host_standup_ppo_runner_cfg(),
   runner_cls=HoSTOnPolicyRunner,
 )
+
+from src.tasks.host_recovery.pressed import pressed_env_cfg
+
+_pressed_rl = unitree_g1_host_standup_ppo_runner_cfg()
+_pressed_rl.experiment_name = "g1_host_pressed"
+register_mjlab_task(
+  task_id="Unitree-G1-HoST-Pressed",
+  env_cfg=pressed_env_cfg(),
+  play_env_cfg=pressed_env_cfg(play=True),
+  rl_cfg=_pressed_rl,
+  runner_cls=HoSTOnPolicyRunner,
+)
