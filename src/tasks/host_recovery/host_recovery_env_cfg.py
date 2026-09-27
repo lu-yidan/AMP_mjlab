@@ -285,6 +285,11 @@ def make_host_recovery_env_cfg() -> ManagerBasedRlEnvCfg:
       weight=-1.5 * mdp.STYLE_GROUP_WEIGHT * mdp.HOST_CONSTRAINT_DT,
       params={"asset_cfg": SceneEntityCfg("robot", joint_names=(".*_knee_joint",))},
     ),
+    "style_elbow_deviation": RewardTermCfg(
+      func=mdp.style_elbow_deviation,
+      weight=-2.0 * mdp.STYLE_GROUP_WEIGHT * mdp.HOST_CONSTRAINT_DT,
+      params={"asset_cfg": SceneEntityCfg("robot", joint_names=(".*_elbow_joint",))},
+    ),
     "style_shank_orientation": RewardTermCfg(
       func=mdp.style_shank_orientation,
       weight=14.0 * mdp.STYLE_GROUP_WEIGHT * mdp.HOST_CONSTRAINT_DT,

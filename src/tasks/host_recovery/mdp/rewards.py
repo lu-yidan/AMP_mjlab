@@ -274,6 +274,27 @@ def style_knee_deviation(
   )
 
 
+def style_elbow_deviation(
+  env: ManagerBasedRlEnv,
+  upper_limit: float = 2.0,
+  lower_limit: float = -0.05,
+  asset_cfg: SceneEntityCfg = SceneEntityCfg("robot", joint_names=()),
+) -> torch.Tensor:
+  """Keep elbows in a human-like range while standing up.
+
+  The G1 elbow range is ``[-1.0472, 2.0944]`` with flexion positive and
+  negative angles meaning hyperextension (bending the wrong way). Penalising
+  ``q < lower_limit`` stops the elbow from being forced backward, while
+  ``|q| > upper_limit`` keeps the final pose from locking into an unnaturally
+  folded arm. Mirrors ``style_knee_deviation`` (HoST-style indicator).
+  """
+  asset: Entity = env.scene[asset_cfg.name]
+  q = _joint_pos(asset, asset_cfg.joint_ids)
+  return (torch.max(torch.abs(q), dim=-1)[0] > upper_limit) | (
+    torch.min(q, dim=-1)[0] < lower_limit
+  )
+
+
 def style_shank_orientation(
   env: ManagerBasedRlEnv,
   phase1_height: float = 0.45,

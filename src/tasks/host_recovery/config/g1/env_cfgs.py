@@ -152,6 +152,15 @@ def unitree_g1_host_standup_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
     None if posture_env == "none" else posture_env
   )
 
+  # Optional: start the robot already resting on the floor instead of
+  # dropping from HoST's 0.5 m pelvis height. Lower the reset height to the
+  # settled contact height so every episode begins as a static lying pose
+  # (no visible fall) rather than a drop-and-settle.
+  default_height = cfg.events["reset_base"].params.get("height", 0.5)
+  cfg.events["reset_base"].params["height"] = float(
+    os.environ.get("HOST_RESET_HEIGHT", str(default_height))
+  )
+
   ##
   # Play mode overrides, mirroring HoST's ``play.py``.
   ##
