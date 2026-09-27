@@ -68,13 +68,14 @@ POSTURE_QUATS: dict[str, tuple[float, float, float, float]] = {
 
 
 #: Settled pelvis (root) heights in metres for each posture, measured with
-#: ``probe_settle.py``. Setting the reset height to these values starts every
+#: ``probe_settle_natural.py`` (gravity only, no pull force). Setting the reset
+#: height to these values starts every
 #: episode already resting on the floor instead of dropping from 0.5 m.
 POSTURE_SETTLED_HEIGHTS: dict[str, float] = {
-  "prone": 0.17,
-  "supine": 0.134,
-  "left_side": 0.139,
-  "right_side": 0.1425,
+  "prone": 0.093,
+  "supine": 0.075,
+  "left_side": 0.094,
+  "right_side": 0.099,
 }
 
 
