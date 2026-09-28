@@ -1,0 +1,254 @@
+[
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_5500.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_5500.pt",
+    "size": 9265845,
+    "sha256": "b09c517ddf99e22060a5552b404ea627a0ac2a54b5020e4926860d820635134b"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/params/agent.yaml",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\params\\agent.yaml",
+    "size": 958,
+    "sha256": "22328dd24b8a0651081f7ceb3486827ec96bd55ecd19438019f74fdf6f8a3db3"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/params/env.yaml",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\params\\env.yaml",
+    "size": 53575,
+    "sha256": "878b79b35b526d2ae889db00a93f736f5190de860f368314b7af521837a0cbbd"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_9500.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_9500.pt",
+    "size": 9265845,
+    "sha256": "e15ca8a30333494221eff0372a8d71f9007c573bfdeb8ee1afa185b12d09519d"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_6000.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_6000.pt",
+    "size": 9265845,
+    "sha256": "73c3513ded07494b1d572ff704a99984aa1384b6c7d335dcb6b3182265e58738"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_7000.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_7000.pt",
+    "size": 9265845,
+    "sha256": "b4890a9a7907e9648e1472b86daad18cddeab6aaae7d6d01488ea49cb4cb490d"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/git/AMP_mjlab.diff",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\git\\AMP_mjlab.diff",
+    "size": 137,
+    "sha256": "d4854f034186de6775229bcf6356e53ed7feb12705312ada40ce843b80f1c9d3"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/videos/supine/rl-video-step-0.mp4",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\videos\\supine\\rl-video-step-0.mp4",
+    "size": 1098955,
+    "sha256": "cfb4f60df0763c4a48cebf0a26684d04baa7556fca72ded5b7e2dcbf7d65bd7f"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/videos/prone/rl-video-step-0.mp4",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\videos\\prone\\rl-video-step-0.mp4",
+    "size": 770499,
+    "sha256": "b01f2ddadf0b9ddba7cb338264fe735e1af05126ef8dc4a24b3b66c2f1987e76"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/videos/left_side/rl-video-step-0.mp4",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\videos\\left_side\\rl-video-step-0.mp4",
+    "size": 910454,
+    "sha256": "e2da0a23ace63d5f1718710d526600a77834811999198ce231728d26a5de8226"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/videos/right_side/rl-video-step-0.mp4",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\videos\\right_side\\rl-video-step-0.mp4",
+    "size": 992440,
+    "sha256": "e5d58848e57108c5aa41a9aba6eaa87b39e56df6169298ab8ccc151ef2850121"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_7500.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_7500.pt",
+    "size": 9265845,
+    "sha256": "fb9d7cde9361d48ab480e590b252ec2f73c421dbe2521d11335195068d7a9083"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_6500.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_6500.pt",
+    "size": 9265845,
+    "sha256": "80f862ee760b40d421593eeba48312848f60d766f59729286a98f893c516aef7"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/policy.onnx",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\policy.onnx",
+    "size": 1625963,
+    "sha256": "5edd885babbfed24552a6dab20e9b1c4556898ccd11e085c8231e773fc1b7fae"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_10500.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_10500.pt",
+    "size": 9265921,
+    "sha256": "b8fcf21d64f91d60fc6cd781a85a883935b2c9d273537d818105d9df167f5c19"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_4500.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_4500.pt",
+    "size": 9265845,
+    "sha256": "775f151491909015de06ebed961a3e9da31fbe51573592d0d4bc58bc3bd53ebb"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_3500.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_3500.pt",
+    "size": 9265845,
+    "sha256": "7ba111aac46a7f4b4c879b9f652b1c6163cb482ec056bc56bae287505992804f"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_11999.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_11999.pt",
+    "size": 9265921,
+    "sha256": "2eea6c6b37127143e008c335ba787338956871b8e76e9b9613018c320e2120a7"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_9000.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_9000.pt",
+    "size": 9265845,
+    "sha256": "20c635b2651c2f8994bc4cee27a309d08bda7d85a6619acf23e7d507de7dfb4a"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_8000.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_8000.pt",
+    "size": 9265845,
+    "sha256": "e02f23624fd1308d6ac5a8107d77df0f7ee1220586edb71296930e2b90fa3c94"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/events.out.tfevents.1790505084.autodl-container-828f41a185-000ffc78.143224.0",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\events.out.tfevents.1790505084.autodl-container-828f41a185-000ffc78.143224.0",
+    "size": 36672308,
+    "sha256": "dbcc1fecc0be40fb99f04c459e99dc98dc04b3eabea655b1ad64c04bdf3742bb"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_3000.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_3000.pt",
+    "size": 9265845,
+    "sha256": "1cd2676a492dfad42f78214271219b3dc557e09160dc0382df316b1235c944d9"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_500.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_500.pt",
+    "size": 9265769,
+    "sha256": "7c841c47f8d8d56fb038998097e019a09e388d8402d48bdb4607196390b74c7c"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_2000.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_2000.pt",
+    "size": 9265845,
+    "sha256": "9d714cb169fa625ded632f2693689b86d837aa6ae7ce85ce71b8ec00e1cc2908"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_1000.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_1000.pt",
+    "size": 9265845,
+    "sha256": "8ce69ab8980299a3dc8ec19c9efe8b84859312daf63401a5cc18be946deaecef"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_2500.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_2500.pt",
+    "size": 9265845,
+    "sha256": "8eabec9de8ff3a6f4f5f3323147cc9637c04529c1ae3472d631133222e7e0b61"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_10000.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_10000.pt",
+    "size": 9265921,
+    "sha256": "c19af1d05f94f7fa67494ddfb1346fb67be02d3731855285e64e2f10d5040bec"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_4000.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_4000.pt",
+    "size": 9265845,
+    "sha256": "05fc3c359705c6fa3698436c053f79a65f77ad704e9c28ba84a01024e02350bc"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_1500.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_1500.pt",
+    "size": 9265845,
+    "sha256": "0026027d3f8bf5c6eeb2fd31ac68e17f28a351728df127f4723cbf5896d07169"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_11000.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_11000.pt",
+    "size": 9265921,
+    "sha256": "d689952dbaa1bb029794d8d1cd122dfb2c4c320c72ce069dde22848c01b9e2c9"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_5000.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_5000.pt",
+    "size": 9265845,
+    "sha256": "64cbceeecc4c2441ef97bd3984e506148dca196b0ed3a9db7eea0760add1029d"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_11500.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_11500.pt",
+    "size": 9265921,
+    "sha256": "e880eaf773ffb89255838529431a43233203c14d327c44579a48fd3bbfe49648"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_0.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_0.pt",
+    "size": 9265169,
+    "sha256": "01384424b18863eb7406a327d63ceabd7f20367d7e3b1067ccbc0a6757827d83"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_8500.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\model_8500.pt",
+    "size": 9265845,
+    "sha256": "9253ed3bd36f6842f80c912b3384348379c827a7c728ff0f81f5217b003e131a"
+  },
+  {
+    "remote": "/home/sjw/train_static_v2.log",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\train_static_v2.log",
+    "size": 27403004,
+    "sha256": "b38fcfeb0dc3b4e5ea465e2704bb4d0216024a2def69f116bc2814345b7b763a"
+  },
+  {
+    "remote": "/home/sjw/static_v2_pipeline.sh",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\static_v2_pipeline.sh",
+    "size": 1165,
+    "sha256": "c774b0b364df57d9fc6e517a60ab5c51addb707ff0bedffa4c5d6829c2735191"
+  },
+  {
+    "remote": "/home/sjw/eval_static_v2_9500.log",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\training_data\\2026-09-27_18-31-18_static_diverse_elbow_v2\\eval_static_v2_9500.log",
+    "size": 46576,
+    "sha256": "47c6fd319960450e7ba9f2869ed6826f37314bebdca97180aa2734295a0388ab"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_11999.pt",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\checkpoints\\static_diverse_elbow_v2_model_11999.pt",
+    "size": 9265921,
+    "sha256": "2eea6c6b37127143e008c335ba787338956871b8e76e9b9613018c320e2120a7"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/videos/prone/rl-video-step-0.mp4",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\videos\\static_v2_prone.mp4",
+    "size": 770499,
+    "sha256": "b01f2ddadf0b9ddba7cb338264fe735e1af05126ef8dc4a24b3b66c2f1987e76"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/videos/supine/rl-video-step-0.mp4",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\videos\\static_v2_supine.mp4",
+    "size": 1098955,
+    "sha256": "cfb4f60df0763c4a48cebf0a26684d04baa7556fca72ded5b7e2dcbf7d65bd7f"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/videos/left_side/rl-video-step-0.mp4",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\videos\\static_v2_left_side.mp4",
+    "size": 910454,
+    "sha256": "e2da0a23ace63d5f1718710d526600a77834811999198ce231728d26a5de8226"
+  },
+  {
+    "remote": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/videos/right_side/rl-video-step-0.mp4",
+    "local": "C:\\Users\\26390\\Desktop\\mjlab\\videos\\static_v2_right_side.mp4",
+    "size": 992440,
+    "sha256": "e5d58848e57108c5aa41a9aba6eaa87b39e56df6169298ab8ccc151ef2850121"
+  }
+]
