@@ -37,4 +37,5 @@ run, including every intermediate checkpoint, is stored locally at
 Each of the 34 downloaded run/log/model/video files was checked against a
 remote SHA256 digest in its local `download_manifest.json`. The GitHub archive
 keeps the best and final checkpoints rather than duplicating all 13 models.
-`SHA256SUMS` lists hashes of the curated files.
+`SHA256SUMS` lists hashes of the curated files (excluding itself and
+`.gitattributes`). The latter preserves their bytes across Git checkouts.
