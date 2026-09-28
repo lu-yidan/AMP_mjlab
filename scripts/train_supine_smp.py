@@ -7,6 +7,7 @@ from pathlib import Path
 
 import mjlab.tasks
 import src.tasks
+import torch
 
 from mjlab.envs import ManagerBasedRlEnv
 from mjlab.rl import RslRlVecEnvWrapper
@@ -35,6 +36,10 @@ def main():
   runner = load_runner_cls(task)(env, asdict(agent), str(log_dir), "cuda:0")
   runner.load(str(checkpoint), load_optimizer=False)
   runner.current_learning_iteration = 0
+  noise_std = os.environ.get("ACTION_NOISE_STD")
+  if noise_std is not None:
+    with torch.no_grad():
+      runner.alg.policy.std.fill_(float(noise_std))
   (log_dir / "params").mkdir()
   dump_yaml(log_dir / "params/env.yaml", asdict(cfg))
   dump_yaml(log_dir / "params/agent.yaml", asdict(agent))
@@ -43,6 +48,7 @@ def main():
     "posture": "supine",
     "load": "none",
     "auxiliary_pull_force": 0,
+    "action_noise_std_override": float(noise_std) if noise_std is not None else None,
     "smp_reference": "https://github.com/tholin-1007/smp/tree/0e67286fe7df77a73740d237ef36b109136552b6",
     "full_smp_prior": False,
   }, indent=2))
