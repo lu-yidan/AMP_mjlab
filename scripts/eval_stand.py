@@ -14,7 +14,7 @@ import src.tasks  # noqa: F401
 
 
 def main():
-    task = "Unitree-G1-HoST-StandUp"
+    task = os.environ.get("TASK", "Unitree-G1-HoST-StandUp")
     ckpt = os.environ["CKPT"]
     num_envs = int(os.environ.get("NUM_ENVS", "64"))
     steps = int(os.environ.get("STEPS", "3000"))
