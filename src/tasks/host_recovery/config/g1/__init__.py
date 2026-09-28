@@ -37,3 +37,15 @@ register_mjlab_task(
   rl_cfg=_supine_smp_rl,
   runner_cls=HoSTOnPolicyRunner,
 )
+
+from src.tasks.host_recovery.prone_smp import prone_smp_env_cfg
+
+_prone_smp_rl = unitree_g1_host_standup_ppo_runner_cfg()
+_prone_smp_rl.experiment_name = "g1_host_prone_smp"
+register_mjlab_task(
+  task_id="Unitree-G1-HoST-ProneSmp",
+  env_cfg=prone_smp_env_cfg(),
+  play_env_cfg=prone_smp_env_cfg(play=True),
+  rl_cfg=_prone_smp_rl,
+  runner_cls=HoSTOnPolicyRunner,
+)

@@ -1,4 +1,4 @@
-"""Fine-tune supine no-load HoST with SMP's two get-up task rewards."""
+"""Fine-tune no-load HoST with SMP get-up rewards, supine by default."""
 
 import json
 import os
@@ -21,7 +21,14 @@ def main():
   log_dir = Path(os.environ["LOG_DIR"])
   log_dir.mkdir(parents=True, exist_ok=False)
   configure_torch_backends()
-  task = "Unitree-G1-HoST-SupineSmp"
+  task = os.environ.get("SMP_TASK", "Unitree-G1-HoST-SupineSmp")
+  posture_by_task = {
+    "Unitree-G1-HoST-SupineSmp": "supine",
+    "Unitree-G1-HoST-ProneSmp": "prone",
+  }
+  if task not in posture_by_task:
+    raise ValueError(f"Unsupported SMP task: {task}")
+  posture = posture_by_task[task]
   cfg = load_env_cfg(task)
   cfg.scene.num_envs = int(os.environ.get("NUM_ENVS", "4096"))
   cfg.seed = 42
@@ -29,7 +36,7 @@ def main():
   agent.seed = 42
   agent.algorithm.learning_rate = float(os.environ.get("LEARNING_RATE", "5e-5"))
   agent.algorithm.entropy_coef = float(os.environ.get("ENTROPY_COEF", "0.01"))
-  agent.save_interval = 500
+  agent.save_interval = int(os.environ.get("SAVE_INTERVAL", "500"))
   agent.logger = "tensorboard"
   iterations = int(os.environ.get("MAX_ITER", "6000"))
   agent.max_iterations = iterations
@@ -55,7 +62,7 @@ def main():
   dump_yaml(log_dir / "params/agent.yaml", asdict(agent))
   (log_dir / "source.json").write_text(json.dumps({
     "checkpoint": str(checkpoint),
-    "posture": "supine",
+    "posture": posture,
     "load": "none",
     "auxiliary_pull_force": 0,
     "action_noise_std_override": float(noise_std) if noise_std is not None else None,
@@ -70,7 +77,7 @@ def main():
     runner.learn(num_learning_iterations=iterations, init_at_random_ep_len=False)
   finally:
     env.close()
-  print("SUPINE_SMP_TRAINING_DONE", flush=True)
+  print(f"{posture.upper()}_SMP_TRAINING_DONE", flush=True)
 
 
 if __name__ == "__main__":
