@@ -27,7 +27,8 @@ def main():
   cfg.seed = 42
   agent = load_rl_cfg(task)
   agent.seed = 42
-  agent.algorithm.learning_rate = 5e-5
+  agent.algorithm.learning_rate = float(os.environ.get("LEARNING_RATE", "5e-5"))
+  agent.algorithm.entropy_coef = float(os.environ.get("ENTROPY_COEF", "0.01"))
   agent.save_interval = 500
   agent.logger = "tensorboard"
   iterations = int(os.environ.get("MAX_ITER", "6000"))
@@ -36,10 +37,19 @@ def main():
   runner = load_runner_cls(task)(env, asdict(agent), str(log_dir), "cuda:0")
   runner.load(str(checkpoint), load_optimizer=False)
   runner.current_learning_iteration = 0
+  freeze_normalizer = os.environ.get("FREEZE_OBS_NORMALIZER", "0") == "1"
+  if freeze_normalizer:
+    # The source checkpoint's actor normalizer has seen far fewer samples
+    # than one 4096-env rollout. Updating it on a single-posture batch shifts
+    # the policy input enough to destroy the pretrained recovery behavior.
+    runner.obs_normalizer.until = int(runner.obs_normalizer.count.item())
+    runner.privileged_obs_normalizer.until = int(runner.privileged_obs_normalizer.count.item())
   noise_std = os.environ.get("ACTION_NOISE_STD")
   if noise_std is not None:
     with torch.no_grad():
       runner.alg.policy.std.fill_(float(noise_std))
+  if os.environ.get("FREEZE_ACTION_STD", "0") == "1":
+    runner.alg.policy.std.requires_grad_(False)
   (log_dir / "params").mkdir()
   dump_yaml(log_dir / "params/env.yaml", asdict(cfg))
   dump_yaml(log_dir / "params/agent.yaml", asdict(agent))
@@ -49,6 +59,10 @@ def main():
     "load": "none",
     "auxiliary_pull_force": 0,
     "action_noise_std_override": float(noise_std) if noise_std is not None else None,
+    "freeze_action_std": os.environ.get("FREEZE_ACTION_STD", "0") == "1",
+    "freeze_obs_normalizer": freeze_normalizer,
+    "learning_rate": agent.algorithm.learning_rate,
+    "entropy_coef": agent.algorithm.entropy_coef,
     "smp_reference": "https://github.com/tholin-1007/smp/tree/0e67286fe7df77a73740d237ef36b109136552b6",
     "full_smp_prior": False,
   }, indent=2))

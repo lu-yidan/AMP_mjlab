@@ -23,7 +23,7 @@ def main():
     configure_torch_backends()
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-    env_cfg = load_env_cfg(task, play=True)
+    env_cfg = load_env_cfg(task, play=os.environ.get("EVAL_TRAIN_CFG") != "1")
     env_cfg.scene.num_envs = num_envs
     if "ACTION_SCALE" in os.environ:
         env_cfg.actions["joint_pos"].scale = float(os.environ["ACTION_SCALE"])
