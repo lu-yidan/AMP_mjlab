@@ -1,4 +1,4 @@
-"""Headless video: prone -> stand up -> stable standing, zero pull force."""
+"""Headless recovery video for a selected HoST task, with zero pull force."""
 import os
 os.environ.setdefault("MUJOCO_GL", "egl")
 import torch
@@ -16,7 +16,7 @@ import src.tasks  # noqa: F401
 
 
 def main():
-    task = "Unitree-G1-HoST-StandUp"
+    task = os.environ.get("TASK", "Unitree-G1-HoST-StandUp")
     ckpt = os.environ["CKPT"]
     action_scale = float(os.environ.get("ACTION_SCALE", "0.30"))
     frames = int(os.environ.get("FRAMES", "800"))
