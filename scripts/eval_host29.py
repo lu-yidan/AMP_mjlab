@@ -75,7 +75,7 @@ def main() -> None:
                 for step in range(args.steps):
                     actions = policy(obs["actor"])
                     obs, _, dones, _ = wrapper.step(actions)
-                    valid &= ~dones
+                    valid &= ~dones.bool()
                     torso_z = robot.data.body_link_pos_w[:, torso_id, 2]
                     feet_z = robot.data.site_pos_w[:, foot_ids, 2].mean(dim=1)
                     height = torso_z - feet_z
