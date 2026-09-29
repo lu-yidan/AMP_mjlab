@@ -71,7 +71,9 @@ def main() -> None:
             final_standing = torch.zeros_like(valid)
             final_upright = torch.zeros_like(valid)
 
-            with torch.inference_mode():
+            # Environment managers update persistent buffers in-place between
+            # postures, so no_grad is required here instead of inference_mode.
+            with torch.no_grad():
                 for step in range(args.steps):
                     actions = policy(obs["actor"])
                     obs, _, dones, _ = wrapper.step(actions)
