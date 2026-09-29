@@ -91,7 +91,7 @@ def main() -> None:
                     final_standing = standing
                     final_upright = upright & valid
 
-            held_times = first_hold[first_hold >= 0].float() * cfg.step_dt
+            held_times = first_hold[first_hold >= 0].float() * env.step_dt
             results[posture] = {
                 "valid_fraction": _fraction(valid),
                 "termination_fraction": _fraction(~valid),
@@ -113,7 +113,7 @@ def main() -> None:
             "checkpoint": str(args.checkpoint),
             "num_envs_per_posture": args.num_envs,
             "steps": args.steps,
-            "step_dt": cfg.step_dt,
+            "step_dt": env.step_dt,
             "hold_steps": args.hold_steps,
             "success_definition": "torso-minus-feet > 0.6 m and projected gravity z < -0.8 for consecutive hold_steps",
             "results": results,
