@@ -127,7 +127,8 @@ def host_noise_vector(
   """
   asset: Entity = env.scene[asset_cfg.name]
   num_joints = asset.data.joint_pos.shape[-1]
-  vector = torch.zeros(NUM_ONE_STEP_OBS, device=env.device)
+  num_actions = env.action_manager.get_term("joint_pos").raw_action.shape[-1]
+  vector = torch.zeros(7 + 2 * num_joints + num_actions, device=env.device)
   vector[0:3] = NOISE_ANG_VEL * ANG_VEL_SCALE
   vector[3:6] = NOISE_GRAVITY
   start = 6
