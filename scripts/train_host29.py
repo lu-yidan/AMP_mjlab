@@ -27,6 +27,7 @@ def main():
     p.add_argument('--log-dir', type=Path, required=True)
     p.add_argument('--smoke', action='store_true')
     p.add_argument('--verify-checkpoint', type=Path)
+    p.add_argument('--resume', type=Path)
     a = p.parse_args()
     if a.smoke:
         # Four rollouts of 50 steps reach beyond the 120-step motor-off period.
@@ -52,7 +53,9 @@ def main():
         assert wrapper.num_actions == 29
         report = dict(joints=list(robot.joint_names), actor_dim=564, actions=29,
                       num_envs=a.num_envs, iterations=a.iterations,
-                      seed=a.seed, from_scratch=a.verify_checkpoint is None, cuda_visible=os.getenv('CUDA_VISIBLE_DEVICES'),
+                      seed=a.seed, from_scratch=a.verify_checkpoint is None and a.resume is None,
+                      resume_checkpoint=str(a.resume) if a.resume else None,
+                      cuda_visible=os.getenv('CUDA_VISIBLE_DEVICES'),
                       method='existing HoST port, single critic PPO; not full paper HoST',
                       robot='repository G1 29DoF; A6 deployment asset parity not yet established',
                       physics_dt=0.002, control_dt=0.02,
@@ -87,7 +90,18 @@ def main():
             assert torch.isfinite(actions).all()
             print('CHECKPOINT_RELOAD_FINITE', str(a.verify_checkpoint), flush=True)
             return
-        runner.learn(num_learning_iterations=a.iterations, init_at_random_ep_len=False)
+        if a.resume:
+            runner.load(str(a.resume), load_optimizer=True, map_location='cuda:0')
+            # A checkpoint named model_N is written after completing update N.
+            runner.current_learning_iteration += 1
+            print('RESUMED_AT_ITERATION', runner.current_learning_iteration, flush=True)
+        remaining = a.iterations - runner.current_learning_iteration
+        if remaining <= 0:
+            raise ValueError(
+                f'target iterations {a.iterations} must exceed resume iteration '
+                f'{runner.current_learning_iteration}'
+            )
+        runner.learn(num_learning_iterations=remaining, init_at_random_ep_len=False)
         print('HOST29_TRAINING_DONE', flush=True)
     finally:
         env.close()

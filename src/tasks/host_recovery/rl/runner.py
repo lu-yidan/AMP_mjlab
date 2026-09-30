@@ -94,11 +94,12 @@ class HoSTOnPolicyRunner(MjlabOnPolicyRunner):
     accepted so playback can request an inference-only load without overriding
     the whole checkpoint logic.
     """
-    del load_optimizer
     infos = super().load(
       path, load_cfg=load_cfg, strict=strict, map_location=map_location
     )
     loaded = torch.load(path, map_location=map_location, weights_only=False)
+    if load_optimizer and "optimizer_state_dict" in loaded:
+      self.alg.optimizer.load_state_dict(loaded["optimizer_state_dict"])
     if getattr(self, "empirical_normalization", False) and "obs_norm_state_dict" in loaded:
       self.obs_normalizer.load_state_dict(loaded["obs_norm_state_dict"])
       priv = getattr(self, "privileged_obs_normalizer", None)
