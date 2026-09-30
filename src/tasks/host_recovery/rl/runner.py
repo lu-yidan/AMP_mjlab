@@ -94,11 +94,12 @@ class HoSTOnPolicyRunner(MjlabOnPolicyRunner):
     accepted so playback can request an inference-only load without overriding
     the whole checkpoint logic.
     """
-    del load_optimizer
     infos = super().load(
       path, load_cfg=load_cfg, strict=strict, map_location=map_location
     )
     loaded = torch.load(path, map_location=map_location, weights_only=False)
+    if load_optimizer and "optimizer_state_dict" in loaded:
+      self.alg.optimizer.load_state_dict(loaded["optimizer_state_dict"])
     if getattr(self, "empirical_normalization", False) and "obs_norm_state_dict" in loaded:
       self.obs_normalizer.load_state_dict(loaded["obs_norm_state_dict"])
       priv = getattr(self, "privileged_obs_normalizer", None)
@@ -108,6 +109,8 @@ class HoSTOnPolicyRunner(MjlabOnPolicyRunner):
     # Restore the HoST curricula that live outside the model weights.
     env_state = (infos or {}).get("env_state", {})
     env = self.env.unwrapped
+    if "common_step_counter" in env_state:
+      env.common_step_counter = int(env_state["common_step_counter"])
     # Playback uses a different env count and a fixed play action scale, and it
     # disables curricula entirely; restoring per-env curriculum tensors there
     # would either crash the step event or override the play scale.

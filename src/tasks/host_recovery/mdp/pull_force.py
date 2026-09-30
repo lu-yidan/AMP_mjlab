@@ -30,6 +30,8 @@ from typing import TYPE_CHECKING
 
 import torch
 
+from .observations import UNACTUATED_STEPS
+
 if TYPE_CHECKING:
   from mjlab.envs import ManagerBasedRlEnv
 
@@ -39,6 +41,21 @@ PULL_FORCE = 200.0
 NO_ORIENTATION = False
 #: Body the force is applied to (HoST uses its virtual torso link).
 PULL_FORCE_BODY = "torso_link"
+
+
+def scheduled_pull_force_cap(
+  common_step_counter: int,
+  steps_per_update: int = 50,
+  warmup_updates: int = 2000,
+  anneal_updates: int = 6000,
+  initial_force: float = PULL_FORCE,
+) -> float:
+  """Return the deterministic force cap for the mixed-assistance curriculum."""
+  if steps_per_update <= 0 or anneal_updates <= 0:
+    raise ValueError("steps_per_update and anneal_updates must be positive")
+  update = float(common_step_counter) / float(steps_per_update)
+  progress = min(max((update - warmup_updates) / anneal_updates, 0.0), 1.0)
+  return float(initial_force) * (1.0 - progress)
 
 
 class PullForceState:
@@ -106,6 +123,51 @@ def pull_force_decay(
   return state.force.mean()
 
 
+def mixed_pull_force_schedule(
+  env: ManagerBasedRlEnv,
+  env_ids: torch.Tensor | None,
+  initial_force: float = PULL_FORCE,
+  warmup_updates: int = 2000,
+  anneal_updates: int = 6000,
+  steps_per_update: int = 50,
+  zero_force_fraction: float = 0.25,
+) -> torch.Tensor:
+  """Reset into paired assisted and strictly unassisted cohorts.
+
+  A global success trigger can deadlock when synchronized environments contain
+  several start postures.  This schedule always includes the deployment
+  condition while linearly removing the bootstrap force from the other cohort.
+  """
+  if not 0.0 <= zero_force_fraction <= 1.0:
+    raise ValueError("zero_force_fraction must be in [0, 1]")
+  state = PullForceState.get()
+  if state.force is None:
+    state.init(env, initial_force)
+  assert state.force is not None
+  if env_ids is None or len(env_ids) == 0:
+    env_ids = torch.arange(env.num_envs, device=env.device, dtype=torch.long)
+
+  cap = scheduled_pull_force_cap(
+    env.common_step_counter,
+    steps_per_update=steps_per_update,
+    warmup_updates=warmup_updates,
+    anneal_updates=anneal_updates,
+    initial_force=initial_force,
+  )
+  period = max(1, round(1.0 / zero_force_fraction)) if zero_force_fraction else 0
+  if period:
+    unassisted = torch.remainder(env_ids, period) == 0
+  else:
+    unassisted = torch.zeros_like(env_ids, dtype=torch.bool)
+  values = torch.full(
+    (len(env_ids), 1), cap, device=env.device, dtype=state.force.dtype
+  )
+  values[unassisted] = 0.0
+  state.force[env_ids] = values
+  env._host_pull_force_cap = cap  # type: ignore[attr-defined]
+  return state.force.mean()
+
+
 def _resolve_wrench_writer(env: ManagerBasedRlEnv, body_name: str):
   """Find the entity method that writes an external wrench, if this mjlab has one."""
   asset = env.scene["robot"]
@@ -137,7 +199,7 @@ def apply_pull_force(
   body_name: str = PULL_FORCE_BODY,
   no_orientation: bool = NO_ORIENTATION,
   force_when_down: bool = False,
-  unactuated_steps: int = 120,
+  unactuated_steps: int = UNACTUATED_STEPS,
 ) -> None:
   """Apply HoST's upward torso force for the current step.
 
