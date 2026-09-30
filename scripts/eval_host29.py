@@ -33,6 +33,10 @@ def main() -> None:
     parser.add_argument("--steps", type=int, default=500)
     parser.add_argument("--hold-steps", type=int, default=50)
     parser.add_argument("--seed", type=int, default=20260930)
+    parser.add_argument(
+        "--action-scale", default="checkpoint",
+        help="checkpoint to restore the saved curriculum value, or a numeric scale",
+    )
     args = parser.parse_args()
 
     cfg = flat29_env_cfg(play=True)
@@ -44,6 +48,26 @@ def main() -> None:
     try:
         runner = HoSTOnPolicyRunner(wrapper, asdict(agent), device="cuda:0")
         runner.load(str(args.checkpoint), load_optimizer=False, map_location="cuda:0")
+        if args.action_scale == "checkpoint":
+            saved = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
+            saved_scale = saved.get("infos", {}).get("env_state", {}).get("host_action_rescale")
+            if saved_scale is None:
+                raise RuntimeError("checkpoint has no host_action_rescale state")
+            action_scale = float(saved_scale.float().mean())
+        else:
+            action_scale = float(args.action_scale)
+        action_term = env.action_manager.get_term("joint_pos")
+        if isinstance(action_term.cfg.scale, dict):
+            action_term.cfg.scale = {key: action_scale for key in action_term.cfg.scale}
+        else:
+            action_term.cfg.scale = action_scale
+        if isinstance(action_term._scale, torch.Tensor):
+            action_term._scale[:] = action_scale
+        else:
+            action_term._scale = action_scale
+        env._host_action_rescale = torch.full(
+            (args.num_envs, 1), action_scale, device=env.device
+        )
         policy = runner.get_inference_policy(device="cuda:0")
         robot = env.scene["robot"]
         torso_id = robot.find_bodies("torso_link")[0][0]
@@ -117,6 +141,7 @@ def main() -> None:
             "steps": args.steps,
             "step_dt": env.step_dt,
             "hold_steps": args.hold_steps,
+            "action_scale": action_scale,
             "success_definition": "torso-minus-feet > 0.6 m and projected gravity z < -0.8 for consecutive hold_steps",
             "results": results,
         }
