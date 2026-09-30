@@ -43,3 +43,26 @@ deployment asset (including actuator limits). Before A6 adaptation, align robot
 dynamics, reset banks, sensors, substep statistics, historical buffers and
 success/invalid criteria, then fork paired guidance-off/on runs from one frozen
 checkpoint. Do not report this initial flat run as a historical A6 reproduction.
+
+## 2026-09-30 failed-run audit
+
+The first 29-joint run was stopped after checkpoint 5000: deterministic,
+unassisted evaluation had zero success in all four postures and the curriculum
+remained at action scale 1.0 / pull force 200 N. Its checkpoints are retained as
+negative evidence and must not initialize A6 experiments.
+
+Comparison against the official HoST source identified three silent semantic
+differences, corrected in commit `66a6333`:
+
+- the official `unactuated_timesteps=30` remains 30 policy steps because HoST
+  multiplies by `0.02 / control_dt`; the port had incorrectly divided by the
+  physics step and used 120 policy steps;
+- HoST already folds the 0.02 s control period into constraint weights while
+  leaving the task group unscaled, so mjlab reward-manager dt scaling is disabled;
+- official exploration starts at standard deviation 0.8 without an upper clamp;
+  the generic vendored policy had silently capped it at 0.5. The cap is now an
+  optional policy parameter and remains unchanged for non-HoST configurations.
+
+The corrected run is a fresh start, not a continuation of the failed policy.
+Checkpoints 500 and 1000 are mandatory four-posture evaluation gates before the
+run is allowed to continue unattended to 12000.
