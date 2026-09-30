@@ -22,6 +22,8 @@ import torch
 from mjlab.entity import Entity
 from mjlab.managers.scene_entity_config import SceneEntityCfg
 
+from .observations import UNACTUATED_STEPS
+
 if TYPE_CHECKING:
   from mjlab.envs import ManagerBasedRlEnv
 
@@ -30,10 +32,6 @@ _DEFAULT_ASSET_CFG = SceneEntityCfg("robot")
 #: HoST ``curriculum.dof_vel_limit`` / ``base_vel_limit``.
 DOF_VEL_LIMIT = 300.0
 BASE_VEL_LIMIT = 20.0
-
-#: HoST ``env.unactuated_timesteps`` converted to policy steps (see observations).
-UNACTUATED_STEPS = 120
-
 
 def dof_velocity_out_of_bounds(
   env: ManagerBasedRlEnv,

@@ -30,6 +30,8 @@ from typing import TYPE_CHECKING
 
 import torch
 
+from .observations import UNACTUATED_STEPS
+
 if TYPE_CHECKING:
   from mjlab.envs import ManagerBasedRlEnv
 
@@ -137,7 +139,7 @@ def apply_pull_force(
   body_name: str = PULL_FORCE_BODY,
   no_orientation: bool = NO_ORIENTATION,
   force_when_down: bool = False,
-  unactuated_steps: int = 120,
+  unactuated_steps: int = UNACTUATED_STEPS,
 ) -> None:
   """Apply HoST's upward torso force for the current step.
 

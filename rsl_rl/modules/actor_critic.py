@@ -38,6 +38,7 @@ class ActorCritic(nn.Module):
         activation="elu",
         init_noise_std=1.0,
         noise_std_type: str = "scalar",
+        max_noise_std: float | None = 0.5,
         action_output_activation: str = "none",
         **kwargs,
     ):
@@ -82,6 +83,7 @@ class ActorCritic(nn.Module):
 
         # Action noise
         self.noise_std_type = noise_std_type
+        self.max_noise_std = max_noise_std
         if self.noise_std_type == "scalar":
             self.std = nn.Parameter(init_noise_std * torch.ones(num_actions))
         elif self.noise_std_type == "per_dim":
@@ -130,9 +132,9 @@ class ActorCritic(nn.Module):
         mean = self.actor(observations)
         # compute standard deviation
         if self.noise_std_type == "scalar":
-            std = torch.clamp(self.std, 1.0e-6, 0.5).expand_as(mean)
+            std = torch.clamp(self.std, min=1.0e-6, max=self.max_noise_std).expand_as(mean)
         elif self.noise_std_type == "per_dim":
-            std = torch.clamp(self.std, 1.0e-6, 0.5)
+            std = torch.clamp(self.std, min=1.0e-6, max=self.max_noise_std)
         elif self.noise_std_type == "log":
             std = torch.clamp_min(torch.exp(self.log_std), 1.0e-6).expand_as(mean)
         else:
