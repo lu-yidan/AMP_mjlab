@@ -1,0 +1,201 @@
+/home/sjw/AMP_mjlab/.venv/lib/python3.11/site-packages/torch/jit/_script.py:1491: FutureWarning: `torch.jit.script` is deprecated. Please switch to `torch.compile` or `torch.export`.
+  warnings.warn(
+Warp 1.12.0 initialized:
+   CUDA Toolkit 12.9, Driver 13.0
+   Devices:
+     "cpu"      : "x86_64"
+     "cuda:0"   : "NVIDIA GeForce RTX 4090" (47 GiB, sm_89, mempool enabled)
+   Kernel cache:
+     /home/sjw/.cache/warp/1.12.0
+Warp DeprecationWarning: The symbol `warp.context.runtime` will soon be removed from the public API. It can still be accessed from `warp._src.context.runtime` but might be changed or removed without notice.
+Module mujoco_warp._src.smooth 95a0b8b load on device 'cuda:0' took 2.68 ms  (cached)
+Module mujoco_warp._src.collision_driver 88f7770 load on device 'cuda:0' took 0.35 ms  (cached)
+Module _nxn_broadphase__locals__kernel_e73b1315 e73b131 load on device 'cuda:0' took 0.37 ms  (cached)
+Module _primitive_narrowphase__locals__primitive_narrowphase_fedabfe7 fedabfe load on device 'cuda:0' took 0.60 ms  (cached)
+Module mujoco_warp._src.constraint 27c5750 load on device 'cuda:0' took 1.93 ms  (cached)
+Module _efc_contact_init__locals__kernel_fda71e14 fda71e1 load on device 'cuda:0' took 0.38 ms  (cached)
+Module _efc_contact_jac_dense__locals__kernel_7974b597 cc0fc30 load on device 'cuda:0' took 0.45 ms  (cached)
+Module _efc_contact_update__locals__kernel_90315d53 90315d5 load on device 'cuda:0' took 0.43 ms  (cached)
+Module mujoco_warp._src.forward b4bf9c3 load on device 'cuda:0' took 1.18 ms  (cached)
+Module mujoco_warp._src.passive 1a5e55c load on device 'cuda:0' took 0.86 ms  (cached)
+Module mujoco_warp._src.sensor 7fc0378 load on device 'cuda:0' took 2.12 ms  (cached)
+Module mujoco_warp._src.forward ab3b1a6 load on device 'cuda:0' took 1.13 ms  (cached)
+Module mujoco_warp._src.support dd3f924 load on device 'cuda:0' took 0.38 ms  (cached)
+Module _tile_cholesky_factorize_solve__locals__cholesky_factorize_solve_f1eb8fa3 61815c7 load on device 'cuda:0' took 26.65 ms  (cached)
+Module mujoco_warp._src.solver b116efb load on device 'cuda:0' took 1.51 ms  (cached)
+Module solve_init_jaref__locals__kernel_52a585f7 52a585f load on device 'cuda:0' took 0.37 ms  (cached)
+Module mul_m_dense__locals___mul_m_dense_f58c2231 f58c223 load on device 'cuda:0' took 0.36 ms  (cached)
+Module update_constraint_efc__locals__kernel_32935e9d 32935e9 load on device 'cuda:0' took 0.39 ms  (cached)
+Module update_constraint_gauss_cost__locals__kernel_37c33b40 37c33b4 load on device 'cuda:0' took 0.38 ms  (cached)
+Module update_gradient_JTDAJ_dense_tiled__locals__kernel_8d0ad4dc c104ab8 load on device 'cuda:0' took 0.65 ms  (cached)
+Module update_gradient_cholesky__locals__kernel_cf32bc05 f5ebb44 load on device 'cuda:0' took 26.86 ms  (cached)
+Module linesearch_jv_fused__locals__kernel_0057f7a6 0057f7a load on device 'cuda:0' took 0.38 ms  (cached)
+Module linesearch_prepare_gauss__locals__kernel_06b74948 06b7494 load on device 'cuda:0' took 0.39 ms  (cached)
+Module update_constraint_efc__locals__kernel_3c1a9816 3c1a981 load on device 'cuda:0' took 0.39 ms  (cached)
+Module mujoco_warp._src.derivative a753363 load on device 'cuda:0' took 0.74 ms  (cached)
+Module reset_data__locals__reset_xfrc_applied_e7898c5c e7898c5 load on device 'cuda:0' took 0.35 ms  (cached)
+Module reset_data__locals__reset_qM_10d3c793 10d3c79 load on device 'cuda:0' took 0.28 ms  (cached)
+Module reset_data__locals__reset_mocap_ff71f630 ff71f63 load on device 'cuda:0' took 0.28 ms  (cached)
+Module reset_data__locals__reset_contact_df686d47 df686d4 load on device 'cuda:0' took 0.28 ms  (cached)
+Module reset_data__locals__reset_nworld_6e0d904e 6e0d904 load on device 'cuda:0' took 0.32 ms  (cached)
+
++---------------------------------+
+|         Base Environment        |
++------------------------+--------+
+| Property               | Value  |
++------------------------+--------+
+| Number of environments | 64     |
+| Environment device     | cuda:0 |
+| Environment seed       | None   |
+| Physics step-size      | 0.005  |
+| Environment step-size  | 0.02   |
++------------------------+--------+
+
+[INFO] <EventManager> contains 2 active terms.
++-------------------------------------+
+| Active Event Terms in Mode: 'reset' |
++--------+----------------------------+
+| Index  | Name                       |
++--------+----------------------------+
+|   0    | reset_base                 |
+|   1    | reset_joints               |
+|   2    | reset_host_metrics         |
++--------+----------------------------+
++---------------------------------------+
+| Active Event Terms in Mode: 'startup' |
++-----------+---------------------------+
+|   Index   | Name                      |
++-----------+---------------------------+
+|     0     | foot_friction             |
+|     1     | encoder_bias              |
+|     2     | base_com                  |
++-----------+---------------------------+
++-----------------------------+
+| Domain Randomization Fields |
++-------+---------------------+
+| Index | Field Name          |
++-------+---------------------+
+|   0   | geom_friction       |
+|   1   | body_ipos           |
+|   2   | body_subtreemass    |
+|   3   | dof_invweight0      |
+|   4   | body_invweight0     |
+|   5   | tendon_length0      |
+|   6   | tendon_invweight0   |
++-------+---------------------+
+
+Module repeat_array_kernel_39317a34 b712927 load on device 'cuda:0' took 0.39 ms  (cached)
+Module repeat_array_kernel_39317a34 b699bd8 load on device 'cuda:0' took 0.39 ms  (cached)
+Module repeat_array_kernel_39317a34 363ede1 load on device 'cuda:0' took 0.43 ms  (cached)
+[INFO] <NullCommandManager> (inactive)
+[INFO] <ActionManager> contains 1 active terms.
++---------------------------------+
+| Active Action Terms (shape: 23) |
++-------+-----------+-------------+
+| Index | Name      |   Dimension |
++-------+-----------+-------------+
+|   0   | joint_pos |          23 |
++-------+-----------+-------------+
+
+[INFO] <ObservationManager> contains 2 groups.
++------------------------------------------------------------+
+| Active Observation Terms in Group: 'actor' (shape: (456,)) |
++------------------+---------------+-------------------------+
+|      Index       | Name          |          Shape          |
++------------------+---------------+-------------------------+
+|        0         | host          |         (6, 76)         |
++------------------+---------------+-------------------------+
++-------------------------------------------------------------+
+| Active Observation Terms in Group: 'critic' (shape: (456,)) |
++------------------+---------------+--------------------------+
+|      Index       | Name          |          Shape           |
++------------------+---------------+--------------------------+
+|        0         | host          |         (6, 76)          |
++------------------+---------------+--------------------------+
+
+[INFO] <TerminationManager> contains 3 active terms.
++---------------------------------+
+|     Active Termination Terms    |
++-------+--------------+----------+
+| Index | Name         | Time Out |
++-------+--------------+----------+
+|   0   | time_out     |   True   |
+|   1   | dof_vel_out  |  False   |
+|   2   | base_vel_out |  False   |
++-------+--------------+----------+
+
+[INFO] <RewardManager> contains 27 active terms.
++-----------------------------------------------------------------+
+|                       Active Reward Terms                       |
++-------+-------------------------------+-------------------------+
+| Index | Name                          |                  Weight |
++-------+-------------------------------+-------------------------+
+|   0   | standup                       |                     1.0 |
+|   1   | regu_dof_acc                  |  -5.000000000000001e-09 |
+|   2   | regu_action_rate              | -0.00010000000000000002 |
+|   3   | regu_smoothness               |                -0.00016 |
+|   4   | regu_dof_vel                  |  -4.000000000000001e-06 |
+|   5   | regu_upper_dof_vel            |  -4.000000000000001e-06 |
+|   6   | regu_dof_pos_limits           |                    -0.3 |
+|   7   | style_waist_deviation         |                    -0.2 |
+|   8   | style_hip_yaw_deviation       |                   -0.24 |
+|   9   | style_hip_roll_deviation      |                   -0.24 |
+|   10  | style_shoulder_roll_deviation |                   -0.05 |
+|   11  | style_left_foot_displacement  |                    0.05 |
+|   12  | style_right_foot_displacement |                    0.05 |
+|   13  | style_knee_deviation          |                   -0.03 |
+|   14  | style_elbow_deviation         |                   -0.04 |
+|   15  | style_shank_orientation       |                    0.28 |
+|   16  | style_ground_parallel         |                     0.5 |
+|   17  | style_feet_distance           |                   -0.28 |
+|   18  | style_style_ang_vel_xy        |                    0.02 |
+|   19  | target_ang_vel_xy             |                    0.32 |
+|   20  | target_lin_vel_xy             |                    0.32 |
+|   21  | target_feet_height_var        |                    0.12 |
+|   22  | target_target_upper_dof_pos   |                     0.5 |
+|   23  | target_target_orientation     |                    0.32 |
+|   24  | target_target_base_height     |                    0.32 |
+|   25  | smp_head_height               |                     0.3 |
+|   26  | smp_upward_velocity           |                     0.7 |
++-------+-------------------------------+-------------------------+
+/home/sjw/AMP_mjlab/src/tasks/host_recovery/mdp/rewards.py:382: UserWarning: var(): degrees of freedom is <= 0. Correction should be strictly less than the reduction factor (input numel divided by output numel). (Triggered internally at /__w/pytorch/pytorch/aten/src/ATen/native/ReduceOps.cpp:1913.)
+  variance = 0.5 * (left_ankle_z.var(dim=1) + right_ankle_z.var(dim=1))
+
+[INFO] <NullCurriculumManager> (inactive)
+[INFO] <MetricsManager> contains 3 active terms.
++-------------------------------+
+|      Active Metrics Terms     |
++-------+-----------------------+
+| Index | Name                  |
++-------+-----------------------+
+|   0   | host_head_height      |
+|   1   | smp_head_world_height |
+|   2   | upright_standing      |
++-------+-----------------------+
+
+Module mujoco_warp._src.io 4b387a0 load on device 'cuda:0' took 1.22 ms  (cached)
+Module _tile_cholesky_factorize__locals__cholesky_factorize_576beba6 bba24ec load on device 'cuda:0' took 22.62 ms  (cached)
+Module _tile_cholesky_solve__locals__cholesky_solve_5abf720d f81c2ef load on device 'cuda:0' took 22.26 ms  (cached)
+Actor MLP: Sequential(
+  (0): Linear(in_features=456, out_features=512, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=512, out_features=256, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=256, out_features=128, bias=True)
+  (5): ELU(alpha=1.0)
+  (6): Linear(in_features=128, out_features=23, bias=True)
+  (7): Tanh()
+)
+Critic MLP: Sequential(
+  (0): Linear(in_features=456, out_features=512, bias=True)
+  (1): ELU(alpha=1.0)
+  (2): Linear(in_features=512, out_features=256, bias=True)
+  (3): ELU(alpha=1.0)
+  (4): Linear(in_features=256, out_features=1, bias=True)
+)
+step=  250 height_mean=0.3477 height_min=0.2322 height_max=0.3991 frac>0.6=0.000 frac>0.7=0.000 upright(grav_z<-0.8)=0.562 grav_z_mean=-0.803
+step=  500 height_mean=0.4838 height_min=-0.2719 height_max=0.8087 frac>0.6=0.516 frac>0.7=0.500 upright(grav_z<-0.8)=0.547 grav_z_mean=-0.695
+step=  750 height_mean=0.6010 height_min=-0.0997 height_max=0.8092 frac>0.6=0.656 frac>0.7=0.609 upright(grav_z<-0.8)=0.672 grav_z_mean=-0.743
+step= 1000 height_mean=0.6085 height_min=-0.3143 height_max=0.8086 frac>0.6=0.688 frac>0.7=0.688 upright(grav_z<-0.8)=0.719 grav_z_mean=-0.771
+UPPER_JOINT_VEL_RMS(standing, 11 upper joints)=3.52824
+[DONE]

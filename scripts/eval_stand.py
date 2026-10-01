@@ -14,7 +14,7 @@ import src.tasks  # noqa: F401
 
 
 def main():
-    task = "Unitree-G1-HoST-StandUp"
+    task = os.environ.get("TASK", "Unitree-G1-HoST-StandUp")
     ckpt = os.environ["CKPT"]
     num_envs = int(os.environ.get("NUM_ENVS", "64"))
     steps = int(os.environ.get("STEPS", "3000"))
@@ -23,7 +23,7 @@ def main():
     configure_torch_backends()
     device = "cuda:0" if torch.cuda.is_available() else "cpu"
 
-    env_cfg = load_env_cfg(task, play=True)
+    env_cfg = load_env_cfg(task, play=os.environ.get("EVAL_TRAIN_CFG") != "1")
     env_cfg.scene.num_envs = num_envs
     if "ACTION_SCALE" in os.environ:
         env_cfg.actions["joint_pos"].scale = float(os.environ["ACTION_SCALE"])
