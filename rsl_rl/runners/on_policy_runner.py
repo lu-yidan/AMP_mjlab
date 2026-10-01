@@ -57,6 +57,7 @@ def _migrate_train_cfg(train_cfg: dict) -> None:
         if dist_cfg:
             policy_cfg["init_noise_std"] = dist_cfg.get("init_std", 1.0)
             policy_cfg["noise_std_type"] = dist_cfg.get("std_type", "scalar")
+            policy_cfg["max_noise_std"] = dist_cfg.get("max_std", 0.5)
         train_cfg["policy"] = policy_cfg
         train_cfg.setdefault("empirical_normalization", actor_cfg.get("obs_normalization", False))
     if "empirical_normalization" not in train_cfg:

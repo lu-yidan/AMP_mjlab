@@ -54,9 +54,11 @@ NOISE_DOF_VEL = 1.5
 #: HoST ``env.num_one_step_observations`` for the 23-DoF G1.
 NUM_ONE_STEP_OBS = 76
 
-#: HoST ``env.unactuated_timesteps`` = 30 -> 30 * 0.02 / 0.005 = 120 policy
-#: steps of "the motors are switched off" at the start of every episode.
-UNACTUATED_STEPS = 120
+#: HoST increments ``real_episode_length_buf`` once per policy step and computes
+#: ``30 * 0.02 / control_dt``.  At a 0.02 s control period this remains 30
+#: policy steps (0.6 s); using the 0.005 s physics step here incorrectly made
+#: the robot passive for 120 policy steps.
+UNACTUATED_STEPS = 30
 
 
 def _get_action_rescale(env: ManagerBasedRlEnv) -> torch.Tensor:
@@ -127,7 +129,8 @@ def host_noise_vector(
   """
   asset: Entity = env.scene[asset_cfg.name]
   num_joints = asset.data.joint_pos.shape[-1]
-  vector = torch.zeros(NUM_ONE_STEP_OBS, device=env.device)
+  num_actions = env.action_manager.get_term("joint_pos").raw_action.shape[-1]
+  vector = torch.zeros(7 + 2 * num_joints + num_actions, device=env.device)
   vector[0:3] = NOISE_ANG_VEL * ANG_VEL_SCALE
   vector[3:6] = NOISE_GRAVITY
   start = 6

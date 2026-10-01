@@ -436,4 +436,8 @@ def make_host_recovery_env_cfg() -> ManagerBasedRlEnvCfg:
     ),
     decimation=4,
     episode_length_s=10.0,
+    # HoST already folds control_dt into constraint weights while leaving the
+    # task group unscaled.  Applying mjlab's default dt scaling here would
+    # shrink every reward by another factor of 0.02.
+    scale_rewards_by_dt=False,
   )

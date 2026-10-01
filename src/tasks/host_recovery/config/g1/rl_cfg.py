@@ -25,6 +25,9 @@ def unitree_g1_host_standup_ppo_runner_cfg() -> RslRlOnPolicyRunnerCfg:
         "class_name": "GaussianDistribution",
         "init_std": 0.8,
         "std_type": "per_dim",
+        # Official HoST starts at 0.8 without an upper clamp.  The vendored
+        # generic policy otherwise caps exploration at 0.5.
+        "max_std": None,
       },
     ),
     critic=RslRlModelCfg(
