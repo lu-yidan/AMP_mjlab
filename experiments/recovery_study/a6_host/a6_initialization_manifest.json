@@ -1,0 +1,42 @@
+{
+  "arm": "A6",
+  "checkpoint": "/root/workplace/smp-ft-speed/logs/rsl_rl/ft_prone_speed/formal_20260918_ft_speed_v1/FT_R2/model_9000.pt",
+  "sha256": "8b4889f80c6b7cc675f6e9b1e98f2d4a1886a15e372f86070f63c329ba9ca5d1",
+  "actor_exact": true,
+  "fresh_critic": true,
+  "fresh_optimizer": true,
+  "common_critic_sha": "6345f93938783e54384cd718df0737c22c93855f412deef3ad0b5109e95e1d98",
+  "num_envs": 4096,
+  "updates": 10000,
+  "bank_sha": "287eae8e8840c1b3281e7010a84182b824fefacd34439c4f993e9f130af1027a",
+  "seed": 20261013,
+  "cost_ramp_updates": 0,
+  "low_smp_termination": false,
+  "reset_counts": {
+    "scene": [2048, 1024, 1024, 0],
+    "stratum": [2048, 1024, 1024, 0, 0, 0, 0, 0],
+    "kind_low_middle_late": [2868, 820, 408],
+    "natural_procedural": [3380, 716],
+    "group": [408, 820, 717, 717, 717, 717]
+  },
+  "relaxed_upward_speed": true,
+  "reset_bank_sha": {
+    "natural_curriculum_v1": "e9f94540520d7927dee01150a0f0bae39ad2aad5ae008b1c7c71f521650e44b9",
+    "procedural_low_v1": "e289bed8d1c93e87fbdcf969fc5fc741f2d8500a0908ed145d2a4e02e7fe116d"
+  },
+  "actor_noise": true,
+  "events": [
+    "init_smp_state",
+    "gsi_reset",
+    "push_robot",
+    "foot_friction",
+    "encoder_bias",
+    "base_com",
+    "reset_stand_counter",
+    "deployment_pair_friction",
+    "v33_stage_reset",
+    "multiterrain_phase"
+  ],
+  "episode_seconds": 10.0,
+  "code_sha256": "03b437894b1cb5eaa54b4ae8725f4c655f00b3ed3f659f80ca14786efbc61edb"
+}
