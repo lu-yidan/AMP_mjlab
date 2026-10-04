@@ -12,6 +12,7 @@ from g1recovery_amp.tasks.recovery.a6_env_cfg import (
     A6_FIXED_PLATE_MASS,
     A6_FORCE_LIMIT_HOLD_S,
     A6_INVALID_PLATE_TERMINATION_WEIGHT,
+    A6_LOW_TORQUE_TRIAL_SCALE,
     A6_PLATE_NO_PROGRESS_WEIGHT,
     A6_PRONE_LATERAL_PROGRESS_WEIGHT,
     A6_STRICT_ESCAPE_CLEAR_HOLD_S,
@@ -74,6 +75,9 @@ A6_G_PLUS_PRONE_LATERAL_020_FIXED6_TASK_ID = (
     "Mjlab-Recovery-AMP-A6-GPlus-CA005-NP015-Escape040x050-"
     "ExploreCost025-ForceHold060-Emergency2500-Invalid2-"
     "ProneLateral020-Fixed6-30-50-20-Unitree-G1-Dev"
+)
+LOW_TORQUE_CAP_ONLY_90_TASK_ID = (
+    "Mjlab-Recovery-AMP-LowTorque-CapOnly-90-Unitree-G1-Dev"
 )
 
 register_mjlab_task(
@@ -208,6 +212,36 @@ register_mjlab_task(
     rl_cfg=g1_recovery_a6_constraint_aware_005_ppo_runner_cfg(),
     runner_cls=RecoveryOnPolicyRunner,
 )
+
+def _low_torque_cap_only_env_cfg(*, play: bool):
+    """Keep the model_21900 task unchanged except for its 139 Nm motor caps."""
+
+    return g1_recovery_a6_env_cfg(
+        play=play,
+        guidance="plus",
+        scene_weights=A6_BALANCED_30_50_20_SCENE_WEIGHTS,
+        obstructed_style_reward_scale=A6_CONSTRAINT_AWARE_AMP_SCALE,
+        training_plate_mass_override=A6_FIXED_PLATE_MASS,
+        plate_no_progress_weight=A6_PLATE_NO_PROGRESS_WEIGHT,
+        escape_min_planar_clearance=A6_STRICT_ESCAPE_MIN_PLANAR_CLEARANCE,
+        escape_clear_hold_s=A6_STRICT_ESCAPE_CLEAR_HOLD_S,
+        exploration_cost_obstructed_scale=A6_EXPLORATION_COST_OBSTRUCTED_SCALE,
+        plate_force_hold_s=A6_FORCE_LIMIT_HOLD_S,
+        catastrophic_plate_force=A6_CATASTROPHIC_PLATE_FORCE,
+        invalid_plate_termination_weight=A6_INVALID_PLATE_TERMINATION_WEIGHT,
+        prone_lateral_progress_weight=A6_PRONE_LATERAL_PROGRESS_WEIGHT,
+        high_torque_limit_scale=A6_LOW_TORQUE_TRIAL_SCALE,
+    )
+
+
+register_mjlab_task(
+    task_id=LOW_TORQUE_CAP_ONLY_90_TASK_ID,
+    env_cfg=_low_torque_cap_only_env_cfg(play=False),
+    play_env_cfg=_low_torque_cap_only_env_cfg(play=True),
+    rl_cfg=g1_recovery_a6_constraint_aware_005_ppo_runner_cfg(),
+    runner_cls=RecoveryOnPolicyRunner,
+)
+
 
 register_mjlab_task(
     task_id=A6_TASK_ID,
@@ -388,6 +422,7 @@ __all__ = [
     "A6_G_PLUS_TASK_ID",
     "A6_TASK_ID",
     "DEV_TASK_ID",
+    "LOW_TORQUE_CAP_ONLY_90_TASK_ID",
     "g1_recovery_a6_env_cfg",
     "g1_recovery_dev_env_cfg",
 ]

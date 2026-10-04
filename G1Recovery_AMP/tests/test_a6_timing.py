@@ -27,6 +27,7 @@ from g1recovery_amp.tasks.recovery import (
     A6_G_PLUS_SYMMETRIC_005_TASK_ID,
     A6_G_PLUS_TASK_ID,
     A6_TASK_ID,
+    LOW_TORQUE_CAP_ONLY_90_TASK_ID,
 )
 from g1recovery_amp.tasks.recovery.a6_env_cfg import (
     A6_ACTION_WARMUP_STEPS,
@@ -87,6 +88,28 @@ from g1recovery_amp.tasks.recovery.rl.rl_cfg import (
 
 
 class TestA6Timing(unittest.TestCase):
+    def test_cap_only_variant_changes_only_139_nm_actuator_limits(self) -> None:
+        for play in (False, True):
+            parent = load_env_cfg(
+                A6_G_PLUS_PRONE_LATERAL_020_FIXED6_TASK_ID, play=play
+            )
+            capped = load_env_cfg(LOW_TORQUE_CAP_ONLY_90_TASK_ID, play=play)
+            original = parent.scene.entities["robot"].articulation.actuators
+            reduced = capped.scene.entities["robot"].articulation.actuators
+            self.assertEqual(len(original), len(reduced))
+            self.assertEqual(sum(group.effort_limit == 139.0 for group in original), 2)
+            for before, after in zip(original, reduced, strict=True):
+                expected = (
+                    before.effort_limit * 0.90
+                    if before.effort_limit == 139.0
+                    else before.effort_limit
+                )
+                self.assertAlmostEqual(after.effort_limit, expected)
+            self.assertEqual(parent.rewards, capped.rewards)
+            self.assertEqual(parent.observations, capped.observations)
+            self.assertEqual(parent.actions, capped.actions)
+            self.assertEqual(set(parent.events), set(capped.events))
+
     def test_invalid_plate_preserves_reason_across_automatic_reset(self) -> None:
         env = SimpleNamespace(
             num_envs=3,

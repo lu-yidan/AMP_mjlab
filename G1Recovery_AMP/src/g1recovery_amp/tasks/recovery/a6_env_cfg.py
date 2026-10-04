@@ -10,6 +10,7 @@ changing the original flat-task baseline.
 from __future__ import annotations
 
 import math
+from dataclasses import replace
 from typing import Literal
 
 from mjlab.envs import ManagerBasedRlEnvCfg
@@ -89,6 +90,7 @@ A6_EXPLORATION_COST_OBSTRUCTED_SCALE = 0.25
 A6_FORCE_LIMIT_HOLD_S = 0.06
 A6_INVALID_PLATE_TERMINATION_WEIGHT = -100.0
 A6_PRONE_LATERAL_PROGRESS_WEIGHT = 0.20
+A6_LOW_TORQUE_TRIAL_SCALE = 0.90
 A6GuidanceMode = Literal["minus", "plus"]
 
 
@@ -123,6 +125,7 @@ def g1_recovery_a6_env_cfg(
     catastrophic_plate_force: float | None = None,
     invalid_plate_termination_weight: float | None = None,
     prone_lateral_progress_weight: float | None = None,
+    high_torque_limit_scale: float | None = None,
 ) -> ManagerBasedRlEnvCfg:
     """Build matched G-/G+ AMP-A6 environments with identical policy I/O."""
 
@@ -191,8 +194,25 @@ def g1_recovery_a6_env_cfg(
             raise ValueError("prone lateral progress reward requires plus guidance")
         if prone_lateral_progress_weight <= 0.0:
             raise ValueError("prone lateral progress weight must be positive")
+    if high_torque_limit_scale is not None and not (
+        0.0 < high_torque_limit_scale <= 1.0
+    ):
+        raise ValueError("high torque limit scale must be in (0, 1]")
 
     cfg = g1_recovery_dev_env_cfg(play=play)
+    if high_torque_limit_scale is not None:
+        robot_cfg = cfg.scene.entities["robot"]
+        assert robot_cfg.articulation is not None
+        groups = robot_cfg.articulation.actuators
+        high_torque_groups = sum(group.effort_limit == 139.0 for group in groups)
+        if high_torque_groups != 2:
+            raise ValueError("expected hip-roll and knee 139 Nm actuator groups")
+        robot_cfg.articulation.actuators = tuple(
+            replace(group, effort_limit=group.effort_limit * high_torque_limit_scale)
+            if group.effort_limit == 139.0
+            else group
+            for group in groups
+        )
     apply_a6_timing(cfg)
     # Keep the AMP policy's 29-D action meaning and 0.25 scale, but adopt the
     # A6 deployment contract's safe hand-over from an arbitrary bank pose.
@@ -500,6 +520,7 @@ __all__ = [
     "A6_FORCE_LIMIT_HOLD_S",
     "A6_HISTORICAL_SCENE_WEIGHTS",
     "A6_INVALID_PLATE_TERMINATION_WEIGHT",
+    "A6_LOW_TORQUE_TRIAL_SCALE",
     "A6_MAX_COMMAND_DELAY_STEPS",
     "A6_OBSTRUCTED_TASK_SCALE",
     "A6_PHYSICS_TIMESTEP",

@@ -13,6 +13,7 @@ wandb/
 runs/
 events.out.tfevents.*
 *.pt
+!checkpoints/model_22899.pt
 *.pth
 *.ckpt
 *.mjb
