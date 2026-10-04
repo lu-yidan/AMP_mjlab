@@ -130,13 +130,22 @@ def run_train(task_id: str, cfg: TrainConfig, log_dir: Path) -> None:
     print(f"[INFO]: Loading model checkpoint from: {resume_path}")
     runner.load(str(resume_path))
 
+  num_learning_iterations = max(
+    0, cfg.agent.max_iterations - runner.current_learning_iteration
+  )
+  if resume_path is not None and rank == 0:
+    print(
+      f"[INFO]: Resuming from iteration {runner.current_learning_iteration}, "
+      f"training for {num_learning_iterations} more iterations."
+    )
+
   # Only write config files from rank 0 to avoid race conditions.
   if rank == 0:
     dump_yaml(log_dir / "params" / "env.yaml", env_cfg)
     dump_yaml(log_dir / "params" / "agent.yaml", agent_cfg)
 
   runner.learn(
-    num_learning_iterations=cfg.agent.max_iterations, init_at_random_ep_len=True
+    num_learning_iterations=num_learning_iterations, init_at_random_ep_len=True
   )
 
   env.close()

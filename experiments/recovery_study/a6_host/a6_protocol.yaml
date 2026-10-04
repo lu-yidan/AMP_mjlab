@@ -1,0 +1,92 @@
+# Historical A6 host-recovery adaptation contract.
+# Source: smp commit 1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2.
+# This file is deliberately data-only: runtime code must not silently replace
+# any of the banks or obstacle scenes with the existing flat HoST baseline.
+
+protocol:
+  name: historical-a6-stage3-host
+  source_commit: 1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2
+  control_dt: 0.02
+  physics_dt: 0.005
+  physics_substeps: 10
+  episode_seconds: 10.0
+  num_envs: 4096
+  updates: 10000
+  save_interval: 500
+
+scene_quota:
+  flat: 0.50
+  vertical_plate: 0.25
+  free_plate: 0.25
+  low: 0.70
+  middle: 0.20
+  near_standing: 0.10
+  low_directions:
+    - supine
+    - prone
+    - left_side_down
+    - right_side_down
+  low_natural_fraction: 0.75
+  low_procedural_fraction: 0.25
+
+plate:
+  size_m: [0.90, 0.64, 0.07]
+  nominal_mass_kg: 6.0
+  mass_range_kg: [4.0, 12.0]
+  placement_clearance_m: 0.002
+  guided_motion: vertical_only
+  free_motion: free_6dof
+
+reset_banks:
+  low_obstacle:
+    path: outputs/multiterrain_bank/train.npz
+    sha256: 287eae8e8840c1b3281e7010a84182b824fefacd34439c4f993e9f130af1027a
+  natural_curriculum:
+    path: datasets/reset_banks/natural_curriculum_v1/train.npz
+    sha256: e9f94540520d7927dee01150a0f0bae39ad2aad5ae008b1c7c71f521650e44b9
+  procedural_low:
+    path: datasets/reset_banks/procedural_low_v1/train.npz
+    sha256: e289bed8d1c93e87fbdcf969fc5fc741f2d8500a0908ed145d2a4e02e7fe116d
+
+task_weights:
+  stage_pose: 0.22
+  head_velocity: 0.18
+  height: 0.10
+  upright: 0.15
+  feet_quiet: 0.08
+  base_quiet: 0.07
+  angular_quiet: 0.07
+  joint_quiet: 0.06
+  action_quiet: 0.07
+
+cost_weights:
+  action_rate: -0.0015
+  action_acceleration: -0.0012
+  joint_acceleration: -5.0e-8
+  torque: -1.0e-6
+  joint_overspeed: -0.02
+  joint_overpower: -2.0e-6
+  head_overspeed: -1.0
+  sustained_effort: -0.05
+  soft_joint_limits: -0.10
+  Q_quiet_feet: -0.03
+  L_joint_stall: -0.20
+
+escape_weights:
+  G_geometry_progress: 0.45
+  dense_clearance: 0.08
+  completion: 0.60
+  separation_progress: 0.01
+  excess_plate_force: -0.03
+
+ablation:
+  G_minus:
+    dense_guidance: false
+    geometry_progress: false
+    separation_progress: false
+    alpha: 1.0
+  G_plus:
+    dense_guidance: true
+    geometry_progress: true
+    separation_progress: true
+    alpha: historical

@@ -1,0 +1,13 @@
+{
+  "checkpoint": "/home/sjw/AMP_mjlab/logs/rsl_rl/g1_host_standup/2026-09-27_18-31-18_static_diverse_elbow_v2/model_11999.pt",
+  "posture": "supine",
+  "load": "none",
+  "auxiliary_pull_force": 0,
+  "action_noise_std_override": 0.1,
+  "freeze_action_std": true,
+  "freeze_obs_normalizer": true,
+  "learning_rate": 1e-05,
+  "entropy_coef": 0.0,
+  "smp_reference": "https://github.com/tholin-1007/smp/tree/0e67286fe7df77a73740d237ef36b109136552b6",
+  "full_smp_prior": false
+}

@@ -1,0 +1,49 @@
+# Human-readable index of the 27 historical L4/R2/A6 reward terms.
+# Numeric implementation truth remains the frozen runtime YAML and code.
+time_scale_s: 0.02
+stages:
+  I_basic:
+    alpha: 1.0
+    cost_ramp: 0.0
+  II_refine:
+    alpha: 1.0
+    cost_ramp: min(update / 500, 1)
+  III_adapt:
+    alpha: standing_gate
+    cost_ramp: 1.0
+
+terms:
+  # T^rise
+  basic_upward_motion: {group: rise, I: 0.70, II: 0.0, III: 0.0, formula: "exp(-100*[0.25-vz]_+^2) if z<0.9 else 1"}
+  basic_height: {group: rise, I: 0.30, II: 0.0, III: 0.0, formula: "exp(-[1.1-z]_+^2)"}
+  phase_posture: {group: rise, I: 0.0, II: 0.22, III: 0.22, formula: "exp(-8*[hs-z]_+^2-6*[us-u]_+^2-5*e_knee)"}
+  head_velocity: {group: rise, I: 0.0, II: 0.18, III: 0.18, formula: "exp(-45*(vz-vs)^2-140*overspeed(vz)^2)"}
+  head_height: {group: rise, I: 0.0, II: 0.10, III: 0.10, formula: "exp(-2*[1.15-z]_+^2)"}
+  uprightness: {group: rise, I: 0.0, II: 0.15, III: 0.15, formula: "u^2"}
+
+  # T^quiet
+  quiet_feet: {group: quiet, I: 0.0, II: 0.08, III: 0.08, formula: "1-g+g*exp(-20*f^2)"}
+  quiet_base: {group: quiet, I: 0.0, II: 0.07, III: 0.07, formula: "1-g+g*exp(-8*||vb||^2)"}
+  angular_quietness: {group: quiet, I: 0.0, II: 0.07, III: 0.07, formula: "exp(-0.8*||omega_b||^2)"}
+  joint_quietness: {group: quiet, I: 0.0, II: 0.06, III: 0.06, formula: "exp(-0.04*mean(dq^2))"}
+  action_smoothness: {group: quiet, I: 0.0, II: 0.07, III: 0.07, formula: "exp(-4*mean(Delta_a^2))"}
+
+  # C
+  action_rate: {group: cost, I: 0.0, II: -0.0015, III: -0.0015, ramp: true}
+  action_acceleration: {group: cost, I: 0.0, II: -0.0012, III: -0.0012, ramp: true}
+  joint_acceleration: {group: cost, I: 0.0, II: -5.0e-8, III: -5.0e-8, ramp: true}
+  torque: {group: cost, I: 0.0, II: -1.0e-6, III: -1.0e-6, ramp: true}
+  joint_overspeed: {group: cost, I: 0.0, II: -0.02, III: -0.02, ramp: true}
+  joint_overpower: {group: cost, I: 0.0, II: -2.0e-6, III: -2.0e-6, ramp: true}
+  head_overspeed: {group: cost, I: 0.0, II: -1.0, III: -1.0, ramp: true}
+  sustained_effort: {group: cost, I: 0.0, II: -0.05, III: -0.05, ramp: true}
+  soft_joint_limits: {group: cost, I: 0.0, II: -0.10, III: -0.10, ramp: false}
+  foot_motion_Q: {group: cost, I: 0.0, II: 0.0, III: -0.03, ramp: false}
+  joint_stall_Lprime: {group: cost, I: 0.0, II: 0.0, III: -0.20, ramp: false}
+
+  # R^esc
+  supported_progress_G: {group: escape, I: 0.0, II: 0.0, III: 0.45}
+  dense_clearance: {group: escape, I: 0.0, II: 0.0, III: 0.08}
+  escape_completion: {group: escape, I: 0.0, II: 0.0, III: 0.60}
+  separation_progress: {group: escape, I: 0.0, II: 0.0, III: 0.01}
+  excess_plate_force: {group: escape, I: 0.0, II: 0.0, III: -0.03}
