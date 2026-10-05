@@ -1,0 +1,12 @@
+# Data included for the default recovery AMP task and constrained reset scenes.
+# Paths are relative to this subproject's src/ directory.
+g1recovery_amp/data/motions/get_up/fallAndGetUp1_subject1_1060_1150.npz
+g1recovery_amp/data/motions/get_up/fallAndGetUp1_subject1_1400_1480.npz
+g1recovery_amp/data/motions/get_up/fallAndGetUp1_subject1_2100_2200.npz
+g1recovery_amp/data/motions/get_up/fallAndGetUp1_subject5_2500_2600.npz
+g1recovery_amp/data/motions/get_up/fallAndGetUp2_subject2_850_1050.npz
+g1recovery_amp/data/motions/get_up/fallAndGetUp6_subject1_530_600.npz
+g1recovery_amp/data/motions/get_up/fallAndGetUp6_subject1_650_700.npz
+g1recovery_amp/data/motions/get_up/fallAndGetUp6_subject1_1630_1690.npz
+g1recovery_amp/data/reset_banks/a6/multiterrain_train.npz
+g1recovery_amp/data/reset_banks/a6/natural_curriculum_train.npz

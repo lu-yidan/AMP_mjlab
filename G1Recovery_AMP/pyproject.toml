@@ -1,0 +1,39 @@
+[project]
+name = "g1recovery-amp"
+version = "0.1.0"
+description = "Independent AMP recovery task for Unitree G1 in mjlab"
+readme = "README.md"
+requires-python = ">=3.13,<3.14"
+dependencies = ["mjlab[cu128]==1.6.0"]
+
+[project.entry-points."mjlab.tasks"]
+g1recovery_amp = "g1recovery_amp"
+
+[project.optional-dependencies]
+motion-conversion = ["joblib>=1.4,<2"]
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv]
+constraint-dependencies = [
+    "torch==2.9.0+cu128; sys_platform != 'darwin'",
+    "torch==2.9.0; sys_platform == 'darwin'",
+    "warp-lang==1.14.0",
+]
+
+[[tool.uv.index]]
+name = "nvidia"
+url = "https://pypi.nvidia.com/"
+explicit = true
+
+[[tool.uv.index]]
+name = "pytorch-cu128"
+url = "https://download.pytorch.org/whl/cu128"
+explicit = true
+
+[tool.uv.sources]
+mjlab = { path = "../../mjlab", editable = true }
+torch = { index = "pytorch-cu128", marker = "sys_platform != 'darwin'" }
+warp-lang = { index = "nvidia", marker = "sys_platform != 'darwin'" }
