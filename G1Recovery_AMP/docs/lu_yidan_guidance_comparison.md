@@ -56,3 +56,10 @@
 `evaluation/sr3_guidance_v1/` 固定初始姿态、标签与 Free-R 参数，manifest 记录哈希。2048 环境包括 1024 平地、512 Guided、512 Free-R。SR3：20 s 内开始连续站立并保持 3 s，观察至 23 s；头高 ≥1.15 m、直立度 ≥.90、双足载荷各 >20 N。不增加安静站立门槛，不使用历史无效压板筛选。
 
 新配对两组都评测后填入配对结果。已有 22899 的结果保留为此前选定策略的记录；不要把它和新 off 隐含为同一预算的训练对照。SR3 数值必须来自保存的逐次试验结果。父模型评测如果采用适配后的 90% 力矩上限，需说明该控制条件；若要评价它原生能力，则使用父模型原生控制上限。
+
+正式运行已启动（2026-10-05，源代码 `fa8822a`）：
+
+- 无三项几何引导：GPU 4，job PID 1020860，W&B https://wandb.ai/tabletennis/amp-guidance-luyidan/runs/yuqgl0st 。
+- 有三项几何引导：GPU 5，job PID 1020861，W&B https://wandb.ai/tabletennis/amp-guidance-luyidan/runs/65qbrvrs 。
+- 根目录 `/root/workplace/amp-luyidan-guidance/G1Recovery_AMP/logs/flat19998_guidance_20k_20261005`，两个目录分别为 `off` 和 `on`。
+- 已验证正式训练完成首个更新，损失有限、actor 权重变化、初始与第零次更新 checkpoint 均保存；W&B online 初始化成功。这里不代表训练完成或成功率已测出。
