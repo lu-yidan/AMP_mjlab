@@ -1,0 +1,60 @@
+{
+  "reason": "User requested stopping AMP; retain 10k comparison and all checkpoints",
+  "at_utc": "2026-10-05T16:09:11.946585+00:00",
+  "jobs": [
+    {
+      "arm": "off",
+      "gpu": 4,
+      "pid": 1020860,
+      "last_progress": {
+        "status": "running",
+        "completed_updates": 11901,
+        "target_updates": 20000,
+        "elapsed_s": 52884.28774523735,
+        "steps_per_second": 22376.53751900205,
+        "learning_rate": 2.25e-05,
+        "actor_max_change": 0.25469669699668884,
+        "action_std_mean": 0.2588498890399933,
+        "losses": {
+          "value": 0.8016116738319397,
+          "surrogate": -0.013025737029965966,
+          "entropy": -5.973235821723938,
+          "amp/disc_loss": 0.15477727726101875,
+          "amp/disc_grad_penalty": 0.10382003486156463,
+          "amp/disc_total_loss": 0.25859731435775757,
+          "amp/disc_score": -0.7415355384349823,
+          "amp/disc_demo_score": 0.7349670499563217,
+          "amp/disc_grad_norm_before_clip": 1.5901516795158386
+        }
+      },
+      "last_checkpoint": "/root/workplace/amp-luyidan-guidance/G1Recovery_AMP/logs/flat19998_guidance_20k_20261005/off/model_11500.pt"
+    },
+    {
+      "arm": "on",
+      "gpu": 5,
+      "pid": 1020861,
+      "last_progress": {
+        "status": "running",
+        "completed_updates": 12351,
+        "target_updates": 20000,
+        "elapsed_s": 52915.16353344917,
+        "steps_per_second": 23177.31140331055,
+        "learning_rate": 2.25e-05,
+        "actor_max_change": 0.26984360814094543,
+        "action_std_mean": 0.25614169239997864,
+        "losses": {
+          "value": 0.7019954949617386,
+          "surrogate": -0.012394124839920551,
+          "entropy": -6.030423641204834,
+          "amp/disc_loss": 0.1549030102789402,
+          "amp/disc_grad_penalty": 0.10501939766108989,
+          "amp/disc_total_loss": 0.2599224098026752,
+          "amp/disc_score": -0.7402302861213684,
+          "amp/disc_demo_score": 0.7282384544610977,
+          "amp/disc_grad_norm_before_clip": 1.3457255631685257
+        }
+      },
+      "last_checkpoint": "/root/workplace/amp-luyidan-guidance/G1Recovery_AMP/logs/flat19998_guidance_20k_20261005/on/model_12000.pt"
+    }
+  ]
+}
