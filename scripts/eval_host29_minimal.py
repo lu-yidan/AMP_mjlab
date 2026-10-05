@@ -107,8 +107,7 @@ def main():
                 hold1=float(held1.float().mean()), hold5=float(held5.float().mean()),
                 abnormal=float(abnormal.float().mean()), metrics=metrics)
             print(name, json.dumps(results[name], sort_keys=True), flush=True)
-        a.output.parent.mkdir(parents=True, exist_ok=False)
-        a.output.mkdir()
+        a.output.mkdir(parents=True, exist_ok=False)
         (a.output / "evaluation.json").write_text(json.dumps({"results": results}, indent=2))
     finally:
         env.close()
