@@ -1,0 +1,55 @@
+{
+  "checkpoint": "/root/workplace/amp-luyidan-guidance/G1Recovery_AMP/logs/flat19998_guidance_20k_20261005/on/model_5000.pt",
+  "checkpoint_sha256": "f9369814474a90df3e9f7f43dfce5def8139c6f823316ff559d357f3dbb5f7ea",
+  "git_commit": "fa8822a8301c8a50833031215df439b68e607da8",
+  "script_sha256": "8b685e2643326c359dd0439eb9c2da181a46d889451d6896f9eda1f158853177",
+  "initial_file_sha256": "ae6db00b773e410b38e15c6c9bc7a52236ece162d753bbe9647c4217507dd538",
+  "task": "Mjlab-Recovery-AMP-LowTorque-CapOnly-90-Unitree-G1-Dev",
+  "seed": 42,
+  "num_envs": 2048,
+  "actor_observation_shape": [
+    2048,
+    480
+  ],
+  "actor_noise": false,
+  "horizon_s": 23.0,
+  "step_dt": 0.02,
+  "physics_dt": 0.002,
+  "bank_path": "/root/workplace/amp-luyidan-guidance/G1Recovery_AMP/src/g1recovery_amp/data/reset_banks/a6/multiterrain_train.npz",
+  "bank_sha256": "287eae8e8840c1b3281e7010a84182b824fefacd34439c4f993e9f130af1027a",
+  "gate_scope": "SMP numeric quiet gates with AMP native head/body/contact definitions; native AMP escape; not matched SMP initial states/dynamics",
+  "invalid": {
+    "rule": "actual termination or numerical failure only; no plate history exclusion"
+  },
+  "frozen_reset": "evaluation/sr3_guidance_v1/sr3_initial.npz",
+  "free_parameters": "evaluation/sr3_guidance_v1/free_initial_parameters.npz",
+  "other_sensor_primary_names": [
+    "pelvis_collision",
+    "left_hip_collision",
+    "left_thigh_collision",
+    "left_shin_collision",
+    "left_linkage_brace_collision",
+    "right_hip_collision",
+    "right_thigh_collision",
+    "right_shin_collision",
+    "right_linkage_brace_collision",
+    "torso_collision",
+    "head_collision",
+    "left_shoulder_yaw_collision",
+    "left_elbow_yaw_collision",
+    "left_wrist_collision",
+    "left_hand_collision",
+    "right_shoulder_yaw_collision",
+    "right_elbow_yaw_collision",
+    "right_wrist_collision",
+    "right_hand_collision"
+  ],
+  "packages": {
+    "torch": "2.9.0+cu128",
+    "mjlab": "1.6.0",
+    "mujoco": "3.11.0",
+    "mujoco-warp": "3.11.0",
+    "warp-lang": "1.14.0",
+    "rsl-rl-lib": "5.4.2"
+  }
+}
