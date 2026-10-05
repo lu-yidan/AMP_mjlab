@@ -1,0 +1,15 @@
+{
+  "source": "evaluation/sr3_guidance_v1/free_initial_parameters.npz",
+  "source_sha256": "05055304edaf3b42753a3125f899f5e750f221a8f080b7c8d57b4299e98c065e",
+  "parameters_sha256": "832d3837b7151f9985dbebd65022dbd2daaec5ba09c2b8c489390979beb339e6",
+  "free_n": 512,
+  "all_board_parameters_match": true,
+  "initial_board_min_distance": 0.0,
+  "friction": [
+    1.2,
+    0.01,
+    0.001
+  ],
+  "native_robot_physics": true,
+  "inactive_termination_exclusions": false
+}
