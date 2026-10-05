@@ -27,6 +27,7 @@ def main():
     p.add_argument("--iterations", type=int, default=200)
     p.add_argument("--seed", type=int, default=20261005)
     p.add_argument("--preflight", action="store_true")
+    p.add_argument("--rollout-steps", type=int, default=100)
     a = p.parse_args()
     a.log_dir.mkdir(parents=True, exist_ok=False)
     cfg = minimal29_env_cfg(a.num_envs, a.seed, a.bank)
@@ -90,11 +91,16 @@ def main():
         (a.log_dir / "launch.json").write_text(json.dumps(launch, indent=2))
 
         policy = runner.get_inference_policy(device="cuda:0")
+        done_count = 0
         with torch.no_grad():
-            for _ in range(100):
-                obs, reward, _, _ = wrapper.step(policy(obs["actor"]))
+            for _ in range(a.rollout_steps):
+                obs, reward, dones, _ = wrapper.step(policy(obs["actor"]))
                 assert torch.isfinite(reward).all()
                 assert all(torch.isfinite(value).all() for value in obs.values())
+                assert torch.isfinite(env.sim.data.qvel).all()
+                done_count += int(dones.sum())
+        if a.rollout_steps >= int(cfg.episode_length_s / env.step_dt):
+            assert done_count > 0, "full-episode smoke never reached a termination"
         print("HOST29_MINIMAL_PREFLIGHT_PASS", flush=True)
         if a.preflight:
             return
