@@ -1,0 +1,17 @@
+{
+  "checkpoint_source": "/home/czr/code/G1Recovery_AMP/logs/rsl_rl/g1_amp_get_up_no_keybody_robust_separate/2026-09-30_01-04-15_low_height_progress_from_14999_gpu3_5000/model_19998.pt",
+  "checkpoint_sha256": "4280efe9de1d6772e33f93847208896c4f7126e62630fc95b1cfeafe72e9f47c",
+  "stage": "native flat-ground recovery; no plates or geometric escape rewards",
+  "prior_training": "14999 from scratch plus 5000 low-height-progress updates, native AMP and native assistance curriculum",
+  "infos": {
+    "env_state": {
+      "common_step_counter": 480000
+    }
+  },
+  "adaptation": "No upward assistance in either new A6 arm; common flat checkpoint and same reward/config except three geometry weights.",
+  "source_hashes": {
+    "env.yaml": "c66cf8e16b4f62043b5466b252c10e6fd78bf66a2fa103c39fd1b13446465bcb",
+    "source_adaptation_record.md": "79496e9266e2468ea4e15756fa1bc76a6e318a9d2aa21d788b1f7c6d2e50dd1a",
+    "agent.yaml": "79e93db028ff4f34a0037ddf5d8e0380b35022ba60f36bca073f91ca5e8669db"
+  }
+}

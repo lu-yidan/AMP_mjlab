@@ -1,0 +1,10 @@
+{
+  "source": "G1_Recovery_Below_Block/evidence/amp_free_r_20261005 and free_robustness_20261005/mixed/complete",
+  "scope": "Frozen shared SR3 reset states and Free-R draws; 1024 flat, 512 guided, 512 free.",
+  "files": {
+    "initial.npz": "edaf10f198547855929fbdd1b54cb76dd7d3648701104b5bccb139c0e8f62c48",
+    "sr3_initial.npz": "d2bb1bcc21dde30554993aa6b76d0ba9550573de9f1894e39bb50fd61a89796d",
+    "free_initial_parameters.npz": "05055304edaf3b42753a3125f899f5e750f221a8f080b7c8d57b4299e98c065e",
+    "sr3_protocol.json": "50a54359072a2954cfed73375459412f85517c726a38787d0a28687eac630701"
+  }
+}
