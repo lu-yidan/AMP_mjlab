@@ -1,0 +1,172 @@
+{
+  "all": {
+    "n": 2048,
+    "success_n": 1942,
+    "sr3": 94.82421875,
+    "wilson95_pct": [
+      93.77806247151021,
+      95.70253516955948
+    ],
+    "terminated_n": 0
+  },
+  "plates": {
+    "n": 1024,
+    "success_n": 918,
+    "sr3": 89.6484375,
+    "wilson95_pct": [
+      87.63202772202523,
+      91.368482816989
+    ],
+    "terminated_n": 0
+  },
+  "flat": {
+    "n": 1024,
+    "success_n": 1024,
+    "sr3": 100.0,
+    "wilson95_pct": [
+      99.62625959599825,
+      100.00000000000003
+    ],
+    "terminated_n": 0
+  },
+  "guided_plate": {
+    "n": 512,
+    "success_n": 414,
+    "sr3": 80.859375,
+    "wilson95_pct": [
+      77.22684811774388,
+      84.03228384935944
+    ],
+    "terminated_n": 0
+  },
+  "free_plate": {
+    "n": 512,
+    "success_n": 504,
+    "sr3": 98.4375,
+    "wilson95_pct": [
+      96.94739672468663,
+      99.20617750215911
+    ],
+    "terminated_n": 0
+  },
+  "flat/supine": {
+    "n": 256,
+    "success_n": 256,
+    "sr3": 100.0,
+    "wilson95_pct": [
+      98.52161435741286,
+      99.99999999999999
+    ],
+    "terminated_n": 0
+  },
+  "flat/prone": {
+    "n": 256,
+    "success_n": 256,
+    "sr3": 100.0,
+    "wilson95_pct": [
+      98.52161435741286,
+      99.99999999999999
+    ],
+    "terminated_n": 0
+  },
+  "flat/left": {
+    "n": 256,
+    "success_n": 256,
+    "sr3": 100.0,
+    "wilson95_pct": [
+      98.52161435741286,
+      99.99999999999999
+    ],
+    "terminated_n": 0
+  },
+  "flat/right": {
+    "n": 256,
+    "success_n": 256,
+    "sr3": 100.0,
+    "wilson95_pct": [
+      98.52161435741286,
+      99.99999999999999
+    ],
+    "terminated_n": 0
+  },
+  "guided_plate/supine": {
+    "n": 128,
+    "success_n": 93,
+    "sr3": 72.65625,
+    "wilson95_pct": [
+      64.35923144931466,
+      79.63300021954198
+    ],
+    "terminated_n": 0
+  },
+  "guided_plate/prone": {
+    "n": 128,
+    "success_n": 78,
+    "sr3": 60.9375,
+    "wilson95_pct": [
+      52.28464818201277,
+      68.95298089950424
+    ],
+    "terminated_n": 0
+  },
+  "guided_plate/left": {
+    "n": 128,
+    "success_n": 128,
+    "sr3": 100.0,
+    "wilson95_pct": [
+      97.08630437264915,
+      100.0
+    ],
+    "terminated_n": 0
+  },
+  "guided_plate/right": {
+    "n": 128,
+    "success_n": 115,
+    "sr3": 89.84375,
+    "wilson95_pct": [
+      83.39751366963888,
+      93.96813512731592
+    ],
+    "terminated_n": 0
+  },
+  "free_plate/supine": {
+    "n": 128,
+    "success_n": 126,
+    "sr3": 98.4375,
+    "wilson95_pct": [
+      94.48190233201828,
+      99.57045502898559
+    ],
+    "terminated_n": 0
+  },
+  "free_plate/prone": {
+    "n": 128,
+    "success_n": 124,
+    "sr3": 96.875,
+    "wilson95_pct": [
+      92.24023687386392,
+      98.77817347549465
+    ],
+    "terminated_n": 0
+  },
+  "free_plate/left": {
+    "n": 128,
+    "success_n": 127,
+    "sr3": 99.21875,
+    "wilson95_pct": [
+      95.70737405611393,
+      99.86195681071257
+    ],
+    "terminated_n": 0
+  },
+  "free_plate/right": {
+    "n": 128,
+    "success_n": 127,
+    "sr3": 99.21875,
+    "wilson95_pct": [
+      95.70737405611393,
+      99.86195681071257
+    ],
+    "terminated_n": 0
+  }
+}

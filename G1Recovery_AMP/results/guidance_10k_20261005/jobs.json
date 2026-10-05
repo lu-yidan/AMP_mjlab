@@ -1,0 +1,52 @@
+[
+  {
+    "arm": "off",
+    "gpu": 4,
+    "pid": 1113802,
+    "command": [
+      "/root/workplace/amp-luyidan-guidance/G1Recovery_AMP/.venv/bin/python",
+      "-u",
+      "scripts/evaluate_free_sr3.py",
+      "--checkpoint",
+      "/root/workplace/amp-luyidan-guidance/G1Recovery_AMP/logs/flat19998_guidance_20k_20261005/off/model_10000.pt",
+      "--sr3",
+      "--horizon",
+      "23",
+      "--num-envs",
+      "2048",
+      "--seed",
+      "42",
+      "--frozen-reset",
+      "evaluation/sr3_guidance_v1/sr3_initial.npz",
+      "--free-parameters",
+      "evaluation/sr3_guidance_v1/free_initial_parameters.npz",
+      "--out",
+      "/root/workplace/amp-luyidan-guidance/G1Recovery_AMP/logs/flat19998_guidance_20k_20261005/eval_10k/off_10000"
+    ]
+  },
+  {
+    "arm": "on",
+    "gpu": 5,
+    "pid": 1113803,
+    "command": [
+      "/root/workplace/amp-luyidan-guidance/G1Recovery_AMP/.venv/bin/python",
+      "-u",
+      "scripts/evaluate_free_sr3.py",
+      "--checkpoint",
+      "/root/workplace/amp-luyidan-guidance/G1Recovery_AMP/logs/flat19998_guidance_20k_20261005/on/model_10000.pt",
+      "--sr3",
+      "--horizon",
+      "23",
+      "--num-envs",
+      "2048",
+      "--seed",
+      "42",
+      "--frozen-reset",
+      "evaluation/sr3_guidance_v1/sr3_initial.npz",
+      "--free-parameters",
+      "evaluation/sr3_guidance_v1/free_initial_parameters.npz",
+      "--out",
+      "/root/workplace/amp-luyidan-guidance/G1Recovery_AMP/logs/flat19998_guidance_20k_20261005/eval_10k/on_10000"
+    ]
+  }
+]

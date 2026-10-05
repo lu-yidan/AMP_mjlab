@@ -1,0 +1,14 @@
+{
+  "name": "SR3_recovery20_confirm3_v1",
+  "recovery_deadline_s": 20.0,
+  "confirmation_s": 3.0,
+  "observation_s": 23.0,
+  "head_height_m": 1.15,
+  "uprightness": 0.9,
+  "minimum_each_foot_load_n": 20.0,
+  "escape_required": false,
+  "quiet_motion_required": false,
+  "historical_plate_invalid_exclusion": false,
+  "deadline_convention": "standing interval begins at or before t=20; ends by t=23",
+  "denominator": "all scheduled initial trials; no retries or historical invalid exclusion"
+}
