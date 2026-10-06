@@ -76,6 +76,20 @@ python scripts/eval_host29_video.py --checkpoint logs/<run>/model_<N>.pt \
 > 首次降抖尝试把 `dof_vel` 放大 ×100、`action_rate/smoothness` 放大 ×20，
 > 策略在 reset 位姿直接冻结（四姿态站立率全部为 0），因此退回上述温和幅度。
 
+### 站起后站立稳定奖励（门控）
+
+温和降抖（`model_12999`）后站立率不崩、抖动 RMS 从 ~7.1 降到 ~4.7 rad/s，
+但右腿仍明显抖动、右脚踝扭曲、上肢有残余扭转。为在不冻结起立过程的前提下
+只约束“站起后”的稳定，新增门控项 `mdp.target_dof_vel`（`root_height > 0.65`
+即站起阶段才生效，返回选中关节速度的均方，配负权重）：
+
+- `target_leg_dof_vel`：12 个腿部关节（含左右 `ankle_roll`），权重 `-0.012`；
+- `target_upper_dof_vel`：17 个上肢关节（含 6 个 twist 关节），权重 `-0.006`；
+- `target_target_upper_dof_pos` 从 `×2` 提升到 `×3`（位置层面的抗扭转）。
+
+> 与首次 ×100 的全局 `regu_dof_vel` 不同，这些项只在站起后生效，起立阶段
+> 的运动不受惩罚，因此不会像过强版那样把策略冻结在 reset 位姿。
+
 ## 目录结构
 
 ```

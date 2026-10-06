@@ -487,3 +487,24 @@ def target_target_base_height(
   """Drive the base to the standing height (HoST ``target_target_base_height``)."""
   error = torch.abs(_root_height(env, root_cfg) - base_height_target)
   return torch.exp(error * sigma) * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_dof_vel(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  asset_cfg: SceneEntityCfg = SceneEntityCfg("robot", joint_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Penalise selected joint velocities once standing (gated anti-jitter).
+
+  Unlike :func:`regu_dof_vel`, this term only applies after the stand-up gate,
+  so the get-up motion is left free and only post-stand-up tremor is penalised.
+  It returns the mean squared velocity of the selected joints and should be
+  given a negative weight in the config.
+  """
+  asset: Entity = env.scene[asset_cfg.name]
+  ids = asset_cfg.joint_ids
+  if len(ids) == 0:
+    return torch.zeros_like(asset.data.joint_vel[:, 0])
+  mean_sq = torch.mean(torch.square(asset.data.joint_vel[:, ids]), dim=1)
+  return mean_sq * _standup_gate(env, phase3_height, root_cfg)

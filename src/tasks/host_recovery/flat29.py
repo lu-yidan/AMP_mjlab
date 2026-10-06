@@ -2,10 +2,19 @@
 import copy
 
 from mjlab.managers.scene_entity_config import SceneEntityCfg
+from mjlab.managers.reward_manager import RewardTermCfg
 from src.tasks.host_recovery import mdp
 from src.assets.robots.unitree_g1.g1_constants_bp import get_g1_robot_cfg
 from src.tasks.host_recovery.config.g1.env_cfgs import (
     HOST_TARGET_UPPER_DOF_POS, UPPER_BODY_JOINTS, unitree_g1_host_standup_env_cfg,
+)
+
+
+LEG_JOINTS = (
+    "left_hip_pitch_joint", "left_hip_roll_joint", "left_hip_yaw_joint",
+    "left_knee_joint", "left_ankle_pitch_joint", "left_ankle_roll_joint",
+    "right_hip_pitch_joint", "right_hip_roll_joint", "right_hip_yaw_joint",
+    "right_knee_joint", "right_ankle_pitch_joint", "right_ankle_roll_joint",
 )
 
 
@@ -50,6 +59,33 @@ def flat29_env_cfg(play=False):
         cfg.rewards["standup"].weight = 1.5
         cfg.rewards["target_target_base_height"].weight *= 2.0
         cfg.rewards["target_target_upper_dof_pos"].weight *= 2.0
+
+        # Gated post-stand-up stability: penalise leg jitter and upper-body
+        # tremor only once the robot is up, leaving the get-up motion free.
+        # Legs get a stronger weight because the current model visibly shakes
+        # its right leg and twists its right ankle after standing.
+        cfg.rewards["target_leg_dof_vel"] = RewardTermCfg(
+            func=mdp.target_dof_vel,
+            weight=-0.012,
+            params={
+                "phase3_height": 0.65,
+                "asset_cfg": SceneEntityCfg(
+                    "robot", joint_names=LEG_JOINTS, preserve_order=True
+                ),
+            },
+        )
+        cfg.rewards["target_upper_dof_vel"] = RewardTermCfg(
+            func=mdp.target_dof_vel,
+            weight=-0.006,
+            params={
+                "phase3_height": 0.65,
+                "asset_cfg": SceneEntityCfg(
+                    "robot", joint_names=tuple(targets), preserve_order=True
+                ),
+            },
+        )
+        # Reinforce a clean neutral upper-body pose (anti-twist) in position.
+        cfg.rewards["target_target_upper_dof_pos"].weight *= 1.5
     cfg.sim.mujoco.timestep = 0.002
     cfg.decimation = 10
     return cfg
