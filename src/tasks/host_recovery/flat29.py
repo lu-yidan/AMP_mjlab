@@ -37,16 +37,19 @@ def flat29_env_cfg(play=False):
             "steps_per_update": 50,
             "zero_force_fraction": 0.25,
         }
-        # Anti-jitter continuation for the 29-DoF policy. The inherited HoST
-        # regularisation is tiny (regu_dof_vel=-4e-6, regu_action_rate=-0.0001,
-        # regu_smoothness=-0.00016), so the recovered policy stands with visible
-        # high-frequency joint chatter (final joint speed RMS ~7 rad/s). Boost
-        # only the smoothness/velocity terms; leave regu_dof_acc and the task
-        # reward untouched so the stand-up objective is not re-shaped.
-        cfg.rewards["regu_dof_vel"].weight *= 100.0
-        cfg.rewards["regu_upper_dof_vel"].weight *= 100.0
-        cfg.rewards["regu_action_rate"].weight *= 20.0
-        cfg.rewards["regu_smoothness"].weight *= 20.0
+        # Anti-jitter continuation (mild). The first attempt used x100 velocity
+        # and x20 action-rate/smoothness boosts, which froze the policy in its
+        # reset pose (never stood in any posture). Use a gentle regularisation
+        # and instead reinforce the get-up objective: stronger head/torso and
+        # waist/base height, plus arm/hand pose stability.
+        cfg.rewards["regu_dof_vel"].weight *= 10.0
+        cfg.rewards["regu_upper_dof_vel"].weight *= 10.0
+        cfg.rewards["regu_action_rate"].weight *= 5.0
+        cfg.rewards["regu_smoothness"].weight *= 5.0
+
+        cfg.rewards["standup"].weight = 1.5
+        cfg.rewards["target_target_base_height"].weight *= 2.0
+        cfg.rewards["target_target_upper_dof_pos"].weight *= 2.0
     cfg.sim.mujoco.timestep = 0.002
     cfg.decimation = 10
     return cfg
