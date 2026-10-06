@@ -80,6 +80,7 @@ class HoSTOnPolicyRunner(MjlabOnPolicyRunner):
     """
     train_cfg.setdefault("actor", {})["action_output_activation"] = "tanh"
     super().__init__(env, train_cfg, log_dir, device)
+    self.logger_type = self.cfg.get("logger", "tensorboard").lower()
   def load(
     self,
     path: str,

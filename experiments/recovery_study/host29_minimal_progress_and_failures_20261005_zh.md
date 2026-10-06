@@ -111,7 +111,71 @@ A6 三份 bank。
 
 ## 7. 当前判断与下一步门槛
 
-本轮结果证明，仅冻结 23 DoF actor 参数仍不能证明运行闭环等价。优先级应为：
+### 7.1 23→29 控制契约核查结果
+
+`scripts/audit_host23_to29_contract.py` 对实际运行配置完成了逐项核查，证据保存在
+`artifacts/host29_minimal_20261005/contract_audit.json`：
+
+- 观测映射正确：23 DoF 的 456 个历史输入按名称映射到 564D 输入；新增的 108 列在
+  actor 第一层权重中严格为 0。六帧静态历史误差为 0。
+- 动作行映射正确：23 个共有输出映射到
+  `[0..12, 15..19, 22..26]`，新增六轴为 `[13,14,20,21,27,28]`；初始化时新增
+  输出权重和偏置严格为 0。
+- PD target 语义已按预期执行：共有轴为 `current + action*0.25`，新增轴为
+  `home + action*0.25`。
+- 两份 MJCF 的共有关节轴、关节范围、共有刚体质量与惯量完全一致；问题不在共有刚体
+  几何或惯量。
+- **共有执行器动力学不一致**：23 DoF 的所有共有轴使用普通
+  `BuiltinPositionActuatorCfg`；29 DoF 将其替换为带速度–扭矩曲线和摩擦的
+  `UnitreeActuator`。这改变了原策略实际看到的闭环。
+- 两个 hip pitch 从 23 DoF 的 `Kp=40.179, Kd=2.558, 88 Nm` 组换成了
+  `Kp=99.098, Kd=6.309, 139 Nm` 组，刚度、阻尼、armature 和限幅全部变化。
+- 共有 ankle 在 23 DoF 中是普通双电机等效 `50 Nm`；29 DoF 虽声明 effort limit
+  50 Nm，却仍使用单电机曲线 `Y1=24.8/Y2=31.9` 以及额外摩擦，等效动态能力与
+  23 DoF 不同。新增 waist 也存在同样的单/双电机曲线不一致。
+- 其余共有 hip/knee/arm 虽保持标称 Kp/Kd，大多也新增了速度相关限幅和摩擦。
+- 未训练的映射 actor 在当前 29 DoF 配置上的零辅助恢复仅为
+  prone/supine/left/right `7.42/0/0/0%`，严格保持全 0；因此失败在任何 PPO 更新前
+  就已存在。200 更新只训练新增六行后为 `3.52/0/0.78/0%`，没有修复闭环。
+
+结论：观测排列和动作行映射不是当前主因；主因是把 23 DoF actor 放进了不等价的
+29 DoF 执行器闭环。仅冻结网络或调整 reward 不可能恢复原策略行为。
+
+### 7.2 最后一次 29 DoF 尝试与回退条件
+
+本分支已把最后一次 29 DoF 尝试限定为控制匹配：29 DoF 的 23 个共有关节恢复为与
+23 DoF 完全相同的 Builtin PD 分组、Kp/Kd、armature 和 effort limit；六个新增轴
+保留独立 home 控制。先评估未训练 actor，再做有上限短训。若四方向零辅助恢复和
+严格站姿仍不成功，停止 29 DoF 路线，按用户要求改用已验证的 23 DoF HoST 策略进行
+压板/A6 训练。
+
+已落地到当前分支：
+
+- `src/assets/robots/unitree_g1/g1_constants_bp.py` 将 29 DoF 共有轴执行器分组
+  改回与 23 DoF 相同：`hip_pitch/hip_yaw/waist_yaw` 使用
+  `Kp=40.179, Kd=2.558, 88 Nm`，`hip_roll/knee` 使用
+  `Kp=99.098, Kd=6.309, 139 Nm`；其余共有轴保持 23 DoF Builtin PD。
+- `src/tasks/host_recovery/flat29.py` 改用 `g1_constants_bp.get_g1_robot_cfg()`，
+  因此 29 DoF 不再使用带速度-扭矩曲线/摩擦的 `UnitreeActuator`。
+- `scripts/audit_host23_to29_contract.py` 改为比较 `g1_constants_bp`，并对 23 个
+  共有轴的 class/Kp/Kd/effort/armature 做硬断言，未匹配会直接失败。
+- 23 DoF 回退资产单独归档到 `archives/23dof_host_a6_20261005/`，包含 MJCF、
+  动作/观测维度和 A6 配置。
+
+### 7.3 最终控制匹配结果与停止 29 DoF
+
+`scripts/audit_host23_to29_contract.py` 已对实际加载的 29 DoF matched 配置通过，
+23 个共有轴的 class/Kp/Kd/effort/armature 不再有任何不匹配。再用未训练的
+23→29 映射 actor 做 1024 环境 x 200 更新短训，并在同一四姿态零辅助严格评估下复测。
+
+源 actor 零辅助宽松恢复为 prone/supine/left/right
+`0/12.89/0.78/1.56%`；200 更新后为 `0/6.25/0.39/1.56%`。四方向严格 1 秒/5 秒
+保持仍全部为 0，异常终止仍为 0。因此控制闭环匹配本身不足以恢复 23 DoF 行为，
+29 DoF 路线停止。
+
+后续改用已验证可恢复的 23 DoF HoST 基线进行压板/A6 训练；23 DoF 的 MJCF、
+动作/观测维度和 A6 配置已单独存档，禁止继续把 29 DoF 资产或失败模型带入该路径。
+本轮结果证明，仅冻结 23 DoF actor 参数仍不能证明运行闭环等价。执行优先级为：
 
 1. 对相同静止 bank，在训练前后逐步回放并逐项对齐 23 与 29 的 564D 观测语义、历史排列、
    关节名称到 action row 的映射、action scale、PD 目标和实际关节力矩。
@@ -125,10 +189,35 @@ A6 三份 bank。
 
 ## 8. 复现入口
 
+先复核共有执行器契约，再用未训练的 23→29 映射 actor 做最终控制匹配短训：
+
 ```bash
 cd /home/sjw/AMP_mjlab-host29-minimal
 export PYTHONPATH=. TORCHDYNAMO_DISABLE=1 MUJOCO_GL=egl
 
+CUDA_VISIBLE_DEVICES=0 /home/sjw/AMP_mjlab/.venv/bin/python \
+  scripts/audit_host23_to29_contract.py \
+  --checkpoint /home/sjw/AMP_mjlab-host29-control-audit/artifacts/host23_lift29_20261004/actor_init.pt \
+  --bank /home/sjw/AMP_mjlab-host29-upright-v2/outputs/native_rest_v2/train.npz \
+  --output logs/host29_matched_contract_20261005/contract_audit.json
+
+CUDA_VISIBLE_DEVICES=0 /home/sjw/AMP_mjlab/.venv/bin/python \
+  scripts/train_host29_minimal.py \
+  --checkpoint /home/sjw/AMP_mjlab-host29-control-audit/artifacts/host23_lift29_20261004/actor_init.pt \
+  --bank /home/sjw/AMP_mjlab-host29-upright-v2/outputs/native_rest_v2/train.npz \
+  --num-envs 1024 --iterations 200 --rollout-steps 100 \
+  --log-dir logs/host29_matched_shared_actuators_pilot1024_20261005
+
+CUDA_VISIBLE_DEVICES=0 /home/sjw/AMP_mjlab/.venv/bin/python \
+  scripts/eval_host29_minimal.py \
+  --checkpoint logs/host29_matched_shared_actuators_pilot1024_20261005/model_200_final.pt \
+  --bank /home/sjw/AMP_mjlab-host29-upright-v2/outputs/native_rest_v2/train.npz \
+  --output logs/host29_matched_shared_actuators_eval200_20261005
+```
+
+旧的最小六输出失败实验仍可从以下命令复现：
+
+```bash
 CUDA_VISIBLE_DEVICES=0 /home/sjw/AMP_mjlab/.venv/bin/python \
   scripts/train_host29_minimal.py \
   --checkpoint /home/sjw/AMP_mjlab-host29-control-audit/artifacts/host23_lift29_20261004/actor_init.pt \
@@ -142,4 +231,3 @@ CUDA_VISIBLE_DEVICES=0 /home/sjw/AMP_mjlab/.venv/bin/python \
   --bank /home/sjw/AMP_mjlab-host29-upright-v2/outputs/native_rest_v2/train.npz \
   --output logs/host29_minimal_added6_eval200_20261005
 ```
-

@@ -154,14 +154,14 @@ G1_ACTUATOR_5020 = BuiltinPositionActuatorCfg(
   armature=ACTUATOR_5020.reflected_inertia,
 )
 G1_ACTUATOR_7520_14 = BuiltinPositionActuatorCfg(
-  target_names_expr=(".*_hip_yaw_joint", "waist_yaw_joint"),
+  target_names_expr=(".*_hip_pitch_joint", ".*_hip_yaw_joint", "waist_yaw_joint"),
   stiffness=STIFFNESS_7520_14,
   damping=DAMPING_7520_14,
   effort_limit=ACTUATOR_7520_14.effort_limit,
   armature=ACTUATOR_7520_14.reflected_inertia,
 )
 G1_ACTUATOR_7520_22 = BuiltinPositionActuatorCfg(
-  target_names_expr=(".*_hip_pitch_joint", ".*_hip_roll_joint", ".*_knee_joint"),
+  target_names_expr=(".*_hip_roll_joint", ".*_knee_joint"),
   stiffness=STIFFNESS_7520_22,
   damping=DAMPING_7520_22,
   effort_limit=ACTUATOR_7520_22.effort_limit,
