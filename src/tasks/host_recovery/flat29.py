@@ -3,7 +3,7 @@ import copy
 
 from mjlab.managers.scene_entity_config import SceneEntityCfg
 from src.tasks.host_recovery import mdp
-from src.assets.robots import get_g1_robot_cfg
+from src.assets.robots.unitree_g1.g1_constants_bp import get_g1_robot_cfg
 from src.tasks.host_recovery.config.g1.env_cfgs import (
     HOST_TARGET_UPPER_DOF_POS, UPPER_BODY_JOINTS, unitree_g1_host_standup_env_cfg,
 )
