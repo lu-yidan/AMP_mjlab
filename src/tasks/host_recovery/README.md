@@ -83,9 +83,12 @@ python scripts/eval_host29_video.py --checkpoint logs/<run>/model_<N>.pt \
 只约束“站起后”的稳定，新增门控项 `mdp.target_dof_vel`（`root_height > 0.65`
 即站起阶段才生效，返回选中关节速度的均方，配负权重）：
 
-- `target_leg_dof_vel`：12 个腿部关节（含左右 `ankle_roll`），权重 `-0.012`；
-- `target_upper_dof_vel`：17 个上肢关节（含 6 个 twist 关节），权重 `-0.006`；
-- `target_target_upper_dof_pos` 从 `×2` 提升到 `×3`（位置层面的抗扭转）。
+- `target_leg_dof_vel`：12 个腿部关节（含左右 `ankle_roll`），权重 `-0.001`；
+- `target_upper_dof_vel`：17 个上肢关节（含 6 个 twist 关节），权重 `-0.0005`。
+
+> 首次把门控项设为 `-0.012`/`-0.006` 时，评测四姿态 `held` 从 ~100% 崩到
+> ~2%（`final_standing` 同步掉到 ~2-4%），即平衡所需的腿部微调被一并压死。
+> 因此降到上述小权重，使门控项只提供温和的站起后收敛，不再压制平衡动作。
 
 > 与首次 ×100 的全局 `regu_dof_vel` 不同，这些项只在站起后生效，起立阶段
 > 的运动不受惩罚，因此不会像过强版那样把策略冻结在 reset 位姿。

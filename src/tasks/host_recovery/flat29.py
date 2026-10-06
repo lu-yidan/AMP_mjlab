@@ -66,7 +66,7 @@ def flat29_env_cfg(play=False):
         # its right leg and twists its right ankle after standing.
         cfg.rewards["target_leg_dof_vel"] = RewardTermCfg(
             func=mdp.target_dof_vel,
-            weight=-0.012,
+            weight=-0.001,
             params={
                 "phase3_height": 0.65,
                 "asset_cfg": SceneEntityCfg(
@@ -76,7 +76,7 @@ def flat29_env_cfg(play=False):
         )
         cfg.rewards["target_upper_dof_vel"] = RewardTermCfg(
             func=mdp.target_dof_vel,
-            weight=-0.006,
+            weight=-0.0005,
             params={
                 "phase3_height": 0.65,
                 "asset_cfg": SceneEntityCfg(
@@ -84,8 +84,6 @@ def flat29_env_cfg(play=False):
                 ),
             },
         )
-        # Reinforce a clean neutral upper-body pose (anti-twist) in position.
-        cfg.rewards["target_target_upper_dof_pos"].weight *= 1.5
     cfg.sim.mujoco.timestep = 0.002
     cfg.decimation = 10
     return cfg
