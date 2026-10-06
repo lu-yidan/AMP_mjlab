@@ -38,11 +38,51 @@ CKPT=<checkpoint.pt> LOG_DIR=<log_dir> python scripts/resume_finetune.py
 - `eval_stand_perjoint.py` 输出 11 个上肢关节的逐关节 RMS。
 - `resume_finetune.py` 会把课程钉在 `action_scale=0.25`、拉力 `0` 的最终阶段。
 
+## 29 自由度平坦恢复（flat29）
+
+在 23 自由度任务之外，本包还提供 29 关节的平坦恢复配置
+`src/tasks/host_recovery/flat29.py`。它复用同一套 HoST 移植（单 critic PPO），
+让全部 17 个上肢关节参与动作，其中含 6 个新增关节
+（`waist_roll_joint`、`waist_pitch_joint`、左右 `wrist_pitch_joint`、
+左右 `wrist_yaw_joint`），动作维度为 29。
+
+```bash
+# 从零训练（4096 环境、12000 迭代）
+python scripts/train_host29.py --num-envs 4096 --iterations 12000 --log-dir logs/<run>
+
+# 从 checkpoint 续训（同时恢复优化器与课程进度）
+python scripts/train_host29.py --resume logs/<run>/model_<N>.pt \
+  --num-envs 4096 --iterations <target> --log-dir logs/<run2>
+
+# 四姿态（俯卧/仰卧/左右侧）零辅助站立评测
+python scripts/eval_host29.py --checkpoint logs/<run>/model_<N>.pt \
+  --output logs/evaluations/<name>/evaluation.json --num-envs 256 --steps 1000
+
+# 四姿态站立视频
+python scripts/eval_host29_video.py --checkpoint logs/<run>/model_<N>.pt \
+  --output logs/evaluations/<name>/videos
+```
+
+### 站立奖励（降抖续训）
+
+29 DoF 站在继承的 HoST 奖励上显式压低高频抖动，并强化“站起来”目标：
+
+- 平滑惩罚温和放大：`regu_dof_vel` / `regu_upper_dof_vel` ×10，
+  `regu_action_rate` / `regu_smoothness` ×5；
+- 站起目标加强：`standup` 权重 `1.0 → 1.5`，
+  `target_target_base_height`（腰部/骨盆高度）×2，
+  `target_target_upper_dof_pos`（手臂/手姿态稳定）×2。
+
+> 首次降抖尝试把 `dof_vel` 放大 ×100、`action_rate/smoothness` 放大 ×20，
+> 策略在 reset 位姿直接冻结（四姿态站立率全部为 0），因此退回上述温和幅度。
+
 ## 目录结构
 
 ```
 src/tasks/host_recovery/
 ├── host_recovery_env_cfg.py   # 任务基配置（奖励/观测/事件/终止/课程/度量）
+├── flat29.py                # 29 关节平坦恢复配置
+├── minimal29.py             # 23→29 DoF 静态部署适配（无 AMP）
 ├── config/g1/
 │   ├── env_cfgs.py            # G1 专属：刚体名、关节名、动作缩放、play 覆盖
 │   ├── rl_cfg.py              # PPO 超参（取自 HoST G1CfgPPO）
