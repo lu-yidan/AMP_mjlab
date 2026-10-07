@@ -93,6 +93,26 @@ python scripts/eval_host29_video.py --checkpoint logs/<run>/model_<N>.pt \
 > 与首次 ×100 的全局 `regu_dof_vel` 不同，这些项只在站起后生效，起立阶段
 > 的运动不受惩罚，因此不会像过强版那样把策略冻结在 reset 位姿。
 
+### 手部辅助起身 + 手臂姿态惩罚（armpose）
+
+`model_13999`（温和降抖 + 门控稳定）后四姿态站立率已稳定，但站起后仍存在
+左腿抖动/肌无力与手臂姿态不佳。为把动作往“屈腿蹬地、手部辅助起身”方向引导，
+并约束站起后的手臂姿态，新增 4 项（全部只影响 29 DoF，门控 `root_height > 0.65`
+在站起后生效，手部辅助在 `0.45–0.65` 过渡区间生效）：
+
+- `style_hand_assist`：权重 `+0.08`，奖励双手高度 `< 0.3 m`，鼓励手部推地辅助起身；
+- `target_elbow_up`：权重 `-0.003`，惩罚双肘关节偏离 0（手肘向上）；
+- `target_arm_twist`：权重 `-0.0015`，惩罚双肩 yaw 偏离 0（胳膊扭曲过大）；
+- `target_wrist_flip`：权重 `-0.0015`，惩罚 6 个腕关节偏离 0（手腕翻转）。
+
+实现上新增 `mdp.style_hand_assist` 与 `mdp.target_dof_pos_deviation`（门控、
+线性绝对偏差，配负权重）。
+
+`model_14999`（`host29_armpose_v3_20261007`，从 model_13999 续训 1000 updates）
+四姿态 `held` 保持 99.6–100%、站立率 98.4–100%，`final_joint_speed_rms` 从基线
+3.6–3.8 降到 2.2–2.6 rad/s（约 -35%，左腿侧 `left_side` 降到 2.22，降幅最大），
+站起后左腿抖动与手臂姿态按数值明显收敛。
+
 ## 目录结构
 
 ```

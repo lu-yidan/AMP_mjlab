@@ -18,6 +18,22 @@ LEG_JOINTS = (
 )
 
 
+ELBOW_JOINTS = (
+    "left_elbow_joint", "right_elbow_joint",
+)
+
+
+ARM_TWIST_JOINTS = (
+    "left_shoulder_yaw_joint", "right_shoulder_yaw_joint",
+)
+
+
+WRIST_JOINTS = (
+    "left_wrist_roll_joint", "left_wrist_pitch_joint", "left_wrist_yaw_joint",
+    "right_wrist_roll_joint", "right_wrist_pitch_joint", "right_wrist_yaw_joint",
+)
+
+
 def flat29_env_cfg(play=False):
     cfg = unitree_g1_host_standup_env_cfg(play=play)
     cfg.scene.entities = {"robot": copy.deepcopy(get_g1_robot_cfg())}
@@ -82,6 +98,51 @@ def flat29_env_cfg(play=False):
                 "asset_cfg": SceneEntityCfg(
                     "robot", joint_names=tuple(targets), preserve_order=True
                 ),
+            },
+        )
+        cfg.rewards["style_hand_assist"] = RewardTermCfg(
+            func=mdp.style_hand_assist,
+            weight=0.08,
+            params={
+                "left_hand_cfg": SceneEntityCfg(
+                    "robot", body_names=("left_wrist_yaw_link",)
+                ),
+                "right_hand_cfg": SceneEntityCfg(
+                    "robot", body_names=("right_wrist_yaw_link",)
+                ),
+            },
+        )
+        cfg.rewards["target_elbow_up"] = RewardTermCfg(
+            func=mdp.target_dof_pos_deviation,
+            weight=-0.003,
+            params={
+                "phase3_height": 0.65,
+                "asset_cfg": SceneEntityCfg(
+                    "robot", joint_names=ELBOW_JOINTS, preserve_order=True
+                ),
+                "target_pos": (0.0, 0.0),
+            },
+        )
+        cfg.rewards["target_arm_twist"] = RewardTermCfg(
+            func=mdp.target_dof_pos_deviation,
+            weight=-0.0015,
+            params={
+                "phase3_height": 0.65,
+                "asset_cfg": SceneEntityCfg(
+                    "robot", joint_names=ARM_TWIST_JOINTS, preserve_order=True
+                ),
+                "target_pos": (0.0, 0.0),
+            },
+        )
+        cfg.rewards["target_wrist_flip"] = RewardTermCfg(
+            func=mdp.target_dof_pos_deviation,
+            weight=-0.0015,
+            params={
+                "phase3_height": 0.65,
+                "asset_cfg": SceneEntityCfg(
+                    "robot", joint_names=WRIST_JOINTS, preserve_order=True
+                ),
+                "target_pos": (0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
             },
         )
     cfg.sim.mujoco.timestep = 0.002

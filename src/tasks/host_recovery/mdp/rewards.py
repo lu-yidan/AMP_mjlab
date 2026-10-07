@@ -260,6 +260,30 @@ def style_right_foot_displacement(
   )
 
 
+def style_hand_assist(
+  env: ManagerBasedRlEnv,
+  phase1_height: float = 0.45,
+  phase3_height: float = 0.65,
+  hand_height_max: float = 0.3,
+  left_hand_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  right_hand_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Reward keeping both hands low to push off during the get-up transition.
+
+  This only fires while the base is lifting off the ground but not yet standing,
+  nudging the policy toward a leg-push / hand-assisted recovery rather than
+  flailing the arms upward.
+  """
+  asset: Entity = env.scene[left_hand_cfg.name]
+  left_z = asset.data.body_link_pos_w[:, left_hand_cfg.body_ids[0], 2]
+  right_z = asset.data.body_link_pos_w[:, right_hand_cfg.body_ids[0], 2]
+  hands_low = ((left_z < hand_height_max) & (right_z < hand_height_max)).float()
+  root_z = _root_height(env, root_cfg)
+  in_transition = ((root_z > phase1_height) & (root_z < phase3_height)).float()
+  return hands_low * in_transition
+
+
 def style_knee_deviation(
   env: ManagerBasedRlEnv,
   upper_limit: float = 2.85,
@@ -508,3 +532,31 @@ def target_dof_vel(
     return torch.zeros_like(asset.data.joint_vel[:, 0])
   mean_sq = torch.mean(torch.square(asset.data.joint_vel[:, ids]), dim=1)
   return mean_sq * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_dof_pos_deviation(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  asset_cfg: SceneEntityCfg = SceneEntityCfg("robot", joint_names=()),
+  target_pos: tuple[float, ...] | None = None,
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Penalise selected joint-position deviation once standing (gated pose penalty).
+
+  Returns the mean absolute deviation of the selected joints from ``target_pos``
+  (the robot default positions when omitted) and should be given a negative
+  weight. Unlike :func:`target_target_upper_dof_pos`, this is a linear
+  deviation so it keeps pushing even for small offsets, intended for targeted
+  arm/hand pose corrections such as elbow flare, arm twist and wrist flip.
+  """
+  asset: Entity = env.scene[asset_cfg.name]
+  ids = asset_cfg.joint_ids
+  if len(ids) == 0:
+    return torch.zeros_like(asset.data.joint_pos[:, 0])
+  q = asset.data.joint_pos[:, ids]
+  if target_pos is None:
+    target = asset.data.default_joint_pos[:, ids]
+  else:
+    target = torch.tensor(target_pos, device=q.device, dtype=q.dtype).expand_as(q)
+  deviation = torch.mean(torch.abs(q - target), dim=-1)
+  return deviation * _standup_gate(env, phase3_height, root_cfg)
