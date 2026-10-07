@@ -56,18 +56,26 @@ def _plate_spec(*, free: bool, body_name: str, geom_name: str) -> Any:
   if free:
     body.add_freejoint(name=f"{body_name}_joint")
   else:
-    # A mocap body is driven by reset events and can only translate vertically
-    # in the runtime adapter. The joint constraint is enforced by that adapter.
-    body.mocap = True
-  body.add_geom(
+    body.add_joint(
+      name=f"{body_name}_slide",
+      type=mujoco.mjtJoint.mjJNT_SLIDE,
+      axis=(0.0, 0.0, 1.0),
+      limited=True,
+      range=(-1.2, 0.0),
+      damping=60.0,
+    )
+  geom = body.add_geom(
     name=geom_name,
     type=mujoco.mjtGeom.mjGEOM_BOX,
     size=PLATE_HALF_SIZE,
-    mass=8.0 if free else 0.0,
+    mass=8.0,
     friction=PLATE_FRICTION,
     rgba=(0.85, 0.45, 0.12, 0.8),
     solref=(0.01, 1.0),
   )
+  if not free:
+    geom.priority = 1
+    geom.solimp = (0.98, 0.995, 0.001, 0.5, 2.0)
   return spec
 
 
@@ -82,7 +90,7 @@ def guided_plate_spec() -> Any:
 
 def free_plate_spec() -> Any:
   """Return the free-jointed historical plate entity."""
-  return _plate_spec(free=True, body_name="free_plate", geom_name="plate_geom")
+  return _plate_spec(free=True, body_name="plate", geom_name="plate_geom")
 
 
 def quotas(num_envs: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:

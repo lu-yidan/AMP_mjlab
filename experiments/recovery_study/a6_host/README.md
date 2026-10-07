@@ -1,5 +1,20 @@
 # HoST historical A6 migration
 
+## Status
+
+As of 2026-10-07, the native 23-DoF A6 G-/G+ retries have been stopped at
+updates 5000 and 5500 for diagnosis. Both runs remained numerically healthy,
+but diagnostic videos showed no complete escape-to-stand sequence. The main
+failure mechanisms are the training-only early invalid-plate termination,
+quiet-motion local optima, the G+ constrained-task multiplier, and excessive
+exploration noise. Do not resume either run unchanged.
+
+The 29-DoF flat line is separate. The elbow-flexion v4 checkpoint passed the
+four-posture zero-assistance evaluation; directional/stability v5 is an
+in-progress continuation and has not yet passed final evaluation. See
+`../host29_v5_a6_diagnostic_20261007_zh.md` for the exact run state, parameters,
+artifact paths, and video findings.
+
 This directory is the HoST-side migration boundary for the historical A6
 stage-3 paired experiment. It is not the existing flat `Unitree-G1-HoST`
 baseline and must not reuse `prone_smp_v1` or `supine_smp_v3` as an A6 claim.

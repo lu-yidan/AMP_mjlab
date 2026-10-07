@@ -534,6 +534,62 @@ def target_dof_vel(
   return mean_sq * _standup_gate(env, phase3_height, root_cfg)
 
 
+def target_dof_stillness(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  velocity_scale: float = 1.5,
+  asset_cfg: SceneEntityCfg = SceneEntityCfg("robot", joint_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Reward low selected-joint velocity after standing with a bounded score."""
+  asset: Entity = env.scene[asset_cfg.name]
+  ids = asset_cfg.joint_ids
+  if len(ids) == 0:
+    return torch.zeros_like(asset.data.joint_vel[:, 0])
+  mean_sq = torch.mean(torch.square(asset.data.joint_vel[:, ids]), dim=1)
+  score = torch.exp(-mean_sq / (velocity_scale * velocity_scale))
+  return score * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_chain_alignment(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  proximal_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  middle_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  distal_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Reward consecutive limb segments pointing in the same direction after standing."""
+  asset: Entity = env.scene[proximal_cfg.name]
+  proximal = asset.data.body_link_pos_w[:, proximal_cfg.body_ids]
+  middle = asset.data.body_link_pos_w[:, middle_cfg.body_ids]
+  distal = asset.data.body_link_pos_w[:, distal_cfg.body_ids]
+  first = torch.nn.functional.normalize(middle - proximal, dim=-1)
+  second = torch.nn.functional.normalize(distal - middle, dim=-1)
+  alignment = torch.sum(first * second, dim=-1).clamp(min=0.0, max=1.0)
+  return alignment.mean(dim=1) * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_leg_vertical(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  hip_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  knee_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  ankle_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Reward thighs and shanks pointing downward after standing."""
+  asset: Entity = env.scene[hip_cfg.name]
+  hip = asset.data.body_link_pos_w[:, hip_cfg.body_ids]
+  knee = asset.data.body_link_pos_w[:, knee_cfg.body_ids]
+  ankle = asset.data.body_link_pos_w[:, ankle_cfg.body_ids]
+  thigh = torch.nn.functional.normalize(knee - hip, dim=-1)
+  shank = torch.nn.functional.normalize(ankle - knee, dim=-1)
+  vertical = (-thigh[..., 2]).clamp(min=0.0, max=1.0)
+  vertical += (-shank[..., 2]).clamp(min=0.0, max=1.0)
+  return vertical.mean(dim=1) * 0.5 * _standup_gate(env, phase3_height, root_cfg)
+
+
 def target_dof_pos_deviation(
   env: ManagerBasedRlEnv,
   phase3_height: float = 0.65,
