@@ -113,6 +113,13 @@ python scripts/eval_host29_video.py --checkpoint logs/<run>/model_<N>.pt \
 3.6–3.8 降到 2.2–2.6 rad/s（约 -35%，左腿侧 `left_side` 降到 2.22，降幅最大），
 站起后左腿抖动与手臂姿态按数值明显收敛。
 
+### 小臂/大臂夹角下限惩罚（elbow flexion）
+
+在 armpose 之上，`model_14999` 站起后仍可能把肘部折得过弯（小臂与大臂夹角过小）。
+新增 `target_elbow_flexion`（门控 `root_height > 0.65`）：对双肘关节正向屈曲超过
+`1.2 rad` 的部分配负权重 `-0.002`。G1 肘关节以正向为屈曲（范围
+`[-1.0472, 2.0944]`），因此该项只在肘部折得过弯时才惩罚，不额外压制伸直位。
+
 ## 目录结构
 
 ```

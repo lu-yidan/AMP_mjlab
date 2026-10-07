@@ -560,3 +560,27 @@ def target_dof_pos_deviation(
     target = torch.tensor(target_pos, device=q.device, dtype=q.dtype).expand_as(q)
   deviation = torch.mean(torch.abs(q - target), dim=-1)
   return deviation * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_elbow_flexion(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  flexion_limit: float = 1.2,
+  asset_cfg: SceneEntityCfg = SceneEntityCfg("robot", joint_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Penalise excessive elbow flexion once standing (forearm/upper-arm angle too small).
+
+  The G1 elbow range is ``[-1.0472, 2.0944]`` with positive = flexion, so the
+  forearm/upper-arm included angle shrinks as the joint position grows. Penalise
+  only the positive flexion exceeding ``flexion_limit`` so the arm does not
+  collapse into a fully folded pose. Returns the mean hinge excess and should be
+  given a negative weight.
+  """
+  asset: Entity = env.scene[asset_cfg.name]
+  ids = asset_cfg.joint_ids
+  if len(ids) == 0:
+    return torch.zeros_like(asset.data.joint_pos[:, 0])
+  q = asset.data.joint_pos[:, ids]
+  excess = torch.clamp(q - flexion_limit, min=0.0)
+  return torch.mean(excess, dim=-1) * _standup_gate(env, phase3_height, root_cfg)

@@ -145,6 +145,17 @@ def flat29_env_cfg(play=False):
                 "target_pos": (0.0, 0.0, 0.0, 0.0, 0.0, 0.0),
             },
         )
+        cfg.rewards["target_elbow_flexion"] = RewardTermCfg(
+            func=mdp.target_elbow_flexion,
+            weight=-0.002,
+            params={
+                "phase3_height": 0.65,
+                "flexion_limit": 1.2,
+                "asset_cfg": SceneEntityCfg(
+                    "robot", joint_names=ELBOW_JOINTS, preserve_order=True
+                ),
+            },
+        )
     cfg.sim.mujoco.timestep = 0.002
     cfg.decimation = 10
     return cfg
