@@ -47,6 +47,9 @@ BANK_FILES = (
   "datasets/reset_banks/procedural_low_v1/train.npz",
 )
 
+REPORT_TITLE = "23-DoF A6 formal evaluation"
+COMPLETE_MARKER = "A6_23_FORMAL_EVAL_COMPLETE"
+
 
 def sha256_file(path: Path) -> str:
   digest = hashlib.sha256()
@@ -359,7 +362,7 @@ def main() -> None:
       return f"{label:<36} {value}\n"
 
     with (args.output / "report.txt").open("w", encoding="utf-8") as stream:
-      stream.write("23-DoF A6 formal evaluation\n")
+      stream.write(f"{REPORT_TITLE}\n")
       stream.write(f"checkpoint {args.checkpoint}\n")
       stream.write(f"group {args.group}\n")
       stream.write(f"seed {args.seed}  num_envs {args.num_envs}  steps {args.steps}\n")
@@ -383,7 +386,7 @@ def main() -> None:
       for key, row in scene_source_detail.items():
         stream.write(line(key, row["primary_success"]))
 
-    print("A6_23_FORMAL_EVAL_COMPLETE", json.dumps(total), flush=True)
+    print(COMPLETE_MARKER, json.dumps(total), flush=True)
   finally:
     env.close()
 

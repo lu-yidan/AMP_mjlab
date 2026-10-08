@@ -2,6 +2,26 @@
 
 ## Status
 
+As of 2026-10-09, the 29-DoF V8-based A6 pair has completed the full protocol
+training schedule:
+
+- G-: `logs/a6_29_v8_gminus_4096_u10000_20261008/model_10000_final.pt`;
+- G+: `logs/a6_29_v8_gplus_4096_u10000_20261008/model_10000_final.pt`.
+
+Both runs use the same V8 source checkpoint, 4096 environments, 10000 updates,
+and the frozen A6 README/protocol parameters. Independent 29-DoF entry points
+are now available as `scripts/eval_a6_29_formal.py` and
+`scripts/eval_a6_29_video.py`. Both groups passed a 32-environment, 1150-step
+smoke evaluation with no abnormal or early termination. The 2048-environment
+formal evaluations and three-scene/four-direction recordings are running; no
+formal success claim should be made until their summaries, per-environment
+rows, hashes, counts, and videos have been audited.
+
+The first formal launch only encountered an output-directory ownership error:
+the evaluator intentionally creates its own output directory. It was relaunched
+with a non-existent result directory; neither checkpoint nor protocol state was
+changed.
+
 As of 2026-10-07, the native 23-DoF A6 G-/G+ retries have been stopped at
 updates 5000 and 5500 for diagnosis. Both runs remained numerically healthy,
 but diagnostic videos showed no complete escape-to-stand sequence. The main

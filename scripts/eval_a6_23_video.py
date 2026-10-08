@@ -34,6 +34,10 @@ from src.tasks.host_recovery.mdp.a6_geometry import DIRECTIONS
 from src.tasks.host_recovery.rl import HoSTOnPolicyRunner
 
 
+VIDEO_PREFIX = "a6_23"
+COMPLETE_MARKER = "A6_23_VIDEO_COMPLETE"
+
+
 def force_cell(
   env: ManagerBasedRlEnv,
   scene_id: int,
@@ -61,7 +65,7 @@ def record_cell(
   scene_name = SCENE_NAMES[scene_id]
   direction_name = DIRECTIONS[direction_id]
   source_name = "procedural" if source_id else "natural"
-  prefix = f"a6_23_{scene_name}_{direction_name}_{source_name}"
+  prefix = f"{VIDEO_PREFIX}_{scene_name}_{direction_name}_{source_name}"
 
   force_cell(env, scene_id, direction_id, source_id)
 
@@ -157,7 +161,7 @@ def main() -> None:
     json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
   )
   env.close()
-  print("A6_23_VIDEO_COMPLETE", len(manifest), flush=True)
+  print(COMPLETE_MARKER, len(manifest), flush=True)
 
 
 if __name__ == "__main__":
