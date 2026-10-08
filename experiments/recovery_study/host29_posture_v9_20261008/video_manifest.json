@@ -1,0 +1,22 @@
+[
+  {
+    "posture": "prone",
+    "video": "logs/evaluations/host29_posture_v9_final_256_seed42/videos/host29_prone-step-0.mp4",
+    "exists": true
+  },
+  {
+    "posture": "supine",
+    "video": "logs/evaluations/host29_posture_v9_final_256_seed42/videos/host29_supine-step-0.mp4",
+    "exists": true
+  },
+  {
+    "posture": "left_side",
+    "video": "logs/evaluations/host29_posture_v9_final_256_seed42/videos/host29_left_side-step-0.mp4",
+    "exists": true
+  },
+  {
+    "posture": "right_side",
+    "video": "logs/evaluations/host29_posture_v9_final_256_seed42/videos/host29_right_side-step-0.mp4",
+    "exists": true
+  }
+]
