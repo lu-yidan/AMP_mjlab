@@ -231,6 +231,7 @@ V4 的四姿态 `ever` / `held` / `final_standing` 均为 100%，对应
 | V8 | `held/final=100%` | `2.147 / 2.196 / 2.138 / 2.053` | 数值达标，但视频仍有抱臂、上身偏轴和补偿跨步 |
 | V9 | `held/final=100%` | `2.152 / 2.131 / 2.102 / 2.051` | 数值达标，但抱臂、胸廓偏斜和补偿跨步仍未消除 |
 | V10 | 训练中 | 待正式评测 | 从原始 V4 重跑 V9 目标，4096 环境、完整 actor、2000 updates |
+| V11-Scratch | 训练中 | 待正式评测 | actor/critic 全随机初始化，标准课程，4096 环境、12000 updates |
 
 V8 不继承退化的 V6/V7 权重，只训练 actor 最后一层并冻结其余 actor、
 观测归一化与 V4 动作尺度。训练参数为学习率 `2e-6`、单 epoch、entropy `0`、
@@ -266,6 +267,12 @@ normalizer，并为同一组 V9 奖励重新初始化 critic 与优化器。为�
 最后一层导致策略容量不足，V10 开放完整 actor MLP，但将学习率降到 `1e-6`，继续
 冻结 normalizer、动作尺度和 `std=0.005`；正式训练使用 4096 环境、2000 updates、
 单 epoch、entropy `0`，每 250 updates 保存一次。
+
+V11-Scratch 完全不加载 checkpoint，actor、critic、两组 normalizer 和优化器均
+随机初始化。它保留 V9 的四项姿态奖励，但恢复原始 HoST 29 DoF 的 action-scale
+衰减与拉力课程，使用标准 PPO 参数（初始 `std=0.8`、entropy `0.01`、自适应
+`lr=1e-3`、5 epochs），在 4096 环境上训练 12000 updates。该实验用于区分
+“连续微调容量不足”和“奖励本身无法塑造目标姿态”两种原因。
 
 同时，A6 运行时恢复使用 V4 原生 MuJoCo position actuator，仅在 reset 时直接
 随机化每个 world 的 `actuator_gainprm` / `actuator_biasprm`，避免替换 actuator
