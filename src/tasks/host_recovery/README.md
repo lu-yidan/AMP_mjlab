@@ -232,6 +232,7 @@ V4 的四姿态 `ever` / `held` / `final_standing` 均为 100%，对应
 | V9 | `held/final=100%` | `2.152 / 2.131 / 2.102 / 2.051` | 数值达标，但抱臂、胸廓偏斜和补偿跨步仍未消除 |
 | V10 | `held/final=100%` | `2.070 / 2.091 / 2.129 / 2.022` | 数值优于 V8/V9，但抱臂、前倾和补偿跨步仍存在 |
 | V11-Scratch | 训练中 | 待正式评测 | actor/critic 全随机初始化，标准课程，4096 环境、12000 updates |
+| V12 | 训练中 | 待正式评测 | 从 V10 续训，以密集三维姿态代价替换可被抱臂策略规避的奖励 |
 
 V8 不继承退化的 V6/V7 权重，只训练 actor 最后一层并冻结其余 actor、
 观测归一化与 V4 动作尺度。训练参数为学习率 `2e-6`、单 epoch、entropy `0`、
@@ -285,6 +286,15 @@ V11-Scratch 完全不加载 checkpoint，actor、critic、两组 normalizer 和�
 衰减与拉力课程，使用标准 PPO 参数（初始 `std=0.8`、entropy `0.01`、自适应
 `lr=1e-3`、5 epochs），在 4096 环境上训练 12000 updates。该实验用于区分
 “连续微调容量不足”和“奖励本身无法塑造目标姿态”两种原因。
+
+V12 针对 V10 视频证据修改奖励几何，而不是简单延长训练：移除仅约束左右位置的
+`target_hands_away_from_torso` 和会让对称抱臂相互抵消的
+`target_upper_center_over_support`，改为手腕在 torso 坐标系中的三维髋旁目标
+（`+0.40`）、torso 倾斜平方代价（`-0.30`）、17 个上肢关节到明确目标姿态的
+平均绝对误差（`-0.20`）和双脚水平速度代价（`-0.05`）。V12 从 V10 final
+精确迁移 actor，使用 fresh critic/optimizer、完整 actor、`lr=5e-6`、固定
+`std=0.015`、单 epoch、1000 updates，以增加离开局部最优的能力而不过度破坏
+原有起身策略。
 
 同时，A6 运行时恢复使用 V4 原生 MuJoCo position actuator，仅在 reset 时直接
 随机化每个 world 的 `actuator_gainprm` / `actuator_biasprm`，避免替换 actuator

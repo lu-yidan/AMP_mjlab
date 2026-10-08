@@ -637,6 +637,31 @@ def target_hands_away_from_torso(
   return score * _standup_gate(env, phase3_height, root_cfg)
 
 
+def target_hands_beside_hips(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.72,
+  left_target: tuple[float, float, float] = (0.0, 0.28, -0.30),
+  right_target: tuple[float, float, float] = (0.0, -0.28, -0.30),
+  error_scale: float = 0.14,
+  torso_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  hand_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Place both hands beside the hips in the torso coordinate frame."""
+  asset: Entity = env.scene[torso_cfg.name]
+  torso_pos = asset.data.body_link_pos_w[:, torso_cfg.body_ids[0]]
+  torso_quat = asset.data.body_link_quat_w[:, torso_cfg.body_ids[0]]
+  hands = asset.data.body_link_pos_w[:, hand_cfg.body_ids]
+  left = quat_apply_inverse(torso_quat, hands[:, 0] - torso_pos)
+  right = quat_apply_inverse(torso_quat, hands[:, 1] - torso_pos)
+  targets = torch.tensor(
+    (left_target, right_target), device=hands.device, dtype=hands.dtype
+  )
+  error_sq = torch.square(torch.stack((left, right), dim=1) - targets).sum(-1)
+  score = torch.exp(-error_sq.mean(dim=1) / error_scale**2)
+  return score * _standup_gate(env, phase3_height, root_cfg)
+
+
 def target_torso_vertical(
   env: ManagerBasedRlEnv,
   phase3_height: float = 0.72,
@@ -653,6 +678,35 @@ def target_torso_vertical(
   tilt_sq = torch.sum(torch.square(gravity_torso[:, :2]), dim=1)
   score = torch.exp(sigma * tilt_sq)
   return score * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_torso_tilt(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.72,
+  torso_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Return dense squared torso tilt for use with a negative reward weight."""
+  asset: Entity = env.scene[torso_cfg.name]
+  torso_quat = asset.data.body_link_quat_w[:, torso_cfg.body_ids[0]]
+  world_down = torch.zeros((env.num_envs, 3), device=torso_quat.device)
+  world_down[:, 2] = -1.0
+  gravity_torso = quat_apply_inverse(torso_quat, world_down)
+  tilt_sq = torch.sum(torch.square(gravity_torso[:, :2]), dim=1)
+  return tilt_sq * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_site_horizontal_speed(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.72,
+  site_cfg: SceneEntityCfg = SceneEntityCfg("robot", site_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Return mean squared horizontal site speed after standing."""
+  asset: Entity = env.scene[site_cfg.name]
+  velocity_xy = asset.data.site_lin_vel_w[:, site_cfg.site_ids, :2]
+  mean_sq = torch.square(velocity_xy).sum(-1).mean(-1)
+  return mean_sq * _standup_gate(env, phase3_height, root_cfg)
 
 
 def target_upper_center_over_support(
