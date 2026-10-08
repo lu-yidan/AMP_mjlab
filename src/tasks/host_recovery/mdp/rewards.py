@@ -40,6 +40,7 @@ import torch
 
 from mjlab.entity import Entity
 from mjlab.managers.scene_entity_config import SceneEntityCfg
+from mjlab.utils.lab_api.math import quat_apply_inverse
 
 from .host_math import (
   HOST_CONSTRAINT_DT,
@@ -588,6 +589,46 @@ def target_leg_vertical(
   vertical = (-thigh[..., 2]).clamp(min=0.0, max=1.0)
   vertical += (-shank[..., 2]).clamp(min=0.0, max=1.0)
   return vertical.mean(dim=1) * 0.5 * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_elbows_outside_torso(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.72,
+  lateral_margin: float = 0.16,
+  error_scale: float = 0.08,
+  torso_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  elbow_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Keep both elbows outside the torso midline in the torso frame."""
+  asset: Entity = env.scene[torso_cfg.name]
+  torso_pos = asset.data.body_link_pos_w[:, torso_cfg.body_ids[0]]
+  torso_quat = asset.data.body_link_quat_w[:, torso_cfg.body_ids[0]]
+  elbows = asset.data.body_link_pos_w[:, elbow_cfg.body_ids]
+  left = quat_apply_inverse(torso_quat, elbows[:, 0] - torso_pos)
+  right = quat_apply_inverse(torso_quat, elbows[:, 1] - torso_pos)
+  crossing = torch.square(torch.clamp(lateral_margin - left[:, 1], min=0.0))
+  crossing += torch.square(torch.clamp(lateral_margin + right[:, 1], min=0.0))
+  asymmetry = torch.square(left[:, 1] + right[:, 1])
+  score = torch.exp(-(crossing + 0.5 * asymmetry) / error_scale**2)
+  return score * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_upper_center_over_support(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.72,
+  error_scale: float = 0.08,
+  upper_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  ankle_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Center the torso/arm chain horizontally over the ankle midpoint."""
+  asset: Entity = env.scene[upper_cfg.name]
+  upper_center = asset.data.body_link_pos_w[:, upper_cfg.body_ids].mean(dim=1)
+  support_center = asset.data.body_link_pos_w[:, ankle_cfg.body_ids].mean(dim=1)
+  horizontal_error = torch.square(upper_center[:, :2] - support_center[:, :2]).sum(-1)
+  score = torch.exp(-horizontal_error / error_scale**2)
+  return score * _standup_gate(env, phase3_height, root_cfg)
 
 
 def target_dof_pos_deviation(

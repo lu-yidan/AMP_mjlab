@@ -18,8 +18,6 @@ Until those layers exist, this configuration remains preflight-only.
 
 from __future__ import annotations
 
-import copy
-import dataclasses
 import math
 import os
 from dataclasses import dataclass
@@ -45,10 +43,6 @@ from mjlab.managers.termination_manager import TerminationTermCfg
 from mjlab.sensor.contact_sensor import ContactMatch, ContactSensorCfg
 from mjlab.utils.lab_api.math import quat_apply
 
-from src.assets.robots.unitree_g1.unitree_actuators import (
-  UnitreeActuator,
-  UnitreeActuatorCfg,
-)
 from src.tasks.host_recovery.flat29 import flat29_env_cfg
 from src.tasks.host_recovery.mdp import a6_geometry
 from src.tasks.host_recovery.mdp.host_math import HOST_CONSTRAINT_DT
@@ -166,112 +160,9 @@ def _a6_actuator_group(name: str) -> int:
   return 5
 
 
-@dataclass(kw_only=True)
-class A6UnitreeActuatorCfg(UnitreeActuatorCfg):
-  """Unitree torque-speed actuator whose Kp/Kd are per-world and per-target."""
-
-  def build(self, entity, target_ids, target_names):
-    return A6UnitreeActuator(self, entity, target_ids, target_names)
-
-
-class A6UnitreeActuator(UnitreeActuator):
-  """Unitree actuator with grouped Kp/Kd randomisation.
-
-  The underlying MuJoCo actuator is a built-in position actuator.  Keeping the
-  per-target ``stiffness``/``damping`` tensors and the model
-  ``actuator_gainprm``/``actuator_biasprm`` in lockstep preserves the
-  torque-speed/friction compensation while randomising effective PD gains.
-  """
-
-  stiffness: torch.Tensor | None
-  damping: torch.Tensor | None
-  default_stiffness: torch.Tensor | None
-  default_damping: torch.Tensor | None
-
-  def initialize(self, mj_model, model, data, device):
-    super().initialize(mj_model, model, data, device)
-    num_envs = data.nworld
-    num_targets = len(self.target_names)
-    self.stiffness = torch.full(
-      (num_envs, num_targets), self.cfg.stiffness, dtype=torch.float, device=device
-    )
-    self.damping = torch.full(
-      (num_envs, num_targets), self.cfg.damping, dtype=torch.float, device=device
-    )
-    self.default_stiffness = self.stiffness.clone()
-    self.default_damping = self.damping.clone()
-
-  def compute(self, cmd):
-    self._joint_vel[:] = cmd.vel
-    effort = self.stiffness * (cmd.position_target - cmd.pos)
-    effort += self.damping * (cmd.velocity_target - cmd.vel)
-    effort += cmd.effort_target
-    effort = self._clip_effort(effort)
-    effort -= (
-      self._friction_static * torch.tanh(cmd.vel / self._activation_vel)
-      + self._friction_dynamic * cmd.vel
-    )
-    kp = torch.clamp(self.stiffness, min=1e-6)
-    kd = self.damping
-    return cmd.pos + (effort + kd * cmd.vel) / kp
-
-  def set_gains(
-    self,
-    env_ids,
-    kp=None,
-    kd=None,
-    env=None,
-    kp_factor=None,
-    kd_factor=None,
-  ):
-    """Set per-world gains and synchronise the native model actuator fields.
-
-    ``kp``/``kd`` are the actual per-target gains written to this Python
-    actuator.  ``*_factor`` are the multiplicative factors relative to the
-    compiled MuJoCo defaults, used to update ``actuator_gainprm`` and
-    ``actuator_biasprm`` without double-counting the default stiffness.
-    """
-    if kp is not None:
-      self.stiffness[env_ids] = kp
-    if kd is not None:
-      self.damping[env_ids] = kd
-    if env is None:
-      return
-    ctrl_ids = self.global_ctrl_ids
-    default_gainprm = env.sim.get_default_field("actuator_gainprm")
-    default_biasprm = env.sim.get_default_field("actuator_biasprm")
-    if kp_factor is not None:
-      env.sim.model.actuator_gainprm[env_ids[:, None], ctrl_ids, 0] = (
-        default_gainprm[ctrl_ids, 0] * kp_factor
-      )
-      env.sim.model.actuator_biasprm[env_ids[:, None], ctrl_ids, 1] = (
-        default_biasprm[ctrl_ids, 1] * kp_factor
-      )
-    if kd_factor is not None:
-      env.sim.model.actuator_biasprm[env_ids[:, None], ctrl_ids, 2] = (
-        default_biasprm[ctrl_ids, 2] * kd_factor
-      )
-
-
-def _as_a6_actuator_cfg(cfg):
-  """Convert a concrete Unitree actuator config to the A6 dynamic variant."""
-  if isinstance(cfg, A6UnitreeActuatorCfg):
-    return cfg
-  fields = dataclasses.fields(cfg)
-  return A6UnitreeActuatorCfg(
-    **{field.name: getattr(cfg, field.name) for field in fields if field.init}
-  )
-
-
 def _a6_dynamics_robot_cfg(robot_cfg):
-  """Return a robot config whose Unitree actuators support grouped Kp/Kd."""
-  robot = copy.deepcopy(robot_cfg)
-  if robot.articulation is None:
-    return robot
-  robot.articulation.actuators = tuple(
-    _as_a6_actuator_cfg(actuator) for actuator in robot.articulation.actuators
-  )
-  return robot
+  """Keep the V4 built-in position actuators unchanged."""
+  return robot_cfg
 
 
 @dataclass(kw_only=True)
@@ -387,8 +278,8 @@ def a6_env_cfg(
   cfg.scene.env_spacing = 0.0
   cfg.scene.spec_fn = a6_geometry.scene_spec
 
-  # Swap the Unitree actuator implementation for one that supports per-world,
-  # per-joint grouped Kp/Kd while preserving the torque-speed/friction model.
+  # Keep V4's native built-in position actuators. Grouped Kp/Kd randomisation
+  # is applied directly to the per-world MuJoCo actuator fields at reset.
   cfg.scene.entities["robot"] = _a6_dynamics_robot_cfg(
     cfg.scene.entities["robot"]
   )
@@ -800,13 +691,23 @@ def _ensure_a6_state(
 
   tau_limits = torch.zeros(num_joints, device=device)
   for actuator in robot.actuators:
-    if not isinstance(actuator, A6UnitreeActuator):
-      raise RuntimeError(
-        f"expected A6UnitreeActuator, got {type(actuator).__name__}"
-      )
-    tau_limits[actuator.target_ids] = actuator._effort_y1[0]
+    effort_limit = float(actuator.cfg.effort_limit)
+    tau_limits[actuator.target_ids] = effort_limit
   if torch.any(tau_limits <= 0):
-    raise RuntimeError("A6 actuator torque limits are not positive")
+    missing_ids = torch.nonzero(tau_limits <= 0, as_tuple=False).flatten().tolist()
+    actuator_audit = [
+      {
+        "targets": actuator.target_names,
+        "ids": actuator.target_ids.tolist(),
+        "effort_limit": actuator.cfg.effort_limit,
+      }
+      for actuator in robot.actuators
+    ]
+    raise RuntimeError(
+      "A6 actuator torque limits are not positive: "
+      f"missing_joint_ids={missing_ids}, num_joints={num_joints}, "
+      f"actuators={actuator_audit}"
+    )
   env._a6_tau_limits = tau_limits
 
   zeros = torch.zeros(num_envs, device=device)
@@ -1619,19 +1520,19 @@ def a6_dynamics_reset(
     getattr(env.sim.model, field)[env_ids[:, None], bodies[None, :]] = values
 
   robot = env.scene["robot"]
+  default_gainprm = env.sim.get_default_field("actuator_gainprm")
+  default_biasprm = env.sim.get_default_field("actuator_biasprm")
   for actuator, group_ids in zip(robot.actuators, env._a6_act_groups):
-    if not isinstance(actuator, A6UnitreeActuator):
-      raise RuntimeError(
-        f"expected A6UnitreeActuator, got {type(actuator).__name__}"
-      )
     per_target = gain_factors[:, group_ids]
-    actuator.set_gains(
-      env_ids,
-      kp=actuator.default_stiffness[env_ids] * per_target,
-      kd=actuator.default_damping[env_ids] * per_target,
-      env=env,
-      kp_factor=per_target,
-      kd_factor=per_target,
+    ctrl_ids = actuator.global_ctrl_ids
+    env.sim.model.actuator_gainprm[env_ids[:, None], ctrl_ids, 0] = (
+      default_gainprm[ctrl_ids, 0] * per_target
+    )
+    env.sim.model.actuator_biasprm[env_ids[:, None], ctrl_ids, 1] = (
+      default_biasprm[ctrl_ids, 1] * per_target
+    )
+    env.sim.model.actuator_biasprm[env_ids[:, None], ctrl_ids, 2] = (
+      default_biasprm[ctrl_ids, 2] * per_target
     )
 
   plate_bodies = env._a6_plate_bodies
@@ -1674,12 +1575,6 @@ def a6_audit_dynamics(env: "ManagerBasedRlEnv") -> dict[str, bool]:
   default_forcerange = env.sim.get_default_field("actuator_forcerange")
   for actuator, group_ids in zip(robot.actuators, env._a6_act_groups):
     per_target = env._a6_gain_factors[:, group_ids]
-    assert torch.allclose(
-      actuator.stiffness, actuator.default_stiffness * per_target
-    )
-    assert torch.allclose(
-      actuator.damping, actuator.default_damping * per_target
-    )
     ctrl_ids = actuator.global_ctrl_ids
     assert torch.allclose(
       env.sim.model.actuator_gainprm[:, ctrl_ids, 0],

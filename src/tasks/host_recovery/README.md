@@ -218,6 +218,34 @@ src/tasks/host_recovery/
 | V12 | 0.576 | -40% | -90% | 新增 `regu_upper_dof_vel` 定向压上肢，`regu_smoothness` `-0.05→-0.08` |
 | A13 | 1.159 | +101% | -80% | 恢复 HoST 增量关节位置动作，加强站起后目标项与腿部风格项（站立稳定/自然腿），上肢抖动回升 |
 
+## 29 DoF V4–V8 姿态续训（2026-10-08）
+
+这组实验以 `host29_elbowflex_v4_20261007/model_15999.pt` 为只读源模型。
+V4 的四姿态 `ever` / `held` / `final_standing` 均为 100%，对应
+`final_joint_speed_rms` 为 `2.05 / 2.20 / 2.15 / 2.09`。
+
+| 版本 | 四姿态保持 | final joint speed RMS | 结论 |
+| --- | --- | --- | --- |
+| V6 | `held=100%`，`final=97.3–98.8%` | `3.31–3.41` | 数值与视频均退化：抱臂、躯干前倾并持续跨步，不用于 A6 |
+| V7 | `held/final=100%` | `2.043 / 2.101 / 2.222 / 2.117` | 数值接近 V4，但视频仍有手臂交叉、上身偏轴和补偿跨步，不用于 A6 |
+| V8 | 训练中 | 待正式评测 | 从 V4 重启，只修正肘部内扭和上身重心偏离支撑中轴 |
+
+V8 不继承退化的 V6/V7 权重，只训练 actor 最后一层并冻结其余 actor、
+观测归一化与 V4 动作尺度。训练参数为学习率 `2e-6`、单 epoch、entropy `0`、
+固定动作标准差 `0.005`、500 updates。新增两个站起后门控奖励：
+
+- `target_elbows_outside_torso`（`+0.20`）：在躯干坐标系中保持左右肘位于身体两侧，惩罚越过中线与左右不对称；
+- `target_upper_center_over_support`（`+0.25`）：让躯干和双臂的水平中心对齐双踝中点，减少下肢为上身偏轴产生的补偿动作。
+
+V8 只有在四姿态 `held/final_standing >= 0.99`、无异常终止、每项
+`final_joint_speed_rms <= 2.20`，且视频中无肘内扭、持续偏轴和连续大跨步时，
+才允许作为后续 29 DoF A6 试训的源 checkpoint。
+
+同时，A6 运行时恢复使用 V4 原生 MuJoCo position actuator，仅在 reset 时直接
+随机化每个 world 的 `actuator_gainprm` / `actuator_biasprm`，避免替换 actuator
+实现后改变源策略的控制语义。`scripts/diagnose_a6_29_flat.py` 用于分别核对源模型
+和 A6 续训模型在平地上的严格站立成功率与稳定性。
+
 分版本要点：
 
 - **V9**：动作噪声 std 上界钳到 `0.8`（根治 std 爆炸导致动作混乱/奖励崩塌）；
