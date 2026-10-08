@@ -614,6 +614,47 @@ def target_elbows_outside_torso(
   return score * _standup_gate(env, phase3_height, root_cfg)
 
 
+def target_hands_away_from_torso(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.72,
+  lateral_margin: float = 0.22,
+  error_scale: float = 0.08,
+  torso_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  hand_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Keep both hands outside the torso on their respective sides."""
+  asset: Entity = env.scene[torso_cfg.name]
+  torso_pos = asset.data.body_link_pos_w[:, torso_cfg.body_ids[0]]
+  torso_quat = asset.data.body_link_quat_w[:, torso_cfg.body_ids[0]]
+  hands = asset.data.body_link_pos_w[:, hand_cfg.body_ids]
+  left = quat_apply_inverse(torso_quat, hands[:, 0] - torso_pos)
+  right = quat_apply_inverse(torso_quat, hands[:, 1] - torso_pos)
+  crossing = torch.square(torch.clamp(lateral_margin - left[:, 1], min=0.0))
+  crossing += torch.square(torch.clamp(lateral_margin + right[:, 1], min=0.0))
+  asymmetry = torch.square(left[:, 1] + right[:, 1])
+  score = torch.exp(-(crossing + 0.25 * asymmetry) / error_scale**2)
+  return score * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_torso_vertical(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.72,
+  sigma: float = -8.0,
+  torso_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Align the torso link's vertical axis with world vertical after standing."""
+  asset: Entity = env.scene[torso_cfg.name]
+  torso_quat = asset.data.body_link_quat_w[:, torso_cfg.body_ids[0]]
+  world_down = torch.zeros((env.num_envs, 3), device=torso_quat.device)
+  world_down[:, 2] = -1.0
+  gravity_torso = quat_apply_inverse(torso_quat, world_down)
+  tilt_sq = torch.sum(torch.square(gravity_torso[:, :2]), dim=1)
+  score = torch.exp(sigma * tilt_sq)
+  return score * _standup_gate(env, phase3_height, root_cfg)
+
+
 def target_upper_center_over_support(
   env: ManagerBasedRlEnv,
   phase3_height: float = 0.72,
