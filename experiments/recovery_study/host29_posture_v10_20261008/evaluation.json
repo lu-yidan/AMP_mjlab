@@ -1,0 +1,55 @@
+{
+  "checkpoint": "logs/host29_posture_v10_4096_u2000_20261008/model_2000_final.pt",
+  "num_envs_per_posture": 256,
+  "steps": 1000,
+  "step_dt": 0.02,
+  "hold_steps": 50,
+  "action_scale": 0.6089529991149902,
+  "success_definition": "torso-minus-feet > 0.6 m and projected gravity z < -0.8 for consecutive hold_steps",
+  "results": {
+    "prone": {
+      "valid_fraction": 1.0,
+      "termination_fraction": 0.0,
+      "ever_standing_fraction": 1.0,
+      "held_fraction": 1.0,
+      "final_standing_fraction": 1.0,
+      "final_upright_fraction": 1.0,
+      "first_hold_seconds_median": 2.0999999046325684,
+      "final_root_linear_speed_mean": 0.3656633496284485,
+      "final_joint_speed_rms": 2.070155382156372
+    },
+    "supine": {
+      "valid_fraction": 1.0,
+      "termination_fraction": 0.0,
+      "ever_standing_fraction": 1.0,
+      "held_fraction": 1.0,
+      "final_standing_fraction": 1.0,
+      "final_upright_fraction": 1.0,
+      "first_hold_seconds_median": 1.8399999141693115,
+      "final_root_linear_speed_mean": 0.42188650369644165,
+      "final_joint_speed_rms": 2.090850830078125
+    },
+    "left_side": {
+      "valid_fraction": 1.0,
+      "termination_fraction": 0.0,
+      "ever_standing_fraction": 1.0,
+      "held_fraction": 1.0,
+      "final_standing_fraction": 1.0,
+      "final_upright_fraction": 1.0,
+      "first_hold_seconds_median": 1.959999918937683,
+      "final_root_linear_speed_mean": 0.3958750367164612,
+      "final_joint_speed_rms": 2.129051685333252
+    },
+    "right_side": {
+      "valid_fraction": 1.0,
+      "termination_fraction": 0.0,
+      "ever_standing_fraction": 1.0,
+      "held_fraction": 1.0,
+      "final_standing_fraction": 1.0,
+      "final_upright_fraction": 1.0,
+      "first_hold_seconds_median": 1.9199999570846558,
+      "final_root_linear_speed_mean": 0.3887924253940582,
+      "final_joint_speed_rms": 2.0218822956085205
+    }
+  }
+}
