@@ -230,6 +230,7 @@ V4 的四姿态 `ever` / `held` / `final_standing` 均为 100%，对应
 | V7 | `held/final=100%` | `2.043 / 2.101 / 2.222 / 2.117` | 数值接近 V4，但视频仍有手臂交叉、上身偏轴和补偿跨步，不用于 A6 |
 | V8 | `held/final=100%` | `2.147 / 2.196 / 2.138 / 2.053` | 数值达标，但视频仍有抱臂、上身偏轴和补偿跨步 |
 | V9 | `held/final=100%` | `2.152 / 2.131 / 2.102 / 2.051` | 数值达标，但抱臂、胸廓偏斜和补偿跨步仍未消除 |
+| V10 | 训练中 | 待正式评测 | 从原始 V4 重跑 V9 目标，4096 环境、完整 actor、2000 updates |
 
 V8 不继承退化的 V6/V7 权重，只训练 actor 最后一层并冻结其余 actor、
 观测归一化与 V4 动作尺度。训练参数为学习率 `2e-6`、单 epoch、entropy `0`、
@@ -259,6 +260,12 @@ V9 正式评测中四姿态均无异常终止，`ever/held/final_standing` 全�
 双手靠近胸前、torso-link 持续侧倾以及双腿连续跨步补偿的主要策略，因此 V9
 仍不满足视觉验收条件。完整 JSON、视频 manifest 和关键帧见
 `experiments/recovery_study/host29_posture_v9_20261008/`。
+
+V10 不继承 V8/V9 actor，而从原始 V4 `model_15999.pt` 精确加载 actor 和
+normalizer，并为同一组 V9 奖励重新初始化 critic 与优化器。为避免连续两版仅训练
+最后一层导致策略容量不足，V10 开放完整 actor MLP，但将学习率降到 `1e-6`，继续
+冻结 normalizer、动作尺度和 `std=0.005`；正式训练使用 4096 环境、2000 updates、
+单 epoch、entropy `0`，每 250 updates 保存一次。
 
 同时，A6 运行时恢复使用 V4 原生 MuJoCo position actuator，仅在 reset 时直接
 随机化每个 world 的 `actuator_gainprm` / `actuator_biasprm`，避免替换 actuator
