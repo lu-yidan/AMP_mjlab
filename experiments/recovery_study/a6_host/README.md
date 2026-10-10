@@ -10,12 +10,13 @@ training schedule:
 
 Both runs use the same V8 source checkpoint, 4096 environments, 10000 updates,
 and the frozen A6 README/protocol parameters. Independent 29-DoF entry points
-are now available as `scripts/eval_a6_29_formal.py` and
-`scripts/eval_a6_29_video.py`. Both groups passed a 32-environment, 1150-step
-smoke evaluation with no abnormal or early termination. The 2048-environment
-formal evaluations and three-scene/four-direction recordings are running; no
-formal success claim should be made until their summaries, per-environment
-rows, hashes, counts, and videos have been audited.
+are available as `scripts/eval_a6_29_formal.py` and
+`scripts/eval_a6_29_video.py`. Both groups passed the smoke evaluation and
+completed the 2048-environment formal evaluation plus 14 videos per group.
+Primary success is 0/2048 for both groups; geometric escape is 24/2048 for G-
+and 12/2048 for G+, with no abnormal termination. See
+`A6_29_V8_FINAL_20261009.md` for the audited counts, hashes, video findings,
+and artifact paths.
 
 The first formal launch only encountered an output-directory ownership error:
 the evaluator intentionally creates its own output directory. It was relaunched

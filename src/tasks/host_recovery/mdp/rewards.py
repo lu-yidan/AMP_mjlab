@@ -446,6 +446,28 @@ def target_lin_vel_xy(
   return torch.exp(lin_xy_sq * sigma) * _standup_gate(env, phase3_height, root_cfg)
 
 
+def target_yaw_rate(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Return squared world-yaw rate after standing for dense anti-spin control."""
+  asset: Entity = env.scene[root_cfg.name]
+  yaw_rate_sq = torch.square(asset.data.root_link_ang_vel_w[:, 2])
+  return yaw_rate_sq * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_root_horizontal_speed(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Return squared world-horizontal root speed after standing."""
+  asset: Entity = env.scene[root_cfg.name]
+  speed_sq = torch.sum(torch.square(asset.data.root_link_lin_vel_w[:, :2]), dim=1)
+  return speed_sq * _standup_gate(env, phase3_height, root_cfg)
+
+
 def target_feet_height_var(
   env: ManagerBasedRlEnv,
   phase3_height: float = 0.65,
@@ -662,6 +684,31 @@ def target_hands_beside_hips(
   return score * _standup_gate(env, phase3_height, root_cfg)
 
 
+def target_hands_beside_hips_error(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.72,
+  left_target: tuple[float, float, float] = (0.0, 0.28, -0.30),
+  right_target: tuple[float, float, float] = (0.0, -0.28, -0.30),
+  torso_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  hand_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Return dense hand-to-hip target distance without exponential saturation."""
+  asset: Entity = env.scene[torso_cfg.name]
+  torso_pos = asset.data.body_link_pos_w[:, torso_cfg.body_ids[0]]
+  torso_quat = asset.data.body_link_quat_w[:, torso_cfg.body_ids[0]]
+  hands = asset.data.body_link_pos_w[:, hand_cfg.body_ids]
+  left = quat_apply_inverse(torso_quat, hands[:, 0] - torso_pos)
+  right = quat_apply_inverse(torso_quat, hands[:, 1] - torso_pos)
+  targets = torch.tensor(
+    (left_target, right_target), device=hands.device, dtype=hands.dtype
+  )
+  distance = torch.linalg.vector_norm(
+    torch.stack((left, right), dim=1) - targets, dim=-1
+  ).mean(dim=1)
+  return distance * _standup_gate(env, phase3_height, root_cfg)
+
+
 def target_torso_vertical(
   env: ManagerBasedRlEnv,
   phase3_height: float = 0.72,
@@ -724,6 +771,23 @@ def target_upper_center_over_support(
   horizontal_error = torch.square(upper_center[:, :2] - support_center[:, :2]).sum(-1)
   score = torch.exp(-horizontal_error / error_scale**2)
   return score * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_upper_center_support_error(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.72,
+  upper_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  ankle_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Return dense horizontal upper-body offset from the ankle midpoint."""
+  asset: Entity = env.scene[upper_cfg.name]
+  upper_center = asset.data.body_link_pos_w[:, upper_cfg.body_ids].mean(dim=1)
+  support_center = asset.data.body_link_pos_w[:, ankle_cfg.body_ids].mean(dim=1)
+  error = torch.linalg.vector_norm(
+    upper_center[:, :2] - support_center[:, :2], dim=-1
+  )
+  return error * _standup_gate(env, phase3_height, root_cfg)
 
 
 def target_dof_pos_deviation(

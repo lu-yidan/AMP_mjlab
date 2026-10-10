@@ -94,6 +94,15 @@ def main() -> None:
             first_hold = torch.full_like(first_stand, -1)
             final_standing = torch.zeros_like(valid)
             final_upright = torch.zeros_like(valid)
+            standing_sample_count = torch.zeros((), device=env.device)
+            standing_yaw_rate_sum = torch.zeros((), device=env.device)
+            standing_yaw_rate_abs_sum = torch.zeros((), device=env.device)
+            standing_yaw_rate_sq_sum = torch.zeros((), device=env.device)
+            standing_horizontal_speed_sq_sum = torch.zeros((), device=env.device)
+            standing_root_height_sum = torch.zeros((), device=env.device)
+            standing_joint_speed_sq_sum = torch.zeros(
+                len(robot.joint_names), device=env.device
+            )
 
             # Environment managers update persistent buffers in-place between
             # postures, so no_grad is required here instead of inference_mode.
@@ -116,6 +125,29 @@ def main() -> None:
                     held |= newly_held
                     final_standing = standing
                     final_upright = upright & valid
+                    standing_float = standing.float()
+                    standing_sample_count += standing_float.sum()
+                    standing_yaw_rate_sum += (
+                        robot.data.root_link_ang_vel_w[:, 2] * standing_float
+                    ).sum()
+                    standing_yaw_rate_abs_sum += (
+                        robot.data.root_link_ang_vel_w[:, 2].abs()
+                        * standing_float
+                    ).sum()
+                    standing_yaw_rate_sq_sum += (
+                        robot.data.root_link_ang_vel_w[:, 2].square()
+                        * standing_float
+                    ).sum()
+                    standing_horizontal_speed_sq_sum += (
+                        robot.data.root_link_lin_vel_w[:, :2].square().sum(dim=-1)
+                        * standing_float
+                    ).sum()
+                    standing_root_height_sum += (
+                        robot.data.root_link_pos_w[:, 2] * standing_float
+                    ).sum()
+                    standing_joint_speed_sq_sum += (
+                        robot.data.joint_vel.square() * standing_float[:, None]
+                    ).sum(dim=0)
 
             held_times = first_hold[first_hold >= 0].float() * env.step_dt
             results[posture] = {
@@ -130,8 +162,45 @@ def main() -> None:
                 ),
                 "final_root_linear_speed_mean": robot.data.root_link_lin_vel_w.norm(dim=-1)[valid].mean().item()
                 if valid.any() else None,
+                "final_root_height_mean": robot.data.root_link_pos_w[:, 2][valid].mean().item()
+                if valid.any() else None,
+                "final_root_yaw_rate_rms": robot.data.root_link_ang_vel_w[:, 2][valid].square().mean().sqrt().item()
+                if valid.any() else None,
+                "standing_yaw_rate_rms": (
+                    (standing_yaw_rate_sq_sum / standing_sample_count).sqrt().item()
+                    if standing_sample_count.item() > 0 else None
+                ),
+                "standing_yaw_rate_mean": (
+                    (standing_yaw_rate_sum / standing_sample_count).item()
+                    if standing_sample_count.item() > 0 else None
+                ),
+                "standing_yaw_rate_abs_mean": (
+                    (standing_yaw_rate_abs_sum / standing_sample_count).item()
+                    if standing_sample_count.item() > 0 else None
+                ),
+                "standing_horizontal_speed_rms": (
+                    (standing_horizontal_speed_sq_sum / standing_sample_count).sqrt().item()
+                    if standing_sample_count.item() > 0 else None
+                ),
+                "standing_root_height_mean": (
+                    (standing_root_height_sum / standing_sample_count).item()
+                    if standing_sample_count.item() > 0 else None
+                ),
                 "final_joint_speed_rms": robot.data.joint_vel[valid].square().mean().sqrt().item()
                 if valid.any() else None,
+                "standing_joint_speed_rms": (
+                    {
+                        name: value
+                        for name, value in zip(
+                            robot.joint_names,
+                            (standing_joint_speed_sq_sum / standing_sample_count)
+                            .sqrt()
+                            .tolist(),
+                            strict=True,
+                        )
+                    }
+                    if standing_sample_count.item() > 0 else None
+                ),
             }
             print(posture, json.dumps(results[posture], sort_keys=True), flush=True)
 
