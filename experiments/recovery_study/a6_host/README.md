@@ -103,6 +103,28 @@ gradient scope, and no NaN/Inf. The formal run uses
 `logs/a6_29_v35_v3_forced_bridge_4096_u1600_20261013` on GPU4, saving every
 100 updates. The original G-/G+ runs continue unchanged on GPUs 0/1.
 
+The live checkpoint audit exposed a counter-origin bug that the synthetic V3
+schedule check did not cover. The V2 source restores
+`common_step_counter=869100`; V3 evaluated its schedule against that absolute
+counter, so `model_0` remained at `0.932387` but the first training reset jumped
+directly to `0.25`. From update 100 onward, height-margin and primary-stance
+rewards were zero and mean reward was about `-55`, so the run did not execute
+the intended bridge and is not a valid method result.
+
+V4 keeps the V3 method unchanged but anchors elapsed bridge time to the source
+counter immediately after checkpoint restore. Its schedule is therefore based
+on `common_step_counter - bridge_start_counter`, preserving the 500-step hold
+and 17,000-step transition even when the source carries a large historical
+counter. A new 64-environment preflight anchored the restored counter at
+`869100`, rechecked the start/midpoint/target scales as
+`0.932387/0.591194/0.25`, and retained finite non-zero height-margin and
+primary-stance contributions (`0.00829` and `0.00425`) with the expected
+gradient scope and no NaN/Inf. The invalid V3 process was then stopped without
+touching the original G-/G+ runs. The corrected formal run uses
+`logs/a6_29_v35_v4_relative_bridge_4096_u1600_20261013`; its initial checkpoint
+and first update both retained scale `0.9324`, confirming that the inherited
+counter no longer skips the bridge.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
