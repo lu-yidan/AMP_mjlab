@@ -676,3 +676,26 @@ active while strengthening bounded torso, waist, support, and arm-pose terms.
 Checkpoint selection prioritizes unchanged standing stability and motion first,
 then torso and arm improvement; any return of knee walking, stepping, or yaw
 drift rejects that checkpoint.
+
+## V36 result (2026-10-12)
+
+V36 completed all 300 updates and all twelve 256-environment checkpoint
+evaluations without runtime errors. Every checkpoint retained 100% held/final
+standing and zero terminations. Update 50 is the best motion-preserving
+candidate: final joint-speed RMS is `0.902 / 0.657 / 0.898 / 0.785`, yaw-rate
+RMS is `0.492 / 0.734 / 0.573 / 0.700`, and horizontal-speed RMS is
+`0.082 / 0.110 / 0.100 / 0.112`. These values are effectively unchanged from
+V35 rather than a meaningful improvement. Later training progressively harms
+stillness; at update 300 yaw-rate RMS reaches
+`0.520 / 0.955 / 0.697 / 0.817` and horizontal-speed RMS reaches
+`0.091 / 0.126 / 0.149 / 0.121`.
+
+The posture diagnosis rules out a useful straightening gain. Mean torso tilt
+is `0.5188 rad` for V35, `0.5187 rad` at V36 update 50, and `0.5239 rad` at
+update 300. Mean waist target error remains `0.529 rad`; mean right-hand target
+error changes from `0.758 m` to `0.759 m` and then `0.766 m`. The update-50
+videos remain quiet after recovery with no knee walking, sustained turn, or
+repeated corrective step, but the torso lean, split crouched stance, and raised
+right arm are visually indistinguishable from V35. V36 therefore provides no
+usable posture improvement. V35 final remains the selected A6 source, and no
+V37 posture run is started.
