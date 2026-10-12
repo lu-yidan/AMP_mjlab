@@ -28,6 +28,54 @@ retain separate fresh critics/optimizers and the frozen inherited actor
 normalizer. Early checkpoint audits must verify flat-ground retention before
 the long runs are treated as useful A6 adaptations.
 
+### Formal-aligned V2 branch (2026-10-13)
+
+The first V35 G-/G+ pair remained numerically healthy through update 1000 and
+retained 100% HoST flat-ground held/final standing, but both formal 256-env
+train-bank evaluations remained at `0/256` primary success and `1/256`
+geometric escape. The flat diagnostic converged to about `1.09 m` head height,
+below the formal `1.15 m` threshold. This is not flat-skill collapse; it is a
+training/evaluation mismatch and a sparse local optimum.
+
+Three concrete causes motivate a separate method instead of changing the two
+healthy long runs in place. First, their inherited action scale begins near
+`0.932` and remains about `0.81` at update 1000, while formal evaluation uses
+exactly `0.25`. Second, G+ multiplies all common recovery tasks by `0.05`
+under an uncleared plate, suppressing the height/upright signal where it is
+needed most. Third, training terminates `invalid_plate` episodes after 25
+steps without registered contact, while formal evaluation intentionally does
+not apply that early abort. The existing smooth height reward is also almost
+saturated at `1.09 m`, so it provides little gradient toward the hard
+`1.15 m` success boundary.
+
+V2 is therefore a formal-protocol-aligned curriculum, not another noise or
+weight-only retry. A direct fixed-`0.25` preflight was rejected because the
+V35 source never entered the new `1.04 m` height-margin reward region from
+all-low resets. V2 instead starts at the source checkpoint's exact `0.932`
+action scale and uses the historical performance-triggered decay at an
+accelerated `0.02` per successful reset, bridging to the formal `0.25` target
+while the policy can adapt. It keeps the V35 actor as an immutable backbone
+and trains only a bounded final output layer. Training uses all-low formal
+reset allocation, nominal dynamics, no observation noise or push/pull
+curriculum, and no training-only invalid-plate termination. G+
+geometry guidance remains active, but common recovery tasks are no longer
+attenuated under the plate. Two bounded smooth rewards add gradient toward the
+formal height margin and the combined height/upright/two-foot-load condition;
+the quiet-feet cost is reduced during this acquisition phase. Exploration is
+fixed at `0.12`, with learning rate `5e-5`, four PPO epochs, and output-layer
+deltas clamped to `0.05` per weight and `0.25` per bias. The original G-/G+
+runs continue untouched while V2 is preflighted and trained on GPU4.
+
+The revised 64-environment bridge preflight passed on 2026-10-13. The source
+action scale was recovered exactly as `0.932387`, the target remained `0.25`,
+all-low reset allocation was `48` natural plus `16` procedural scenes, and the
+new height-margin and primary-stance rewards were both finite and non-zero
+(`0.00375` and `0.00213` mean absolute single-step contribution). Frozen actor
+normalization, fresh critic/optimizer state, bounded output-layer training, and
+the removal of `invalid_plate` termination were all verified without NaN/Inf.
+The formal run uses `logs/a6_29_v35_v2_bridge_4096_u2000_20261013` on GPU4;
+the original G-/G+ runs remain untouched on GPUs 0/1.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
