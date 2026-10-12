@@ -7,12 +7,23 @@ protocol:
   name: historical-a6-stage3-host
   source_commit: 1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2
   control_dt: 0.02
-  physics_dt: 0.005
+  physics_dt: 0.002
   physics_substeps: 10
   episode_seconds: 10.0
   num_envs: 4096
   updates: 10000
   save_interval: 500
+
+evaluation:
+  duration_seconds: 20.0
+  control_steps: 1000
+  nominal_plate_mass_kg: 6.0
+  stable_hold_seconds: [1.0, 10.0]
+  plate_success_requires_escape: true
+  report_by_scene_and_direction: true
+  scene_macro_average: true
+  load_sampling: physics_substep
+  include_failed_trials: true
 
 scene_quota:
   flat: 0.50

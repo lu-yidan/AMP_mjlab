@@ -10,10 +10,9 @@ baseline and the historical three-scene A6 protocol. It intentionally:
 - zeroes all velocities and clears per-environment runtime buffers on reset;
 - randomises grouped body mass/inertia and Kp/Kd, with 0--10 ms command delay,
   leaving 25% of episodes nominal;
-- keeps partial resets confined to the requested worlds.
-
-Reward registration and per-substep metrics are deliberately not in this layer.
-Until those layers exist, this configuration remains preflight-only.
+- keeps partial resets confined to the requested worlds;
+- registers the shared recovery task, common costs, Q/L terms, obstacle terms,
+  and per-physics-substep load metrics for the paired G-/G+ arms.
 """
 
 from __future__ import annotations

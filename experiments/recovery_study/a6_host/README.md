@@ -2,21 +2,58 @@
 
 ## Status
 
-As of 2026-10-09, the 29-DoF V8-based A6 pair has completed the full protocol
-training schedule:
+### V35 paired A6 launch (2026-10-12)
+
+The relaxed posture gate accepted the 29-DoF V35 update-400 checkpoint as the
+new A6 source. Its SHA256 is
+`abe5850708a1da9a6fd3167af10d30b976dbc168128177bcd598f2b37e140da3`.
+Four-posture evaluation held and finished standing in 100% of environments
+with zero termination. Compared with V25, yaw and horizontal motion improved
+slightly at update 400. Video remains visibly leaned with one raised arm, but
+it is stationary after recovery and shows no knee walking, repeated stepping,
+or sustained spin, which is sufficient for the user-approved A6 transition.
+
+Both G- and G+ passed a 64-environment, 510-control-step preflight, including a
+complete 10-second training episode and reset. Paired formal training is now
+running from the same source checkpoint:
+
+- G-: `logs/a6_29_v35_gminus_4096_u10000_20261012` on GPU0;
+- G+: `logs/a6_29_v35_gplus_4096_u10000_20261012` on GPU1.
+
+Both runs use 4096 environments, 10000 updates, learning rate `2e-5`, fixed
+action-noise standard deviation `0.05`, and checkpoints every 250 updates.
+This deliberately replaces the historical adapter default noise `0.8`, which
+previous diagnostics showed could erase flat-ground recovery. The two runs
+retain separate fresh critics/optimizers and the frozen inherited actor
+normalizer. Early checkpoint audits must verify flat-ground retention before
+the long runs are treated as useful A6 adaptations.
+
+As of 2026-10-10, the source of truth for this migration is the frozen SMP
+commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
+kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
+later recovery/S3 branches must not be substituted into this contract.
+
+The 29-DoF V8- and V13-based A6 pairs completed the current HoST adapter's
+paired `4096 x 10000` training schedule. They did **not** complete the unified
+historical-A6 final evaluation specified by the 2026-09-28 handoff. Their
+2048-environment evaluations used the older 23-second diagnostic predicate
+(start before 20 s and hold for 3 s), not the required 20-second SR1/SR10
+protocol with physical-substep load reporting. They remain useful interface
+and failure-analysis results, but must not be cited as final cross-method A6
+success rates.
+
+The V8 checkpoints are:
 
 - G-: `logs/a6_29_v8_gminus_4096_u10000_20261008/model_10000_final.pt`;
 - G+: `logs/a6_29_v8_gplus_4096_u10000_20261008/model_10000_final.pt`.
 
-Both runs use the same V8 source checkpoint, 4096 environments, 10000 updates,
-and the frozen A6 README/protocol parameters. Independent 29-DoF entry points
-are available as `scripts/eval_a6_29_formal.py` and
-`scripts/eval_a6_29_video.py`. Both groups passed the smoke evaluation and
-completed the 2048-environment formal evaluation plus 14 videos per group.
-Primary success is 0/2048 for both groups; geometric escape is 24/2048 for G-
-and 12/2048 for G+, with no abnormal termination. See
-`A6_29_V8_FINAL_20261009.md` for the audited counts, hashes, video findings,
-and artifact paths.
+Both V8 runs use the same source checkpoint and completed 14 diagnostic videos
+per group. Under the legacy diagnostic, primary success is 0/2048 for both
+groups; geometric escape is 24/2048 for G- and 12/2048 for G+, with no abnormal
+termination. The V13 pair is also diagnostic: primary success is 0/2048 for
+both groups, with geometric escape 19/2048 for G- and 58/2048 for G+. See
+`A6_29_V8_FINAL_20261009.md` and `A6_29_V13_FINAL_20261010.md` for the original
+counts, hashes, video findings, and artifact paths.
 
 The first formal launch only encountered an output-directory ownership error:
 the evaluator intentionally creates its own output directory. It was relaunched
@@ -46,7 +83,7 @@ The protocol requires:
 - low/middle/near-standing reset strata of 70/20/10;
 - four balanced low postures, with 75% natural and 25% procedural low states;
 - the exact three reset banks and SHA256 values in `a6_protocol.yaml`;
-- 0.02 s control steps, 0.005 s physics steps, ten physics substeps;
+- 0.02 s control steps, 0.002 s physics steps, ten physics substeps;
 - common task, execution cost, Q/L cost, and escape terms from the A6 table;
 - paired `G-` and `G+` runs from the same native HoST checkpoint.
 
@@ -56,10 +93,13 @@ Run the asset gate before wiring the runtime scene:
 python scripts/validate_a6_host_assets.py --root .
 ```
 
-The next runtime step is to add the three-scene entities, reset-bank sampler,
-per-environment geometry/history buffers, and the `G-`/`G+` HoST task
-registrations. Until the banks and historical plate geometry are present, the
-branch must remain preflight-only.
+The runtime now contains the three-scene entities, exact-bank sampler,
+per-environment geometry/history buffers, grouped dynamics, delayed action,
+shared task/cost layer, and paired `G-`/`G+` registrations. New formal long
+training is nevertheless gated by the migration acceptance checklist in
+`HISTORICAL_A6_PROTOCOL_AUDIT_20261010_ZH.md`, especially reward-trace parity,
+native flat migration verification, reset screenshots, and the unified
+20-second evaluator.
 
 ## Mapping from the historical entry point
 
@@ -96,8 +136,9 @@ copied into the HoST adapter.
 The historical A6 path module confirms the following semantics:
 
 - `A6` is in `G_ARMS`, `Q_ARMS`, and `L_ARMS`.
-- Geometry uses the conservative world-XY projection of a rotating free
-  plate. There is no above-board exemption.
+- `G` geometry uses the conservative world-XY projection of a rotating free
+  plate and has no above-board exemption. The separate completion-clearance
+  calculation does retain the frozen above-board exemption.
 - `G` is an incremental improvement over each environment's historical best
   coverage/clearance, gated by low body height, prior obstacle contact, and
   not-yet-escaped/non-invalid state. Hand support is required for A6.
@@ -171,12 +212,12 @@ invalid = penetration depth < -0.02 m
           OR episode step > 25 without prior contact
 ```
 
-The pasted balanced-low code uses an `above-board` geometry exemption and a
-`.05` multiplier on the task product while an obstacle episode is constrained.
-That exact geometry exemption is not historical A6 and must be removed in the
-HoST adapter. The `.05` multiplier is the implementation form of the A6
-`alpha=.05` gate before confirmed escape; after confirmation and on flat
-episodes alpha is `1`, and negative costs must never be scaled by alpha.
+The frozen balanced-low code uses an `above-board` exemption only in the
+completion-clearance calculation. The HoST adapter must retain it there, while
+keeping it out of `G`'s horizontal geometry progress. The `.05` multiplier is
+the implementation form of the A6 `alpha=.05` gate before confirmed escape;
+after confirmation and on flat episodes alpha is `1`, and negative costs must
+never be scaled by alpha.
 
 The escape terms remain separate: geometry progress, dense clearance,
 completion, separation progress, and excess plate-force cost. Completion is a
@@ -272,9 +313,11 @@ curriculum mass. A HoST preflight must verify actual model fields and action
 targets without advancing simulation: mass/inertia, all six gain groups,
 unchanged force caps, and both zero-delay and 10 ms-delay behavior.
 
-The current HoST baseline has friction, encoder-bias, and COM randomization,
-but does not yet have this grouped mass/inertia, Kp/Kd, or delayed-action
-adapter. These are runtime requirements, not documentation-only metadata.
+The current adapter implements friction, encoder-bias, COM and push
+randomization together with grouped mass/inertia, grouped Kp/Kd, and the
+0--10 ms delayed-action ring buffer. Formal acceptance still requires exported
+samples proving the actual MuJoCo fields, force caps, nominal fraction, and
+zero/10 ms action-target behavior rather than only showing configuration flags.
 
 ## Reward ledger
 
@@ -298,12 +341,35 @@ terms, startup/reset/interval/step events, termination predicates, and MuJoCo
 simulation settings. It is an audit artifact only. In particular, its SMP
 function paths are provenance and are not importable HoST implementations.
 
-Two historical values require an explicit migration decision before launch:
+The current A6 runtime now matches `physics_dt=0.002`, `decimation=10`, and the
+0.02 s control period. The frozen reference starts GSI with
+`compile_model=true`, whereas the HoST adapter currently disables compilation;
+that optimizer/runtime difference must be disclosed but does not change the
+physical timing contract.
 
-- the reference uses `physics_dt=0.002`, `decimation=10`; the current HoST
-  baseline uses `0.005`, `4` while keeping the same `0.02 s` control period;
-- the reference starts GSI with `compile_model=true`; the current smoke test
-  contract requires torch compilation disabled.
+## Formal evaluation boundary
+
+`scripts/eval_a6_29_formal.py` currently delegates to the legacy
+`scripts/eval_a6_23_formal.py` evaluator. It observes 1150 steps (23 s), uses a
+3-second standing predicate, treats 4 cm horizontal clearance as a separate
+diagnostic, and does not produce the frozen 20-second SR1/SR10 or complete
+physical-substep load ledger. It must therefore not be used as the final
+cross-method evaluator.
+
+The unified evaluator still needs to:
+
+1. run exactly 1000 control steps (20 s) at 50 Hz with nominal 6 kg plates;
+2. require confirmed escape plus stable standing for plate-scene SR1/SR10,
+   while flat scenes require stable standing only;
+3. freeze one standing checker covering height, torso uprightness, body/joint/
+   foot speed, and bilateral foot support;
+4. report every scene and direction separately plus an unweighted scene macro
+   average;
+5. retain failed trials and report time-to-rise, longest hold, hard falls,
+   post-escape displacement, intervention/protection events, and threshold
+   definitions;
+6. sample torque, joint speed, mechanical power, and sustained load on every
+   2 ms physics step, then compute per-trial peaks and cross-trial P95 values.
 
 ## Initialization manifest
 

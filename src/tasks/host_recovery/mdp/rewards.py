@@ -40,7 +40,7 @@ import torch
 
 from mjlab.entity import Entity
 from mjlab.managers.scene_entity_config import SceneEntityCfg
-from mjlab.utils.lab_api.math import quat_apply_inverse
+from mjlab.utils.lab_api.math import quat_apply, quat_apply_inverse
 
 from .host_math import (
   HOST_CONSTRAINT_DT,
@@ -485,6 +485,184 @@ def target_feet_height_var(
   return torch.exp(difference * sigma) * _standup_gate(env, phase3_height, root_cfg)
 
 
+def target_feet_side_by_side_error(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  target_lateral_separation: float = 0.24,
+  forward_scale: float = 0.08,
+  height_scale: float = 0.03,
+  lateral_scale: float = 0.08,
+  foot_cfg: SceneEntityCfg = SceneEntityCfg("robot", site_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Penalise staggered, lifted, or excessively spread feet after standing."""
+  asset: Entity = env.scene[foot_cfg.name]
+  feet_w = asset.data.site_pos_w[:, foot_cfg.site_ids]
+  root_pos = asset.data.root_link_pos_w
+  root_quat = asset.data.root_link_quat_w
+  left_b = quat_apply_inverse(root_quat, feet_w[:, 0] - root_pos)
+  right_b = quat_apply_inverse(root_quat, feet_w[:, 1] - root_pos)
+
+  forward_error = torch.abs(left_b[:, 0] - right_b[:, 0]) / forward_scale
+  height_error = torch.abs(feet_w[:, 0, 2] - feet_w[:, 1, 2]) / height_scale
+  separation = torch.abs(left_b[:, 1] - right_b[:, 1])
+  lateral_error = torch.abs(separation - target_lateral_separation) / lateral_scale
+  error = forward_error.square() + 0.5 * height_error.square()
+  error = error + 0.25 * lateral_error.square()
+  return error * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_feet_side_by_side_huber_error(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  target_lateral_separation: float = 0.24,
+  forward_scale: float = 0.08,
+  height_scale: float = 0.03,
+  lateral_scale: float = 0.08,
+  foot_cfg: SceneEntityCfg = SceneEntityCfg("robot", site_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Penalise staggered feet with a linear-tailed, critic-friendly loss."""
+  asset: Entity = env.scene[foot_cfg.name]
+  feet_w = asset.data.site_pos_w[:, foot_cfg.site_ids]
+  root_pos = asset.data.root_link_pos_w
+  root_quat = asset.data.root_link_quat_w
+  left_b = quat_apply_inverse(root_quat, feet_w[:, 0] - root_pos)
+  right_b = quat_apply_inverse(root_quat, feet_w[:, 1] - root_pos)
+
+  forward_error = torch.abs(left_b[:, 0] - right_b[:, 0]) / forward_scale
+  height_error = torch.abs(feet_w[:, 0, 2] - feet_w[:, 1, 2]) / height_scale
+  separation = torch.abs(left_b[:, 1] - right_b[:, 1])
+  lateral_error = torch.abs(separation - target_lateral_separation) / lateral_scale
+  zeros = torch.zeros_like(forward_error)
+  error = torch.nn.functional.smooth_l1_loss(
+    forward_error, zeros, reduction="none", beta=1.0
+  )
+  error += 0.5 * torch.nn.functional.smooth_l1_loss(
+    height_error, zeros, reduction="none", beta=1.0
+  )
+  error += 0.25 * torch.nn.functional.smooth_l1_loss(
+    lateral_error, zeros, reduction="none", beta=1.0
+  )
+  return error * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_heading_error(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Penalise accumulated world-yaw error instead of yaw rate alone."""
+  asset: Entity = env.scene[root_cfg.name]
+  root_quat = asset.data.root_link_quat_w
+  forward_b = torch.zeros((env.num_envs, 3), device=root_quat.device)
+  forward_b[:, 0] = 1.0
+  forward_w = quat_apply(root_quat, forward_b)
+  forward_xy = torch.nn.functional.normalize(forward_w[:, :2], dim=-1)
+  error = torch.square(1.0 - forward_xy[:, 0]) + torch.square(forward_xy[:, 1])
+  return error * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_feet_orientation_error(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  tilt_weight: float = 0.5,
+  symmetry_weight: float = 0.5,
+  foot_cfg: SceneEntityCfg = SceneEntityCfg("robot", body_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Keep both feet level, parallel, and facing world forward after standing."""
+  asset: Entity = env.scene[foot_cfg.name]
+  quats = asset.data.body_link_quat_w[:, foot_cfg.body_ids]
+  flat_quats = quats.reshape(-1, 4)
+  forward = torch.zeros((flat_quats.shape[0], 3), device=quats.device)
+  forward[:, 0] = 1.0
+  up = torch.zeros_like(forward)
+  up[:, 2] = 1.0
+  forward_w = quat_apply(flat_quats, forward).reshape(env.num_envs, -1, 3)
+  up_w = quat_apply(flat_quats, up).reshape(env.num_envs, -1, 3)
+  forward_xy = torch.nn.functional.normalize(forward_w[..., :2], dim=-1)
+  heading_error = torch.square(1.0 - forward_xy[..., 0])
+  heading_error += torch.square(forward_xy[..., 1])
+  tilt_error = torch.sum(torch.square(up_w[..., :2]), dim=-1)
+  symmetry_error = torch.sum(
+    torch.square(forward_xy[:, 0] - forward_xy[:, 1]), dim=-1
+  )
+  error = heading_error.mean(dim=1) + tilt_weight * tilt_error.mean(dim=1)
+  error += symmetry_weight * symmetry_error
+  return error * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_foot_ground_error(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  max_clearance: float = 0.04,
+  clearance_scale: float = 0.04,
+  foot_cfg: SceneEntityCfg = SceneEntityCfg("robot", site_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Penalise either foot lifting away from the floor after standing."""
+  asset: Entity = env.scene[foot_cfg.name]
+  ground_z = env.scene.env_origins[:, 2].unsqueeze(1)
+  clearance = asset.data.site_pos_w[:, foot_cfg.site_ids, 2] - ground_z
+  excess = torch.clamp(clearance - max_clearance, min=0.0) / clearance_scale
+  error = torch.mean(torch.square(excess), dim=1)
+  return error * _standup_gate(env, phase3_height, root_cfg)
+
+
+def _ensure_post_stand_foot_anchor(env: ManagerBasedRlEnv) -> None:
+  if getattr(env, "_host_foot_anchor_valid", None) is not None:
+    if env._host_foot_anchor_valid.shape[0] == env.num_envs:
+      return
+  env._host_foot_anchor_valid = torch.zeros(
+    env.num_envs, device=env.device, dtype=torch.bool
+  )
+  env._host_foot_anchor_steps = torch.zeros(
+    env.num_envs, device=env.device, dtype=torch.long
+  )
+  env._host_foot_anchor_xy = torch.zeros(
+    env.num_envs, 2, 2, device=env.device
+  )
+
+
+def reset_post_stand_foot_anchor(
+  env: ManagerBasedRlEnv, env_ids: torch.Tensor | None
+) -> None:
+  """Clear captured standing foot positions on episode reset."""
+  _ensure_post_stand_foot_anchor(env)
+  if env_ids is None:
+    env_ids = torch.arange(env.num_envs, device=env.device, dtype=torch.int)
+  env._host_foot_anchor_valid[env_ids] = False
+  env._host_foot_anchor_steps[env_ids] = 0
+  env._host_foot_anchor_xy[env_ids] = 0.0
+
+
+def target_post_stand_foot_anchor_error(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  settle_steps: int = 30,
+  anchor_scale: float = 0.08,
+  foot_cfg: SceneEntityCfg = SceneEntityCfg("robot", site_names=()),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Capture both feet after settling, then penalise subsequent stepping."""
+  _ensure_post_stand_foot_anchor(env)
+  asset: Entity = env.scene[foot_cfg.name]
+  feet_xy = asset.data.site_pos_w[:, foot_cfg.site_ids, :2]
+  standing = _standup_gate(env, phase3_height, root_cfg).bool()
+  inactive = ~standing
+  env._host_foot_anchor_valid[inactive] = False
+  env._host_foot_anchor_steps[inactive] = 0
+  waiting = standing & ~env._host_foot_anchor_valid
+  env._host_foot_anchor_steps[waiting] += 1
+  capture = waiting & (env._host_foot_anchor_steps >= settle_steps)
+  env._host_foot_anchor_xy[capture] = feet_xy[capture]
+  env._host_foot_anchor_valid[capture] = True
+  drift = (feet_xy - env._host_foot_anchor_xy) / anchor_scale
+  error = torch.square(drift).sum(dim=-1).mean(dim=1)
+  return error * env._host_foot_anchor_valid
+
+
 def target_target_upper_dof_pos(
   env: ManagerBasedRlEnv,
   phase3_height: float = 0.65,
@@ -554,6 +732,21 @@ def target_dof_vel(
   if len(ids) == 0:
     return torch.zeros_like(asset.data.joint_vel[:, 0])
   mean_sq = torch.mean(torch.square(asset.data.joint_vel[:, ids]), dim=1)
+  return mean_sq * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_action_l2(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  action_indices: tuple[int, ...] = (),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Penalise persistent selected joint commands after standing."""
+  action = env.action_manager.get_term("joint_pos").raw_action
+  if not action_indices:
+    return torch.zeros_like(action[:, 0])
+  selected = action[:, action_indices]
+  mean_sq = torch.mean(torch.square(selected), dim=1)
   return mean_sq * _standup_gate(env, phase3_height, root_cfg)
 
 
