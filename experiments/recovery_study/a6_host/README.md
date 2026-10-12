@@ -76,6 +76,33 @@ the removal of `invalid_plate` termination were all verified without NaN/Inf.
 The formal run uses `logs/a6_29_v35_v2_bridge_4096_u2000_20261013` on GPU4;
 the original G-/G+ runs remain untouched on GPUs 0/1.
 
+V2 completed all 2000 updates without numerical or termination failures, but
+its core bridge never activated: every saved checkpoint retained action scale
+`0.932387`. The curriculum trigger uses the mean episode-final head height over
+the resetting all-low batch; that metric plateaued near `0.564 m`, below the
+configured `0.70 m` trigger, even though the high-scale flat diagnostic still
+reached about `1.17 m` after standing. The final checkpoint retained HoST flat
+held success (`128/128`, final standing `99.22%`) at its saved high scale, but a
+formal fixed-`0.25` 256-environment evaluation produced `0/256` primary and
+`0/256` escape. V2 therefore learned useful high-scale posture shaping but did
+not test the intended scale transition and is not a formal A6 improvement.
+
+V3 changes only the failed mechanism. It starts from the V2 final actor and
+replaces the success-triggered curriculum with a reset-synchronized linear
+schedule: hold the source scale for 500 control steps, then move from
+`0.932387` to `0.25` over 17,000 control steps regardless of plate success.
+This preserves the V2 all-low resets, bounded final-layer adaptation, fixed
+exploration, formal reward alignment, and fresh critic/optimizer. The actor
+observes the current action rescale, so the forced bridge remains identifiable;
+one high-scale acquisition episode is retained before the scale starts moving.
+
+The 64-environment V3 preflight verified the complete schedule at `0.932387`,
+`0.591194`, and `0.25`, with finite non-zero height-margin and primary-stance
+terms (`0.00827` and `0.00445` mean absolute single-step contribution), correct
+gradient scope, and no NaN/Inf. The formal run uses
+`logs/a6_29_v35_v3_forced_bridge_4096_u1600_20261013` on GPU4, saving every
+100 updates. The original G-/G+ runs continue unchanged on GPUs 0/1.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
