@@ -301,6 +301,17 @@ unintended scale change: the final cohort had `70.31%` above the stricter
 in `logs/a6_29_v35_v9_confirmed_homotopy_4096_u3000_20261013`; update zero
 preserved scale `0.622388`, and early PPO updates are numerically healthy.
 
+Fixed-scale near diagnostics through V9 update 800 show real consolidation
+without another curriculum step. Updates 50, 100, 200, 400, and 800 achieved
+respectively `111/128`, `113/128`, `118/128`, `120/128`, and `117/128` HoST
+holds; final-standing rates rose from `59.38%` to `60.16%`, `63.28%`,
+`63.28%`, and `69.53%`. At update 800, mean head height at step 1149 was
+`0.9234 m` with uprightness `0.9115`, compared with `0.8928 m` and `0.8929`
+for the fixed-scale V8b update-1750 source. The scale and all six synchronized
+normalizer means remained exactly `0.622388`, so this gain is controller
+learning rather than a hidden scale change. V9 remains active because the
+stricter two-cohort gate has not yet been met.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
