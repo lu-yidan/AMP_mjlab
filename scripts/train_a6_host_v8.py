@@ -48,7 +48,7 @@ from src.tasks.host_recovery.rl import HoSTOnPolicyRunner
 TRAIN_STD = 0.08
 LEARNING_RATE = 2e-5
 ACTION_SCALE_DECAY = 0.01
-ACTION_SCALE_HEIGHT_GATE = 0.90
+ACTION_SCALE_HEIGHT_GATE = 0.65
 
 
 def near_retention_reward(env: ManagerBasedRlEnv) -> torch.Tensor:
