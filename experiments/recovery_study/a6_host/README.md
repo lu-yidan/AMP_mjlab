@@ -156,6 +156,57 @@ stance, `0.000178` geometry, and `0.000324` completion. This confirms that the
 new dense acquisition signal is active while the formal sparse objectives
 remain measurable rather than dominating the initial update.
 
+The original paired runs subsequently completed all 10,000 updates without a
+runtime failure. Their final checkpoint SHA256 values are
+`6a9fbbc14c02d2e69e9259b5906fe90007466ed4b8ff6074c3e660f487e14f1c`
+for G- and
+`bad69ccaad502de7e6bdac5c0f56007a30a868ae7f81832f3fd96252af7eac19`
+for G+. G- retained `128/128` flat HoST holds but ended at `79.69%` standing;
+G+ retained `128/128` holds but ended at `72.66%`. Their final 256-environment
+train-bank evaluations produced respectively `0/256` primary with `0/256`
+escape and `0/256` primary with `1/256` escape. Neither is a formal A6
+improvement, so no 2048-environment or video claim is made.
+
+V5 also completed all 1,200 updates without NaN/Inf or abnormal termination.
+Its final SHA256 is
+`b2add6e6557a36815a4a9588ea531afffba366e344b7d7920423d9f096b6b57f`.
+Updates 100, 200, 400, 800, and 1200 all remained at `0/256` formal primary;
+the final result also had `0/256` escape and zero abnormal trials. Final low
+flat evaluation had `0/128` HoST hold and `0%` final standing. More
+importantly, update 800 failed separately from low, middle, and near-standing
+resets. Near-standing states began around `0.955 m` head height and `0.839`
+uprightness but fell to roughly `0.45 m` by step 100 and `0.42 m` by step 200.
+The mixed reverse curriculum therefore failed to acquire even its easiest
+stratum; extending it is not justified.
+
+Two concrete implementation interactions explain the V5 collapse. First, the
+inherited frozen actor normalizer still centers its six action-scale history
+channels near `0.939-0.942` with standard deviations near `0.233-0.239`; the
+formal `0.25` constant is consequently presented as an out-of-distribution
+value near `-2.9` in every history slot. Second, legacy non-A6 posture terms
+dominate the acquisition signal: around update 770, hip-yaw and shoulder-roll
+episode penalties were about `-3.13` and `-1.88`, while stage progress was
+only `+0.85`, height `+0.09`, and upright `+0.15`. Output-gain scans through
+`3.73`, with and without action-scale-channel recentering at inference, still
+produced zero near-standing holds, so this cannot be repaired by a static
+gain alone.
+
+V6 changes the acquisition boundary rather than extending V5. It trains only
+flat near-standing natural resets at fixed formal scale `0.25`, disables all
+legacy non-A6 style/target and obstacle rewards during this first controller
+acquisition phase, trains the full actor, recenters the six action-scale
+normalizer means to `0.25`, and permits the actor normalizer to adapt. It uses
+a fresh critic/optimizer, standard deviation `0.10`, learning rate `5e-5`,
+four PPO epochs, and stronger bounded stage-pose, height, upright,
+stage-progress, height-margin, and primary-stance rewards. A 64-environment
+200-step preflight verified exact flat/near reset allocation, fixed scale,
+full-actor gradients, finite rollout values, and non-zero target rewards; the
+largest target contribution was stage progress at `0.0418` per step. The
+formal pilot runs in
+`logs/a6_29_v35_v6_near_acquire_4096_u400_20261013`. Near-standing retention
+is only its first acquisition criterion: middle, low, and obstacle curricula
+must still be added in later phases before any A6 success claim.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from

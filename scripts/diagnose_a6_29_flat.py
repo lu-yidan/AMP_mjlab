@@ -16,6 +16,7 @@ import torch
 from mjlab.envs import ManagerBasedRlEnv
 from mjlab.rl import RslRlVecEnvWrapper
 
+from scripts.train_host29_v7 import set_action_scale
 from src.tasks.host_recovery.a6_runtime import (
   _a6_ground_force,
   _a6_height,
@@ -25,6 +26,7 @@ from src.tasks.host_recovery.a6_runtime import (
 from src.tasks.host_recovery.config.g1.rl_cfg import (
   unitree_g1_host_standup_ppo_runner_cfg,
 )
+from src.tasks.host_recovery.mdp.observations import UNACTUATED_STEPS
 from src.tasks.host_recovery.rl import HoSTOnPolicyRunner
 
 
@@ -42,6 +44,13 @@ def main() -> None:
   parser.add_argument("--num-envs", type=int, default=128)
   parser.add_argument("--steps", type=int, default=1150)
   parser.add_argument("--seed", type=int, default=42)
+  parser.add_argument(
+    "--stratum", choices=("low", "middle", "near"), default="low"
+  )
+  parser.add_argument("--skip-unactuated", action="store_true")
+  parser.add_argument("--output-gain", type=float, default=1.0)
+  parser.add_argument("--action-scale", type=float)
+  parser.add_argument("--center-action-scale", action="store_true")
   parser.add_argument("--dynamics", action="store_true")
   parser.add_argument("--push", action="store_true")
   args = parser.parse_args()
@@ -63,13 +72,30 @@ def main() -> None:
   env = ManagerBasedRlEnv(cfg=cfg, device="cuda:0", render_mode=None)
   env.reset()
   env._a6_scene[:] = 0
-  env._a6_stratum[:] = 0
+  env._a6_stratum[:] = {"low": 0, "middle": 1, "near": 2}[args.stratum]
   env._a6_source[:] = 0
   env._reset_idx(torch.arange(env.num_envs, device=env.device))
+  if args.skip_unactuated:
+    env.episode_length_buf.fill_(UNACTUATED_STEPS + 1)
 
   wrapper = RslRlVecEnvWrapper(env, clip_actions=agent.clip_actions)
   runner = HoSTOnPolicyRunner(wrapper, asdict(agent), device="cuda:0")
   runner.load(str(args.checkpoint), load_optimizer=False, map_location="cuda:0")
+  if args.action_scale is not None:
+    set_action_scale(env, args.action_scale)
+  if args.center_action_scale:
+    action = env.action_manager.get_term("joint_pos")
+    num_joints = env.scene["robot"].data.joint_pos.shape[-1]
+    single_step_dim = 7 + 2 * num_joints + action.action_dim
+    scale_indices = torch.arange(
+      single_step_dim - 1,
+      runner.obs_normalizer._mean.shape[-1],
+      single_step_dim,
+      device=runner.obs_normalizer._mean.device,
+    )
+    runner.obs_normalizer._mean[:, scale_indices] = float(
+      env._host_action_rescale.mean()
+    )
   policy = runner.get_inference_policy(device="cuda:0")
   observations = wrapper.get_observations()
   robot = env.scene["robot"]
@@ -86,7 +112,8 @@ def main() -> None:
   trajectory = {}
   with torch.no_grad():
     for step in range(args.steps):
-      observations, _, _, _ = wrapper.step(policy(observations["actor"]))
+      actions = (policy(observations["actor"]) * args.output_gain).clamp(-1.0, 1.0)
+      observations, _, _, _ = wrapper.step(actions)
       if step % 100 == 0 or step == args.steps - 1:
         height = _a6_height(env)
         upright = _a6_upright(env)
@@ -111,6 +138,11 @@ def main() -> None:
   result = {
     "checkpoint": str(args.checkpoint),
     "group": args.group,
+    "stratum": args.stratum,
+    "skip_unactuated": args.skip_unactuated,
+    "output_gain": args.output_gain,
+    "action_scale": float(env._host_action_rescale.mean()),
+    "center_action_scale": args.center_action_scale,
     "dynamics": args.dynamics,
     "push": args.push,
     "num_envs": args.num_envs,
