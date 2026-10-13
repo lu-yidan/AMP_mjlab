@@ -276,7 +276,7 @@ def main() -> None:
       len(env.reward_manager.active_terms), device=env.device
     )
     policy = runner.get_inference_policy(device="cuda:0")
-    rollout_steps = 600 if args.preflight else 200
+    rollout_steps = 1100 if args.preflight else 200
     start_scale = float(env._host_action_rescale.mean())
     with torch.inference_mode():
       for _ in range(rollout_steps):
