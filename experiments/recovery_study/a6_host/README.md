@@ -325,6 +325,38 @@ failure. The update-800 checkpoint remains the best fixed-scale retention
 point so far; V9 continues at `0.582388` to test whether consolidation recovers
 before any further scale change.
 
+V9 completed 3,000 updates without NaN/Inf or abnormal termination. Its final
+checkpoint is
+`logs/a6_29_v35_v9_confirmed_homotopy_4096_u3000_20261013/model_3000_final.pt`
+with SHA256
+`5ea66e9fbd2dab7bda48281af9638e8aa32802087641e56f1c3fb5a1938aefb1`.
+The curriculum eventually reached scale `0.567388`, but fixed-scale retention
+did not recover: update 2400 at scale `0.572388` achieved `97/128` holds and
+`44.53%` final standing, while the final checkpoint achieved `102/128` and
+`42.19%`. Their step-1149 head heights were only `0.7801 m` and `0.7879 m`.
+The failure mechanism is now observable: the V9 gate inspected only
+episode-final head height. The lower-scale policies often fell soon after the
+30-step motor-off window (`0.6743 m` and `0.6659 m` mean head height at step
+100), then recovered by step 400 (`0.9101 m` and `0.8774 m`). Episode-final
+cohorts could therefore authorize another scale reduction even though the
+controller no longer retained a near-standing reset continuously.
+
+V10 restarts from the best V9 update-800 checkpoint (SHA256
+`c7693f8449819471b83a8d9fcf6af8f5ae2bc8917e4462f4a2b4678c8fd02125`) at
+scale `0.622388` and replaces the endpoint-only gate with an episode-retention
+gate. After the 30-step motor-off interval, each environment must keep head
+height above `0.70 m` and uprightness above `0.80` for at least 80% of its
+controlled steps and finish retained; at least 90% of the 4,096-environment
+cohort must pass for three consecutive episodes. Scale changes remain bounded
+to `0.005` and are separated by at least 14,400 control steps (600 updates).
+The actor/critic/optimizer state is resumed, with standard deviation `0.05`,
+learning rate `1e-5`, and two PPO epochs. A 64-environment, 1,100-step
+preflight kept scale fixed, reported a `59.38%` retained cohort and `79.31%`
+mean retained-step fraction, and passed finite reward/gradient checks. The
+2,400-update run is active in
+`logs/a6_29_v35_v10_retained_near_4096_u2400_20261013`; update zero was saved
+and early PPO/GPU execution is healthy.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
