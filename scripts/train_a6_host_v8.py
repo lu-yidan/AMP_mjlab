@@ -43,6 +43,7 @@ from src.tasks.host_recovery.config.g1.rl_cfg import (
   unitree_g1_host_standup_ppo_runner_cfg,
 )
 from src.tasks.host_recovery.mdp.metrics import HoSTMetrics
+from src.tasks.host_recovery.mdp.observations import UNACTUATED_STEPS
 from src.tasks.host_recovery.rl import HoSTOnPolicyRunner
 
 
@@ -51,11 +52,42 @@ LEARNING_RATE = 2e-5
 ACTION_SCALE_DECAY = 0.01
 ACTION_SCALE_STANDING_HEIGHT = 0.60
 ACTION_SCALE_STANDING_FRACTION = 0.90
+RETENTION_UPRIGHT = 0.80
+RETENTION_STEP_FRACTION = 0.80
 
 
-def near_retention_reward(env: ManagerBasedRlEnv) -> torch.Tensor:
-  height = smooth_gate(_a6_height(env), 0.72, 1.08)
-  upright = smooth_gate(_a6_upright(env), 0.55, 0.90)
+def _ensure_retention_state(env: ManagerBasedRlEnv) -> None:
+  if not hasattr(env, "_a6_retention_good_steps"):
+    env._a6_retention_good_steps = torch.zeros(
+      env.num_envs, device=env.device
+    )
+    env._a6_retention_control_steps = torch.zeros(
+      env.num_envs, device=env.device
+    )
+    env._a6_last_retention_cohort_fraction = 0.0
+    env._a6_last_retention_step_fraction = 0.0
+
+
+def near_retention_reward(
+  env: ManagerBasedRlEnv,
+  track_retention: bool = False,
+  gate_height: float = ACTION_SCALE_STANDING_HEIGHT,
+  gate_upright: float = RETENTION_UPRIGHT,
+) -> torch.Tensor:
+  raw_height = _a6_height(env)
+  raw_upright = _a6_upright(env)
+  if track_retention:
+    _ensure_retention_state(env)
+    controlled = env.episode_length_buf > UNACTUATED_STEPS
+    retained = (
+      controlled
+      & (raw_height > gate_height)
+      & (raw_upright > gate_upright)
+    )
+    env._a6_retention_good_steps += retained.float()
+    env._a6_retention_control_steps += controlled.float()
+  height = smooth_gate(raw_height, 0.72, 1.08)
+  upright = smooth_gate(raw_upright, 0.55, 0.90)
   return height * upright
 
 
@@ -67,6 +99,10 @@ def near_action_scale_decay(
   decay: float = ACTION_SCALE_DECAY,
   min_scale: float = FORMAL_ACTION_SCALE,
   required_successes: int = 1,
+  require_retention: bool = False,
+  retention_upright: float = RETENTION_UPRIGHT,
+  retention_step_fraction: float = RETENTION_STEP_FRACTION,
+  min_scale_hold_steps: int = 0,
   term_name: str = "joint_pos",
 ) -> torch.Tensor:
   if env_ids is None or len(env_ids) == 0:
@@ -74,9 +110,34 @@ def near_action_scale_decay(
 
   state = HoSTMetrics.get()
   reached = False
-  if state.initialized and state.last_episode_head_height is not None:
+  if require_retention:
+    _ensure_retention_state(env)
+    if state.initialized and state.current_head_height is not None:
+      final_retained = (
+        (state.current_head_height[env_ids] > standing_height)
+        & (_a6_upright(env)[env_ids] > retention_upright)
+      )
+      total_steps = env._a6_retention_control_steps[env_ids].clamp_min(1.0)
+      step_fraction = env._a6_retention_good_steps[env_ids] / total_steps
+      episode_retained = final_retained & (
+        step_fraction >= retention_step_fraction
+      )
+      cohort_fraction = float(episode_retained.float().mean())
+      env._a6_last_retention_cohort_fraction = cohort_fraction
+      env._a6_last_retention_step_fraction = float(step_fraction.mean())
+      reached = cohort_fraction >= min_fraction
+    env._a6_retention_good_steps[env_ids] = 0.0
+    env._a6_retention_control_steps[env_ids] = 0.0
+  elif state.initialized and state.last_episode_head_height is not None:
     standing = state.last_episode_head_height[env_ids] > standing_height
     reached = bool(standing.float().mean() >= min_fraction)
+
+  current_step = int(env.common_step_counter)
+  last_change_step = int(
+    getattr(env, "_a6_scale_last_change_step", current_step)
+  )
+  hold_complete = current_step - last_change_step >= min_scale_hold_steps
+  reached = reached and hold_complete
 
   success_streak = int(getattr(env, "_a6_scale_success_streak", 0))
   success_streak = success_streak + 1 if reached else 0
@@ -97,6 +158,7 @@ def near_action_scale_decay(
   if success_streak >= required_successes:
     rescale[env_ids] = (rescale[env_ids] - decay).clamp(min=min_scale)
     env._a6_scale_success_streak = 0
+    env._a6_scale_last_change_step = current_step
 
   term = env.action_manager.get_term(term_name)
   new_value = float(rescale.mean())
@@ -127,6 +189,16 @@ def main() -> None:
     "--standing-fraction", type=float, default=ACTION_SCALE_STANDING_FRACTION
   )
   parser.add_argument("--required-successes", type=int, default=1)
+  parser.add_argument("--require-retention-gate", action="store_true")
+  parser.add_argument(
+    "--retention-upright", type=float, default=RETENTION_UPRIGHT
+  )
+  parser.add_argument(
+    "--retention-step-fraction",
+    type=float,
+    default=RETENTION_STEP_FRACTION,
+  )
+  parser.add_argument("--min-scale-hold-steps", type=int, default=0)
   parser.add_argument("--train-std", type=float, default=TRAIN_STD)
   parser.add_argument("--learning-rate", type=float, default=LEARNING_RATE)
   parser.add_argument("--resume-training-state", action="store_true")
@@ -157,6 +229,10 @@ def main() -> None:
     "decay": args.action_scale_decay,
     "min_scale": FORMAL_ACTION_SCALE,
     "required_successes": args.required_successes,
+    "require_retention": args.require_retention_gate,
+    "retention_upright": args.retention_upright,
+    "retention_step_fraction": args.retention_step_fraction,
+    "min_scale_hold_steps": args.min_scale_hold_steps,
   }
   cfg.curriculum.pop("pull_force", None)
   cfg.terminations.pop("invalid_plate", None)
@@ -183,7 +259,13 @@ def main() -> None:
     func=primary_stance_reward, weight=2.00 * CONTROL_DT
   )
   cfg.rewards["a6_near_retention"] = RewardTermCfg(
-    func=near_retention_reward, weight=4.00 * CONTROL_DT
+    func=near_retention_reward,
+    weight=4.00 * CONTROL_DT,
+    params={
+      "track_retention": args.require_retention_gate,
+      "gate_height": args.standing_height,
+      "gate_upright": args.retention_upright,
+    },
   )
 
   agent = unitree_g1_host_standup_ppo_runner_cfg()
@@ -227,6 +309,7 @@ def main() -> None:
     runner.current_learning_iteration = 0
     set_action_scale(env, source_action_scale)
     env._a6_scale_success_streak = 0
+    env._a6_scale_last_change_step = int(env.common_step_counter)
     for param_group in runner.alg.optimizer.param_groups:
       param_group["lr"] = args.learning_rate
 
@@ -278,6 +361,12 @@ def main() -> None:
       "action_scale_standing_height": args.standing_height,
       "action_scale_standing_fraction": args.standing_fraction,
       "action_scale_required_successes": args.required_successes,
+      "action_scale_retention_gate": args.require_retention_gate,
+      "action_scale_retention_upright": args.retention_upright,
+      "action_scale_retention_step_fraction": (
+        args.retention_step_fraction
+      ),
+      "action_scale_min_hold_steps": args.min_scale_hold_steps,
       "reset_mix": reset_counts,
       "nominal_dynamics": True,
       "observation_noise": False,
@@ -381,6 +470,12 @@ def main() -> None:
           "start": start_scale,
           "end": end_scale,
           "last_standing_fraction": last_standing_fraction,
+          "last_retention_cohort_fraction": float(
+            getattr(env, "_a6_last_retention_cohort_fraction", 0.0)
+          ),
+          "last_retention_step_fraction": float(
+            getattr(env, "_a6_last_retention_step_fraction", 0.0)
+          ),
         }
       ),
       flush=True,
@@ -388,6 +483,13 @@ def main() -> None:
     print(f"{args.log_tag}_PREFLIGHT_PASS", json.dumps(launch), flush=True)
     if args.preflight:
       return
+
+    env._a6_scale_success_streak = 0
+    env._a6_scale_last_change_step = int(env.common_step_counter)
+    if args.require_retention_gate:
+      _ensure_retention_state(env)
+      env._a6_retention_good_steps.zero_()
+      env._a6_retention_control_steps.zero_()
 
     runner.alg.policy.train()
     runner.obs_normalizer.train()
