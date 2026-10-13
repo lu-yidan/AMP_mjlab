@@ -64,6 +64,8 @@ def main() -> None:
   cfg.scene.num_envs = args.num_envs
   cfg.seed = args.seed
   cfg.terminations.pop("invalid_plate", None)
+  if args.action_scale is not None:
+    cfg.curriculum.pop("action_scale", None)
   if not args.push:
     cfg.events.pop("push_robot", None)
   cfg.observations["actor"].terms["host"].params["add_noise"] = False
@@ -141,6 +143,7 @@ def main() -> None:
     "stratum": args.stratum,
     "skip_unactuated": args.skip_unactuated,
     "output_gain": args.output_gain,
+    "action_scale_requested": args.action_scale,
     "action_scale": float(env._host_action_rescale.mean()),
     "center_action_scale": args.center_action_scale,
     "dynamics": args.dynamics,
