@@ -66,6 +66,7 @@ def near_action_scale_decay(
   min_fraction: float = ACTION_SCALE_STANDING_FRACTION,
   decay: float = ACTION_SCALE_DECAY,
   min_scale: float = FORMAL_ACTION_SCALE,
+  required_successes: int = 1,
   term_name: str = "joint_pos",
 ) -> torch.Tensor:
   if env_ids is None or len(env_ids) == 0:
@@ -76,6 +77,10 @@ def near_action_scale_decay(
   if state.initialized and state.last_episode_head_height is not None:
     standing = state.last_episode_head_height[env_ids] > standing_height
     reached = bool(standing.float().mean() >= min_fraction)
+
+  success_streak = int(getattr(env, "_a6_scale_success_streak", 0))
+  success_streak = success_streak + 1 if reached else 0
+  env._a6_scale_success_streak = success_streak
 
   rescale = getattr(env, "_host_action_rescale", None)
   if rescale is None:
@@ -89,8 +94,9 @@ def near_action_scale_decay(
     rescale = torch.full((env.num_envs, 1), value, device=env.device)
     env._host_action_rescale = rescale
 
-  if reached:
+  if success_streak >= required_successes:
     rescale[env_ids] = (rescale[env_ids] - decay).clamp(min=min_scale)
+    env._a6_scale_success_streak = 0
 
   term = env.action_manager.get_term(term_name)
   new_value = float(rescale.mean())
@@ -113,6 +119,26 @@ def main() -> None:
   parser.add_argument("--updates", type=int, default=1800)
   parser.add_argument("--seed", type=int, default=20261013)
   parser.add_argument("--preflight", action="store_true")
+  parser.add_argument("--action-scale-decay", type=float, default=ACTION_SCALE_DECAY)
+  parser.add_argument(
+    "--standing-height", type=float, default=ACTION_SCALE_STANDING_HEIGHT
+  )
+  parser.add_argument(
+    "--standing-fraction", type=float, default=ACTION_SCALE_STANDING_FRACTION
+  )
+  parser.add_argument("--required-successes", type=int, default=1)
+  parser.add_argument("--train-std", type=float, default=TRAIN_STD)
+  parser.add_argument("--learning-rate", type=float, default=LEARNING_RATE)
+  parser.add_argument("--resume-training-state", action="store_true")
+  parser.add_argument(
+    "--method-name",
+    default="gated near-standing action-scale homotopy",
+  )
+  parser.add_argument(
+    "--experiment-name",
+    default="g1_host_a6_v8_near_scale_homotopy",
+  )
+  parser.add_argument("--log-tag", default="A6_V8")
   args = parser.parse_args()
 
   args.log_dir.mkdir(parents=True, exist_ok=False)
@@ -126,10 +152,11 @@ def main() -> None:
   cfg.seed = args.seed
   cfg.curriculum["action_scale"].func = near_action_scale_decay
   cfg.curriculum["action_scale"].params = {
-    "standing_height": ACTION_SCALE_STANDING_HEIGHT,
-    "min_fraction": ACTION_SCALE_STANDING_FRACTION,
-    "decay": ACTION_SCALE_DECAY,
+    "standing_height": args.standing_height,
+    "min_fraction": args.standing_fraction,
+    "decay": args.action_scale_decay,
     "min_scale": FORMAL_ACTION_SCALE,
+    "required_successes": args.required_successes,
   }
   cfg.curriculum.pop("pull_force", None)
   cfg.terminations.pop("invalid_plate", None)
@@ -162,15 +189,17 @@ def main() -> None:
   agent = unitree_g1_host_standup_ppo_runner_cfg()
   agent.seed = args.seed
   agent.logger = "tensorboard"
-  agent.experiment_name = "g1_host_a6_v8_near_scale_homotopy"
+  agent.experiment_name = args.experiment_name
   agent.max_iterations = args.updates
   agent.num_steps_per_env = 24
   agent.save_interval = 50
-  agent.algorithm.learning_rate = LEARNING_RATE
+  agent.algorithm.learning_rate = args.learning_rate
   agent.algorithm.schedule = "fixed"
   agent.algorithm.entropy_coef = 0.0
   agent.algorithm.num_learning_epochs = 2
-  agent.actor.distribution_cfg.update(init_std=TRAIN_STD, max_std=TRAIN_STD)
+  agent.actor.distribution_cfg.update(
+    init_std=args.train_std, max_std=args.train_std
+  )
   dump_yaml(args.log_dir / "env.yaml", asdict(cfg))
   dump_yaml(args.log_dir / "agent.yaml", asdict(agent))
 
@@ -188,14 +217,18 @@ def main() -> None:
     )
     runner.load(
       str(args.checkpoint),
-      load_optimizer=False,
-      load_cfg={"actor": True, "critic": False},
+      load_optimizer=args.resume_training_state,
+      load_cfg={"actor": True, "critic": args.resume_training_state},
       map_location="cuda:0",
     )
-    runner.alg.policy.critic.load_state_dict(fresh_critic)
-    runner.privileged_obs_normalizer.load_state_dict(fresh_critic_normalizer)
+    if not args.resume_training_state:
+      runner.alg.policy.critic.load_state_dict(fresh_critic)
+      runner.privileged_obs_normalizer.load_state_dict(fresh_critic_normalizer)
     runner.current_learning_iteration = 0
     set_action_scale(env, source_action_scale)
+    env._a6_scale_success_streak = 0
+    for param_group in runner.alg.optimizer.param_groups:
+      param_group["lr"] = args.learning_rate
 
     policy_state = runner.alg.policy.state_dict()
     for name, value in source["actor_state_dict"].items():
@@ -203,7 +236,8 @@ def main() -> None:
         continue
       mapped = "actor." + name.removeprefix("mlp.")
       assert torch.equal(policy_state[mapped].detach().cpu(), value.cpu()), mapped
-    assert len(runner.alg.optimizer.state) == 0
+    if not args.resume_training_state:
+      assert len(runner.alg.optimizer.state) == 0
     assert all(
       parameter.requires_grad for parameter in runner.alg.policy.actor.parameters()
     )
@@ -221,7 +255,7 @@ def main() -> None:
     sync_action_scale_mean(runner.obs_normalizer, ())
 
     with torch.no_grad():
-      runner.alg.policy.std.fill_(TRAIN_STD)
+      runner.alg.policy.std.fill_(args.train_std)
     runner.alg.policy.std.requires_grad_(False)
     env._a6_adaptation_start_step = int(env.common_step_counter)
 
@@ -233,30 +267,31 @@ def main() -> None:
     launch = {
       "checkpoint": str(args.checkpoint.resolve()),
       "checkpoint_sha256": sha256(args.checkpoint),
-      "method": "gated near-standing action-scale homotopy",
+      "method": args.method_name,
       "group": "G+",
       "num_envs": args.num_envs,
       "updates": args.updates,
       "seed": args.seed,
       "action_scale_start": source_action_scale,
       "action_scale_target": FORMAL_ACTION_SCALE,
-      "action_scale_decay": ACTION_SCALE_DECAY,
-      "action_scale_standing_height": ACTION_SCALE_STANDING_HEIGHT,
-      "action_scale_standing_fraction": ACTION_SCALE_STANDING_FRACTION,
+      "action_scale_decay": args.action_scale_decay,
+      "action_scale_standing_height": args.standing_height,
+      "action_scale_standing_fraction": args.standing_fraction,
+      "action_scale_required_successes": args.required_successes,
       "reset_mix": reset_counts,
       "nominal_dynamics": True,
       "observation_noise": False,
       "invalid_plate_termination": False,
-      "train_std": TRAIN_STD,
-      "learning_rate": LEARNING_RATE,
+      "train_std": args.train_std,
+      "learning_rate": args.learning_rate,
       "learning_epochs": 2,
       "actor_trainable_scope": "full actor",
       "actor_normalizer": "frozen except scale means synchronized to runtime scale",
       "actor_normalizer_scale_indices": scale_indices.tolist(),
       "legacy_style_target_rewards": "disabled",
       "obstacle_rewards": "disabled during acquisition",
-      "fresh_critic": True,
-      "fresh_optimizer": True,
+      "fresh_critic": not args.resume_training_state,
+      "fresh_optimizer": not args.resume_training_state,
     }
     (args.log_dir / "launch.json").write_text(
       json.dumps(launch, indent=2), encoding="utf-8"
@@ -310,7 +345,7 @@ def main() -> None:
     last_standing_fraction = float(
       (
         metric_state.last_episode_head_height
-        > ACTION_SCALE_STANDING_HEIGHT
+        > args.standing_height
       ).float().mean()
     )
     synced_mean = runner.obs_normalizer._mean[:, scale_indices]
@@ -318,10 +353,10 @@ def main() -> None:
       synced_mean, torch.full_like(synced_mean, end_scale), atol=1e-6
     )
     if args.preflight:
-      assert end_scale < start_scale, (start_scale, end_scale)
-      assert end_scale >= start_scale - ACTION_SCALE_DECAY - 1e-5
+      assert FORMAL_ACTION_SCALE <= end_scale <= start_scale
+      assert end_scale >= start_scale - args.action_scale_decay - 1e-5
     print(
-      "A6_V8_PREFLIGHT_REWARD_ABS",
+      f"{args.log_tag}_PREFLIGHT_REWARD_ABS",
       json.dumps(
         {
           name: reward_abs_mean[name]
@@ -340,7 +375,7 @@ def main() -> None:
       flush=True,
     )
     print(
-      "A6_V8_PREFLIGHT_SCALE",
+      f"{args.log_tag}_PREFLIGHT_SCALE",
       json.dumps(
         {
           "start": start_scale,
@@ -350,7 +385,7 @@ def main() -> None:
       ),
       flush=True,
     )
-    print("A6_V8_PREFLIGHT_PASS", json.dumps(launch), flush=True)
+    print(f"{args.log_tag}_PREFLIGHT_PASS", json.dumps(launch), flush=True)
     if args.preflight:
       return
 
@@ -363,7 +398,7 @@ def main() -> None:
     assert runner.obs_normalizer.training
     runner.learn(num_learning_iterations=args.updates, init_at_random_ep_len=False)
     runner.save(str(args.log_dir / f"model_{args.updates}_final.pt"))
-    print("A6_V8_TRAINING_DONE", flush=True)
+    print(f"{args.log_tag}_TRAINING_DONE", flush=True)
   finally:
     env.close()
 

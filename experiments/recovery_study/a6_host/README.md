@@ -267,6 +267,33 @@ loophole, whose weight is reduced eightfold. This phase must first preserve
 near-standing while reaching scale `0.25`; middle, low, and obstacle stages
 remain separate follow-on work.
 
+The corrected V8b run completed 1,800 updates without NaN/Inf or abnormal
+termination. Its final checkpoint is
+`logs/a6_29_v35_v8b_near_homotopy_4096_u1800_20261013/model_1800_final.pt`
+with SHA256
+`be1f6c31f4d1718dbc07e2434d4be19cb936c750269b72bfcf95b6c91630090d`.
+The gate reduced scale from `0.932387` to `0.622388` by update 700, then held
+that scale through update 1750 while the controller relearned. Near-standing
+evaluation improved at the plateau from `89/128` held and `35.16%` final
+standing at update 800 to `117/128` held and `61.72%` final standing at update
+1600; update 1750 reached `115/128` held and the best final-standing rate,
+`64.06%`. This is the first clear retained-control improvement below the
+previous approximately `0.65` collapse boundary. A final successful training
+cohort lowered scale once more to `0.612388`, but the unadapted update-1800
+checkpoint fell to `108/128` held and `53.12%` final standing. V8b therefore
+shows that gated homotopy works, but one successful cohort and a `0.01` step
+are still too aggressive for robust transfer.
+
+V9 resumes the full actor, critic, optimizer, and normalizers from V8b update
+1750 (SHA256
+`5aff2e12cf49148c4ec303fa61317c37cb69a763b28d4436d9f1b1d579711fa3`)
+at scale `0.622388`. It lowers the step to `0.005`, requires two consecutive
+cohorts with at least 90% episode-final head height above `0.70 m`, reduces
+exploration standard deviation to `0.06`, and uses learning rate `1.5e-5`.
+This continuation is intended to consolidate each lower-control plateau
+before another scale change; it does not yet claim formal-scale or obstacle
+success.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
