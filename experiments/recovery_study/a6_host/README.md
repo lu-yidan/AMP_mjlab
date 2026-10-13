@@ -258,8 +258,8 @@ V8 changes the acquisition strategy to a gated homotopy instead of another
 fixed-scale restart. It begins from the verified V2 near-standing controller
 at its native scale, uses only flat near-standing resets, trains the full
 actor with a smaller `2e-5` learning rate and two PPO epochs, and lowers scale
-by `0.01` only after the HoST episode-final torso-above-feet metric exceeds
-`0.65 m`. The
+by `0.01` only after at least 90% of the resetting cohort has an episode-final
+HoST torso-above-feet metric above `0.60 m`. The
 state-observation normalizer remains frozen, while a forward hook synchronizes
 only the six action-scale history means to the current runtime scale. A new
 bounded height-upright retention reward dominates the lying-stage progress

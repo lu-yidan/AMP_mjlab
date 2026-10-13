@@ -42,19 +42,67 @@ from src.tasks.host_recovery.a6_runtime import (
 from src.tasks.host_recovery.config.g1.rl_cfg import (
   unitree_g1_host_standup_ppo_runner_cfg,
 )
+from src.tasks.host_recovery.mdp.metrics import HoSTMetrics
 from src.tasks.host_recovery.rl import HoSTOnPolicyRunner
 
 
 TRAIN_STD = 0.08
 LEARNING_RATE = 2e-5
 ACTION_SCALE_DECAY = 0.01
-ACTION_SCALE_HEIGHT_GATE = 0.65
+ACTION_SCALE_STANDING_HEIGHT = 0.60
+ACTION_SCALE_STANDING_FRACTION = 0.90
 
 
 def near_retention_reward(env: ManagerBasedRlEnv) -> torch.Tensor:
   height = smooth_gate(_a6_height(env), 0.72, 1.08)
   upright = smooth_gate(_a6_upright(env), 0.55, 0.90)
   return height * upright
+
+
+def near_action_scale_decay(
+  env: ManagerBasedRlEnv,
+  env_ids: torch.Tensor,
+  standing_height: float = ACTION_SCALE_STANDING_HEIGHT,
+  min_fraction: float = ACTION_SCALE_STANDING_FRACTION,
+  decay: float = ACTION_SCALE_DECAY,
+  min_scale: float = FORMAL_ACTION_SCALE,
+  term_name: str = "joint_pos",
+) -> torch.Tensor:
+  if env_ids is None or len(env_ids) == 0:
+    env_ids = torch.arange(env.num_envs, device=env.device, dtype=torch.long)
+
+  state = HoSTMetrics.get()
+  reached = False
+  if state.initialized and state.last_episode_head_height is not None:
+    standing = state.last_episode_head_height[env_ids] > standing_height
+    reached = bool(standing.float().mean() >= min_fraction)
+
+  rescale = getattr(env, "_host_action_rescale", None)
+  if rescale is None:
+    term = env.action_manager.get_term(term_name)
+    scale = term.cfg.scale
+    value = (
+      float(sum(scale.values()) / len(scale))
+      if isinstance(scale, dict)
+      else float(scale)
+    )
+    rescale = torch.full((env.num_envs, 1), value, device=env.device)
+    env._host_action_rescale = rescale
+
+  if reached:
+    rescale[env_ids] = (rescale[env_ids] - decay).clamp(min=min_scale)
+
+  term = env.action_manager.get_term(term_name)
+  new_value = float(rescale.mean())
+  if isinstance(term.cfg.scale, dict):
+    term.cfg.scale = {key: new_value for key in term.cfg.scale}
+  else:
+    term.cfg.scale = new_value
+  if isinstance(term._scale, torch.Tensor):
+    term._scale[:] = new_value
+  else:
+    term._scale = new_value
+  return rescale.mean()
 
 
 def main() -> None:
@@ -76,11 +124,13 @@ def main() -> None:
   cfg = a6_env_cfg(seed=args.seed, dynamics=False, group="G+")
   cfg.scene.num_envs = args.num_envs
   cfg.seed = args.seed
-  cfg.curriculum["action_scale"].params.update(
-    threshold_height=ACTION_SCALE_HEIGHT_GATE,
-    decay=ACTION_SCALE_DECAY,
-    min_scale=FORMAL_ACTION_SCALE,
-  )
+  cfg.curriculum["action_scale"].func = near_action_scale_decay
+  cfg.curriculum["action_scale"].params = {
+    "standing_height": ACTION_SCALE_STANDING_HEIGHT,
+    "min_fraction": ACTION_SCALE_STANDING_FRACTION,
+    "decay": ACTION_SCALE_DECAY,
+    "min_scale": FORMAL_ACTION_SCALE,
+  }
   cfg.curriculum.pop("pull_force", None)
   cfg.terminations.pop("invalid_plate", None)
   for name in ("push_robot", "foot_friction", "encoder_bias", "base_com"):
@@ -191,7 +241,8 @@ def main() -> None:
       "action_scale_start": source_action_scale,
       "action_scale_target": FORMAL_ACTION_SCALE,
       "action_scale_decay": ACTION_SCALE_DECAY,
-      "action_scale_height_gate": ACTION_SCALE_HEIGHT_GATE,
+      "action_scale_standing_height": ACTION_SCALE_STANDING_HEIGHT,
+      "action_scale_standing_fraction": ACTION_SCALE_STANDING_FRACTION,
       "reset_mix": reset_counts,
       "nominal_dynamics": True,
       "observation_noise": False,
@@ -254,6 +305,14 @@ def main() -> None:
     ):
       assert 0.0 < reward_abs_mean[name] < 0.20, (name, reward_abs_mean[name])
     end_scale = float(env._host_action_rescale.mean())
+    metric_state = HoSTMetrics.get()
+    assert metric_state.last_episode_head_height is not None
+    last_standing_fraction = float(
+      (
+        metric_state.last_episode_head_height
+        > ACTION_SCALE_STANDING_HEIGHT
+      ).float().mean()
+    )
     synced_mean = runner.obs_normalizer._mean[:, scale_indices]
     assert torch.allclose(
       synced_mean, torch.full_like(synced_mean, end_scale), atol=1e-6
@@ -282,7 +341,13 @@ def main() -> None:
     )
     print(
       "A6_V8_PREFLIGHT_SCALE",
-      json.dumps({"start": start_scale, "end": end_scale}),
+      json.dumps(
+        {
+          "start": start_scale,
+          "end": end_scale,
+          "last_standing_fraction": last_standing_fraction,
+        }
+      ),
       flush=True,
     )
     print("A6_V8_PREFLIGHT_PASS", json.dumps(launch), flush=True)
