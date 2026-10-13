@@ -357,6 +357,20 @@ mean retained-step fraction, and passed finite reward/gradient checks. The
 `logs/a6_29_v35_v10_retained_near_4096_u2400_20261013`; update zero was saved
 and early PPO/GPU execution is healthy.
 
+Through update 800, V10 correctly held scale at `0.622388`. The fixed-seed
+near diagnostics at updates 400, 600, and 800 produced respectively `116/128`,
+`119/128`, and `119/128` holds with final-standing rates `65.63%`, `67.19%`,
+and `63.28%`; the source V9 update-800 checkpoint remains better on that last
+single-time predicate (`69.53%`). The new gate audit, however, shows the
+intended continuous-retention signal improving materially: the source
+preflight retained only `59.38%` of environments for the required share of
+controlled steps, while V10 updates 600 and 800 reached `79.69%` and `81.25%`.
+Mean retained-step fraction rose from `79.31%` to `83.54%` and `84.45%`, and
+episode-final head-height pass fraction reached `96.88%` and `98.44%`. The
+90% cohort threshold has therefore not been met, so preventing a scale drop is
+the correct behavior; V10 continues consolidating rather than launching a new
+method from the noisier final-step diagnostic alone.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
