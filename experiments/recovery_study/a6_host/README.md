@@ -371,6 +371,16 @@ episode-final head-height pass fraction reached `96.88%` and `98.44%`. The
 the correct behavior; V10 continues consolidating rather than launching a new
 method from the noisier final-step diagnostic alone.
 
+At update 1200, scale is still correctly fixed at `0.622388`. The same
+128-environment near diagnostic improved held success to `121/128`, with a
+`60.16%` final-standing rate, step-100/400/1149 mean head heights of
+`0.7664/1.0470/0.9117 m`, and final uprightness `0.8953`. More importantly,
+the retention audit advanced again to an `85.16%` retained cohort, while the
+mean retained-step fraction remained strong at `83.30%` and the episode-final
+head-height pass fraction was `96.88%`. This is the best continuous-retention
+cohort so far, but it remains below the deliberately conservative 90% scale
+gate, so training continues at the current scale.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
