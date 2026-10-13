@@ -354,6 +354,10 @@ def main() -> None:
     if args.preflight:
       return
 
+    runner.alg.policy.train()
+    runner.obs_normalizer.train()
+    if runner.privileged_obs_normalizer is not None:
+      runner.privileged_obs_normalizer.train()
     runner.save(str(args.log_dir / "model_0.pt"))
     assert runner.alg.policy.training
     assert runner.obs_normalizer.training
