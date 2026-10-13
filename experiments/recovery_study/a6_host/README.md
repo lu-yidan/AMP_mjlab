@@ -125,6 +125,37 @@ touching the original G-/G+ runs. The corrected formal run uses
 and first update both retained scale `0.9324`, confirming that the inherited
 counter no longer skips the bridge.
 
+V4 completed the intended bridge cleanly, reaching scales `0.8521`, `0.7518`,
+`0.5711`, and `0.25` at updates 100, 200, 400, and 800. The policy nevertheless
+lost recovery continuously below about `0.65`: mean reward fell from `156.7`
+at update 100 to `22.7` at update 400 and `-58.9` at update 800; episode-final
+head height fell from `0.546 m` to `0.374 m` and `0.112 m`. At fixed formal
+scale, updates 800/1200/1600 had zero flat HoST holds and zero formal primary
+success, with only `1/2/1` of 256 geometric escapes. Multiplying the inherited
+actor output logits by gains from `0` through `3.73` also produced zero of 64
+flat holds at scale `0.25`. The failure is therefore not bridge timing or a
+single output-amplitude calibration: the bounded final layer cannot relearn
+the state-feedback policy as control authority changes.
+
+V5 changes the training hypothesis. It fixes action scale at the formal `0.25`
+from the first step, trains the full actor rather than a bounded output layer,
+and uses a reverse reset curriculum with 25% low, 37.5% middle, and 37.5%
+near-standing states in every scene/direction cell. A bounded stage-progress
+reward remains informative below the final height threshold, while the formal
+height/upright/two-foot-load terms and nominal protocol alignment are retained.
+This phase is intended to acquire a formal-scale controller before a later
+all-low consolidation phase; it does not claim low-reset success in advance.
+
+The 64-environment V5 preflight passed with the fixed `0.25` scale, the
+expected mixed reset allocation (`16/28/20` low/middle/near at this small
+batch size), non-zero gradients in both the first and final actor layers, and
+finite rollout statistics without NaN/Inf. Mean absolute single-step reward
+contributions were `0.00102` stage pose, `0.00179` height, `0.00285` upright,
+`0.01676` stage progress, `0.0000063` height margin, `0.000000044` primary
+stance, `0.000178` geometry, and `0.000324` completion. This confirms that the
+new dense acquisition signal is active while the formal sparse objectives
+remain measurable rather than dominating the initial update.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
