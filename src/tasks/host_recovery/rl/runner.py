@@ -145,29 +145,36 @@ class HoSTOnPolicyRunner(MjlabOnPolicyRunner):
     """Export the actor to ONNX using the vendored rsl_rl policy."""
     policy = self.alg.get_policy()
     obs_normalizer = self.obs_normalizer if self.empirical_normalization else None
-    wrapper = _OnnxPolicyWrapper(policy, obs_normalizer)
-    wrapper.to("cpu")
-    wrapper.eval()
-
-    num_obs = policy.actor[0].in_features
-    dummy_input = torch.zeros(1, num_obs)
-    os.makedirs(path, exist_ok=True)
-    torch.onnx.export(
-      wrapper,
-      dummy_input,
-      os.path.join(path, filename),
-      export_params=True,
-      opset_version=18,
-      input_names=["obs"],
-      output_names=["actions"],
-      dynamic_axes={"obs": {0: "batch"}, "actions": {0: "batch"}},
-      **_onnx_export_kwargs_single_file(),
+    policy_training = policy.training
+    normalizer_training = (
+      obs_normalizer.training if obs_normalizer is not None else None
     )
-    _inline_external_onnx_data(os.path.join(path, filename))
+    try:
+      wrapper = _OnnxPolicyWrapper(policy, obs_normalizer)
+      wrapper.to("cpu")
+      wrapper.eval()
 
-    policy.to(self.device)
-    if obs_normalizer is not None:
-      obs_normalizer.to(self.device)
+      num_obs = policy.actor[0].in_features
+      dummy_input = torch.zeros(1, num_obs)
+      os.makedirs(path, exist_ok=True)
+      torch.onnx.export(
+        wrapper,
+        dummy_input,
+        os.path.join(path, filename),
+        export_params=True,
+        opset_version=18,
+        input_names=["obs"],
+        output_names=["actions"],
+        dynamic_axes={"obs": {0: "batch"}, "actions": {0: "batch"}},
+        **_onnx_export_kwargs_single_file(),
+      )
+      _inline_external_onnx_data(os.path.join(path, filename))
+    finally:
+      policy.to(self.device)
+      policy.train(policy_training)
+      if obs_normalizer is not None:
+        obs_normalizer.to(self.device)
+        obs_normalizer.train(bool(normalizer_training))
 
   def save(self, path: str, infos=None):
     env = self.env.unwrapped

@@ -41,6 +41,7 @@ from src.tasks.host_recovery.rl import HoSTOnPolicyRunner
 TRAIN_STD = 0.10
 LEARNING_RATE = 5e-5
 NORMALIZER_UNTIL = 100_000_000
+RUN_LABEL = os.environ.get("A6_RUN_LABEL", "V6")
 
 
 def configure_flat_near_resets(env: ManagerBasedRlEnv) -> None:
@@ -119,7 +120,7 @@ def main() -> None:
   agent = unitree_g1_host_standup_ppo_runner_cfg()
   agent.seed = args.seed
   agent.logger = "tensorboard"
-  agent.experiment_name = "g1_host_a6_v6_formal_near_acquisition"
+  agent.experiment_name = f"g1_host_a6_{RUN_LABEL.lower()}_formal_near_acquisition"
   agent.max_iterations = args.updates
   agent.num_steps_per_env = 24
   agent.save_interval = 25
@@ -181,6 +182,7 @@ def main() -> None:
       "checkpoint": str(args.checkpoint.resolve()),
       "checkpoint_sha256": sha256(args.checkpoint),
       "method": "fixed-formal-scale flat-near acquisition",
+      "run_label": RUN_LABEL,
       "group": "G+",
       "num_envs": args.num_envs,
       "updates": args.updates,
@@ -247,7 +249,7 @@ def main() -> None:
     assert float(env._host_action_rescale.amin()) == FORMAL_ACTION_SCALE
     assert float(env._host_action_rescale.amax()) == FORMAL_ACTION_SCALE
     print(
-      "A6_V6_PREFLIGHT_REWARD_ABS",
+      f"A6_{RUN_LABEL}_PREFLIGHT_REWARD_ABS",
       json.dumps(
         {
           name: reward_abs_mean[name]
@@ -264,14 +266,14 @@ def main() -> None:
       ),
       flush=True,
     )
-    print("A6_V6_PREFLIGHT_PASS", json.dumps(launch), flush=True)
+    print(f"A6_{RUN_LABEL}_PREFLIGHT_PASS", json.dumps(launch), flush=True)
     if args.preflight:
       return
 
     runner.save(str(args.log_dir / "model_0.pt"))
     runner.learn(num_learning_iterations=args.updates, init_at_random_ep_len=False)
     runner.save(str(args.log_dir / f"model_{args.updates}_final.pt"))
-    print("A6_V6_TRAINING_DONE", flush=True)
+    print(f"A6_{RUN_LABEL}_TRAINING_DONE", flush=True)
   finally:
     env.close()
 

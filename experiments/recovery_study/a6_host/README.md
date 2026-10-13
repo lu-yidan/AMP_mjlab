@@ -207,6 +207,26 @@ formal pilot runs in
 is only its first acquisition criterion: middle, low, and obstacle curricula
 must still be added in later phases before any A6 success claim.
 
+The first V6 checkpoint audit exposed a runner-level issue before this claim
+could be accepted. `model_0`, `model_100`, and `model_150` all retained actor
+normalizer count `307200` and identical scale-channel moments despite the
+requested adaptive setting. Checkpoint ONNX export recursively called
+`eval()` on the policy wrapper but restored only device placement, not the
+policy and normalizer training modes. Since update zero saves a checkpoint,
+the normalizer stopped adapting immediately. Near-standing evaluations at
+updates 25, 100, and 150 consequently remained at `0/128` hold with head
+height near `0.43 m` by step 100 and `0.21-0.22 m` at the end.
+
+The export path now snapshots and restores both training flags in a `finally`
+block. A two-update, 64-environment V7 smoke run proved that normalizer count
+continued from `206400` at the first saved checkpoint to `207936` after the
+next checkpoint, while the six recentered scale-channel means remained near
+`0.249923`. V7 keeps the V6 acquisition method unchanged so this single bug is
+isolated, and runs in
+`logs/a6_29_v35_v7_near_acquire_4096_u400_20261013` on GPU1. The original V6
+pilot remains running as a non-adaptive control and is not stopped or
+overwritten.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
