@@ -294,6 +294,13 @@ This continuation is intended to consolidate each lower-control plateau
 before another scale change; it does not yet claim formal-scale or obstacle
 success.
 
+The V9 64-environment, 1,100-step preflight passed with finite rollout and
+gradients, restored critic/optimizer state, all target rewards active, and no
+unintended scale change: the final cohort had `70.31%` above the stricter
+`0.70 m` gate, below the required `90%`. The 4,096-environment run is active
+in `logs/a6_29_v35_v9_confirmed_homotopy_4096_u3000_20261013`; update zero
+preserved scale `0.622388`, and early PPO updates are numerically healthy.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
