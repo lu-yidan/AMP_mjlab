@@ -227,6 +227,45 @@ isolated, and runs in
 pilot remains running as a non-adaptive control and is not stopped or
 overwritten.
 
+V6 and V7 both completed 400 updates without NaN/Inf, abnormal termination,
+or a runtime failure. Their final SHA256 values are
+`ff03383d2fd23a67864d3053a0a3e3b136c70dc7d79a3a469be1ec8e66ba4ea1`
+and
+`2d2abc35ee49024f3e86fb3b80b122bf0e8d6169542f6c87f089b224527327b3`.
+The non-adaptive V6 checkpoints at updates 0, 25, 100, 150, 200, and 400 all
+had `0/128` near-standing holds and zero final standing. V7 updates 25, 50,
+100, 200, and 400 also all had `0/128` holds and zero final standing. V7 did
+extend the middle of the first episode slightly: at update 400, mean head
+height was `0.4058/0.4352/0.4642 m` at steps 100/200/400, compared with
+V6-final `0.4361/0.4102/0.3836 m`. It still ended lower at step 1149
+(`0.1566 m` versus `0.2179 m`) and never acquired a standing hold.
+
+The normalization fix itself is verified rather than rejected. V6 remained at
+normalizer count `307200` with all six recentered action-scale means fixed at
+`0.246667`. V7 grew from `307200` at update 0 to `2,764,800` at update 25 and
+`39,530,496` at update 400; its scale-channel means converged to
+`0.232256..0.234717` and standard deviations to `0.066467..0.062205`.
+Skipping the 30-step unactuated window at V7-final still yielded `0/128` hold
+and zero final standing, so the startup mask is not the sole blocker. The
+source V2 policy at its native scale retained `127/128` near-standing holds
+and `99.22%` final standing, while multiplying its output by the exact
+`0.932387/0.25` ratio at formal scale, with or without scale-channel
+recentering, yielded `0/128`. The failure is therefore the abrupt loss of
+control authority plus the need to relearn closed-loop feedback, not one
+normalizer channel, one dead window, or one static output gain.
+
+V8 changes the acquisition strategy to a gated homotopy instead of another
+fixed-scale restart. It begins from the verified V2 near-standing controller
+at its native scale, uses only flat near-standing resets, trains the full
+actor with a smaller `2e-5` learning rate and two PPO epochs, and lowers scale
+by `0.01` only after episode-final mean head height exceeds `0.90 m`. The
+state-observation normalizer remains frozen, while a forward hook synchronizes
+only the six action-scale history means to the current runtime scale. A new
+bounded height-upright retention reward dominates the lying-stage progress
+loophole, whose weight is reduced eightfold. This phase must first preserve
+near-standing while reaching scale `0.25`; middle, low, and obstacle stages
+remain separate follow-on work.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
