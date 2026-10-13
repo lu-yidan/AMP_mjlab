@@ -312,6 +312,19 @@ normalizer means remained exactly `0.622388`, so this gain is controller
 learning rather than a hidden scale change. V9 remains active because the
 stricter two-cohort gate has not yet been met.
 
+The stricter gate subsequently triggered real scale migration. Update 1200
+was evaluated at its checkpoint-native scale `0.617388` and retained
+`113/128` holds with `60.94%` final standing, `0.9308 m` step-1149 head height,
+and `0.8995` uprightness. Further confirmed cohorts lowered scale in bounded
+`0.005` steps to `0.582388` by update 1550, where it then stopped decreasing.
+The update-1800 diagnostic at that lower scale reached `108/128` holds but only
+`43.75%` final standing, with step-1149 head height `0.7939 m` and uprightness
+`0.8734`. Training remained finite with zero velocity terminations, so this is
+an adaptation lag after cumulative authority reduction rather than a numerical
+failure. The update-800 checkpoint remains the best fixed-scale retention
+point so far; V9 continues at `0.582388` to test whether consolidation recovers
+before any further scale change.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
