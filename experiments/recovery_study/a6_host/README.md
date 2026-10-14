@@ -483,6 +483,30 @@ this small seeded cohort, so no scale change was authorized. The formal
 acquisition experiment, not yet evidence that retention exceeds V10's 85.16%
 or that formal A6 low-reset recovery succeeds.
 
+V14 completed all 1,600 updates without numerical or runtime failure; final
+SHA256 is
+`bef8a7e54f63114c6890b91225f50645413ff0f686dbaf033de1475a50610511`.
+The fixed-scale checkpoint sweep did not exceed the unchanged V10 update-1200
+source. Retained-cohort fractions at updates 200/400/600/800/1200/final were
+`81.25 / 75.00 / 78.13 / 84.38 / 81.25 / 71.88%`, versus the source's
+`85.16%`; scale therefore correctly remained near `0.622388` throughout.
+Update 800 is the best V14 compromise, with near held `119/128`, final standing
+`64.06%`, mean retained-step fraction `85.74%`, and SHA256
+`35456085b1bc5615e322cc62d0c447465eb4e6bb1752c1eda71d98bbd636a117`.
+
+The reset-stratified audit explains the failure. Replay-state recovery at step
+100 rose from `78.13%` at update 200 to `89.06%` at update 1200, and nearly all
+replay states were retained by step 400. Ordinary near resets did not improve
+in parallel: their step-100 retention stayed around `73-78%`, while the mixed
+cohort never passed the 90% gate and fell to `71.88%` at final. V14 therefore
+learned the replay distribution but did not transfer that gain into stronger
+continuous retention from natural near-standing states. This rejects another
+ordinary PPO extension of the same mixed replay objective. A follow-up should
+use explicit teacher-action distillation or a history-aware residual trained
+on paired failure/recovery trajectories, while constraining behavior on the
+V10 source distribution. These results remain a 29-DoF HoST A6 adapter
+diagnostic and are not formal full-method A6 success.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
