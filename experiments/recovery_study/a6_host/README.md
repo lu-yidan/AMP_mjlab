@@ -381,6 +381,28 @@ head-height pass fraction was `96.88%`. This is the best continuous-retention
 cohort so far, but it remains below the deliberately conservative 90% scale
 gate, so training continues at the current scale.
 
+V10 completed all 2,400 updates without numerical or termination failures;
+the final checkpoint SHA256 is
+`d40968a685792caba3673a6732888c59b42d9532d82672769e4e8ce5ca86b24d`.
+Scale correctly remained `0.622388` throughout because the retention gate did
+not pass. Update 1200 was the best retention checkpoint (`85.16%` cohort).
+Update 1800 reached `84.38%` with `109/128` held and `60.16%` final standing;
+the final checkpoint fell to `78.91%`, `107/128` held, and `58.59%` final
+standing. The late decline at unchanged scale shows optimization drift rather
+than a scale-transition failure, so the final checkpoint is not the source for
+the next run.
+
+V11 restarts from V10 update 1200 (SHA256
+`4929accdae244812bf205c785a5cc2cd673fee3e5cf271174f38e913066304c1`) and
+targets conservative retention consolidation before any further scale decay.
+It raises the bounded near-retention reward weight from `4` to `6`, reduces
+standard deviation from `0.05` to `0.035`, and reduces learning rate from
+`1e-5` to `5e-6`; the 90% three-cohort scale gate and 600-update minimum hold
+remain unchanged. A 64-environment preflight kept scale at `0.622388`, measured
+an `85.94%` retained cohort and `83.43%` retained-step fraction, and verified
+finite rewards and gradients. The 1,200-update run is active in
+`logs/a6_29_v35_v11_retention_consolidation_4096_u1200_20261014` on GPU 0.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
