@@ -652,6 +652,15 @@ completion, separation progress, and excess plate-force cost. Completion is a
 state transition/hold criterion, not a one-shot visual bonus; separation is
 allowed to continue under the historical A6 rule after escape.
 
+For the 29-DoF G+ adapter, the vertically guided plate also exposes a bounded
+robot-center separation shaping term. It measures horizontal distance from the
+robot root center to the guided-plate center, is zero through `0.05 m`, rises
+smoothly to one at `0.45 m`, and is enabled only after motor activation and
+confirmed plate contact. Its pre-dt weight is `0.20`. This supplements rather
+than replaces the historical `0.01` incremental separation-progress term: the
+new signal gives the policy a persistent direction for moving its body center
+off the up/down plate while remaining bounded and inactive during settling.
+
 ## Scene geometry boundary
 
 The shared geometry module fixes the actual A6 scene boundary:

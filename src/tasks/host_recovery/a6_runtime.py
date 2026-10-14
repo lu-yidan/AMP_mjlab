@@ -49,6 +49,7 @@ from src.tasks.host_recovery.mdp.actions import (
   IncrementalJointPositionAction,
   IncrementalJointPositionActionCfg,
 )
+from src.tasks.host_recovery.mdp.observations import UNACTUATED_STEPS
 
 if TYPE_CHECKING:
   from mjlab.envs import ManagerBasedRlEnv
@@ -452,6 +453,11 @@ def a6_env_cfg(
     cfg.rewards["plate_separation"] = RewardTermCfg(
       func=a6_separation_reward, weight=0.01 * dt
     )
+    cfg.rewards["plate_center_separation"] = RewardTermCfg(
+      func=a6_center_separation_reward,
+      params={"start_distance": 0.05, "target_distance": 0.45},
+      weight=0.20 * dt,
+    )
 
   # Q and L are common costs and also apply on flat ground.
   cfg.rewards["path_quiet_feet"] = RewardTermCfg(
@@ -470,6 +476,9 @@ def a6_env_cfg(
   cfg.metrics["a6_escaped"] = MetricsTermCfg(func=a6_escaped_metric, params={})
   cfg.metrics["a6_clear_hold"] = MetricsTermCfg(
     func=a6_clear_hold_metric, params={}
+  )
+  cfg.metrics["a6_plate_center_distance"] = MetricsTermCfg(
+    func=a6_center_distance_metric, params={}
   )
   cfg.metrics["a6_joint_stall"] = MetricsTermCfg(
     func=a6_load_metric, params={}
@@ -724,6 +733,7 @@ def _ensure_a6_state(
   env._a6_support = zeros.clone()
   env._a6_force = zeros.clone()
   env._a6_separation_progress = zeros.clone()
+  env._a6_center_distance = zeros.clone()
   env._a6_best_distance = zeros.clone()
   env._a6_clearance = zeros.clone()
   env._a6_ever_contact = zeros_bool.clone()
@@ -1067,6 +1077,7 @@ def _a6_phase_update(env, env_ids=None):
   distance = (env.scene["robot"].data.root_link_pos_w[:, :2] - plate_xy).norm(
     dim=-1
   )
+  env._a6_center_distance = distance
   env._a6_separation_progress = torch.where(
     active & env._a6_ever_contact,
     ((distance - env._a6_best_distance) / 0.025).clamp(0.0, 1.0),
@@ -1303,6 +1314,28 @@ def a6_separation_reward(env):
   return env._a6_separation_progress
 
 
+def a6_center_separation_reward(
+  env,
+  start_distance: float = 0.05,
+  target_distance: float = 0.45,
+):
+  """Reward bounded robot-center clearance from the vertically guided plate."""
+  if target_distance <= start_distance:
+    raise ValueError("target_distance must exceed start_distance")
+  _a6_update(env)
+  progress = (
+    (env._a6_center_distance - start_distance)
+    / (target_distance - start_distance)
+  ).clamp(0.0, 1.0)
+  progress = progress.square() * (3.0 - 2.0 * progress)
+  eligible = (
+    (env._a6_scene == 1)
+    & env._a6_ever_contact
+    & (env.episode_length_buf > UNACTUATED_STEPS)
+  )
+  return eligible.float() * progress
+
+
 def a6_invalid(env):
   _a6_update(env)
   return env._a6_invalid
@@ -1326,6 +1359,11 @@ def a6_escaped_metric(env):
 def a6_clear_hold_metric(env):
   _a6_update(env)
   return env._a6_clear_hold.float()
+
+
+def a6_center_distance_metric(env):
+  _a6_update(env)
+  return env._a6_center_distance
 
 
 def a6_load_metric(env):
@@ -1418,6 +1456,7 @@ def _clear_a6_runtime_buffers(
     "_a6_support",
     "_a6_force",
     "_a6_separation_progress",
+    "_a6_center_distance",
     "_a6_best_distance",
     "_a6_clearance",
     "_a6_accum",
