@@ -456,6 +456,33 @@ must change the state distribution or supervision: use motor-on recovery
 resets collected from actual early-failure trajectories, or offline action
 distillation, rather than another reward-weight or output-bound variant.
 
+V14 implements that state-distribution change from the unchanged V10
+update-1200 source. A 4,096-environment source rollout captured finite failed
+motor-on states at controlled steps 40-160. The versioned recovery bank
+`datasets/reset_banks/a6_29_motor_recovery_v3/train.npz` contains 7,487 rows
+with all four directions represented; 95.19% of the captured rows later
+returned above the collection height/upright thresholds under the source
+policy. Its SHA256 is
+`906cb43b9d76dd11f7b53881a67cf46e862b19b2a57ade6d55168674283a7a03`.
+Training samples only those recoverable rows for half of each reset cohort,
+restores root and joint position/velocity, and enables motors immediately;
+the other half retains the ordinary near-standing reset and passive 30-step
+settling window to constrain forgetting. The actor, critic and normalizers
+resume from V10, optimizer moments are reset, scale remains `0.622388`, and
+the original retention gate remains authoritative.
+
+The 64-environment, 1,100-step V14 preflight passed finite state, reward,
+gradient, action-scale, reset-mixture, and immediate-motor checks. Under the
+unmodified source policy, replayed recovery states improved from 0% retained
+at reset (mean head height `0.489 m`) to 84.38% at 100 steps and 100% at 400
+steps, with no velocity termination; ordinary near resets reached 78.13% and
+100% at the same probes. The combined final retention audit was 68.75% for
+this small seeded cohort, so no scale change was authorized. The formal
+1,600-update V14 run is active in
+`logs/a6_29_v35_v14_recovery_replay_4096_u1600_20261014` on GPU 0. This is an
+acquisition experiment, not yet evidence that retention exceeds V10's 85.16%
+or that formal A6 low-reset recovery succeeds.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
