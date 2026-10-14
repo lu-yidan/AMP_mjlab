@@ -198,6 +198,7 @@ def main() -> None:
     type=float,
     default=RETENTION_STEP_FRACTION,
   )
+  parser.add_argument("--retention-reward-weight", type=float, default=4.0)
   parser.add_argument("--min-scale-hold-steps", type=int, default=0)
   parser.add_argument("--train-std", type=float, default=TRAIN_STD)
   parser.add_argument("--learning-rate", type=float, default=LEARNING_RATE)
@@ -260,7 +261,7 @@ def main() -> None:
   )
   cfg.rewards["a6_near_retention"] = RewardTermCfg(
     func=near_retention_reward,
-    weight=4.00 * CONTROL_DT,
+    weight=args.retention_reward_weight * CONTROL_DT,
     params={
       "track_retention": args.require_retention_gate,
       "gate_height": args.standing_height,
