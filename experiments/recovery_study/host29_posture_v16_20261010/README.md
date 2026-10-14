@@ -725,3 +725,34 @@ GPU4 from `logs/host29_posture_v35_4096_u400_20261012/model_400_final.pt` in
 `logs/host29_posture_v37_4096_u300_20261014`. Selection will prioritize lower
 joint/yaw/horizontal motion with unchanged four-posture recovery and will reject
 any return of knee walking, repeated stepping, or sustained turning.
+
+## V37 result (2026-10-15)
+
+V37 completed all 300 updates without OOM, NaN/Inf, abnormal termination, or
+training interruption. All twelve 256-environment checkpoint evaluations kept
+100% held/final standing and zero terminations in every posture. Update 100 is
+the selected stability checkpoint:
+`logs/host29_posture_v37_4096_u300_20261014/model_100.pt`, SHA256
+`6317a1990393bcb603cec449042f30302b71a70a25e50a894e7af57e41945e09`.
+
+At update 100, final joint-speed RMS is
+`0.264 / 0.199 / 0.173 / 0.215`, standing yaw-rate RMS is
+`0.436 / 0.378 / 0.360 / 0.385`, and standing horizontal-speed RMS is
+`0.117 / 0.103 / 0.094 / 0.093` for prone/supine/left/right. Compared with
+V35, the four-posture mean final joint-speed RMS falls from `0.824` to `0.213`
+(`-74%`), mean standing yaw-rate RMS from `0.631` to `0.390` (`-38%`), and
+mean final root linear speed from `0.0493` to `0.0060 m/s` (`-88%`). Mean
+standing horizontal-speed RMS remains effectively unchanged at `0.1014 m/s`
+because that statistic includes the recovery transient; the final-speed and
+joint-speed measurements capture the large post-settle damping improvement.
+
+The 128-environment diagnosis shows no meaningful posture drift relative to
+V35: torso tilt remains `0.51-0.53 rad`, torso/support error `0.07-0.08 m`,
+feet-forward offset `0.32-0.34 m`, and arm/waist errors are unchanged. The four
+20-second videos confirm that after recovery the robot holds the same inherited
+leaning, split stance without knee walking, sustained turn, periodic direction
+change, repeated corrective stepping, or visible leg jitter. Frames at
+4/8/12/16 seconds are visually stationary. V37 therefore succeeds at the
+requested stability objective while intentionally not claiming a straight-pose
+improvement; update 100 is preferred over the final checkpoint and becomes the
+current 29-DoF post-standing stability result.
