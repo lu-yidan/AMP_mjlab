@@ -423,6 +423,25 @@ gradients, the new reward is active and finite, scale stays `0.622388`, and
 the rollout has no NaN/Inf. The 1,200-update run is active in
 `logs/a6_29_v35_v12_early_recovery_4096_u1200_20261014` on GPU 0.
 
+V12 completed 1,200 updates without numerical failures; final SHA256 is
+`fbda08e4e3cb6e1c3a93762ca9885045caea42ab4c7df993bb5bcdd38030673c`.
+The output-layer-only early-recovery hypothesis also failed to improve
+continuous retention. Updates 600, 800, and 1200 reached retained cohorts of
+`73.44%`, `67.97%`, and `57.81%`, all below the V10 source's `85.16%`.
+Although final standing reached `67.19%` at update 600 and `67.97%` at the
+final checkpoint, the gate correctly rejected those endpoint-only gains.
+
+V13 treats adaptation as an explicitly bounded lower-body residual. It again
+starts from V10 update 1200, freezes the actor backbone and all upper-body
+output rows, and trains only output rows 0-12. Final-layer changes are clamped
+to `0.003` per weight and `0.001` per bias; frozen-output exploration standard
+deviation is `0.005`, and optimizer moments are reset. The 120-step early
+recovery reward remains active, while the original retention gate is
+unchanged. A 64-environment preflight verified exact frozen-row gradients,
+finite lower-row gradients/rewards, bounded scale, and no NaN/Inf. The
+1,200-update run is active in
+`logs/a6_29_v35_v13_bounded_recovery_4096_u1200_20261014` on GPU 0.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
