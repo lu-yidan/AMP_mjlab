@@ -14,10 +14,15 @@ os.environ.setdefault("TORCHDYNAMO_DISABLE", "1")
 import torch
 
 from mjlab.envs import ManagerBasedRlEnv
+from mjlab.managers.event_manager import EventTermCfg
 from mjlab.managers.reward_manager import RewardTermCfg
 from mjlab.rl import RslRlVecEnvWrapper
 from mjlab.utils.os import dump_yaml
 
+from scripts.a6_recovery_bank import (
+  activate_a6_recovery_resets,
+  mixed_a6_recovery_reset,
+)
 from scripts.train_a6_host_v2 import (
   CONTROL_DT,
   FORMAL_ACTION_SCALE,
@@ -194,6 +199,9 @@ def main() -> None:
   parser.add_argument("--updates", type=int, default=1800)
   parser.add_argument("--seed", type=int, default=20261013)
   parser.add_argument("--preflight", action="store_true")
+  parser.add_argument("--recovery-bank", type=Path)
+  parser.add_argument("--recovery-fraction", type=float, default=0.0)
+  parser.add_argument("--recovery-successful-only", action="store_true")
   parser.add_argument("--action-scale-decay", type=float, default=ACTION_SCALE_DECAY)
   parser.add_argument(
     "--standing-height", type=float, default=ACTION_SCALE_STANDING_HEIGHT
@@ -237,6 +245,14 @@ def main() -> None:
   parser.add_argument("--log-tag", default="A6_V8")
   args = parser.parse_args()
 
+  if args.recovery_bank is None and args.recovery_fraction != 0.0:
+    raise ValueError("--recovery-fraction requires --recovery-bank")
+  if args.recovery_bank is not None:
+    if not args.recovery_bank.is_file():
+      raise FileNotFoundError(args.recovery_bank)
+    if not 0.0 < args.recovery_fraction < 1.0:
+      raise ValueError("mixed recovery training requires fraction in (0, 1)")
+
   args.log_dir.mkdir(parents=True, exist_ok=False)
   source = torch.load(args.checkpoint, map_location="cpu", weights_only=False)
   source_action_scale = float(
@@ -263,6 +279,22 @@ def main() -> None:
   for name in ("push_robot", "foot_friction", "encoder_bias", "base_com"):
     cfg.events.pop(name, None)
   cfg.observations["actor"].terms["host"].params["add_noise"] = False
+  if args.recovery_bank is not None:
+    cfg.events["a6_reset"] = EventTermCfg(
+      func=mixed_a6_recovery_reset,
+      mode="reset",
+      params={
+        "bank_split": "train",
+        "recovery_bank": str(args.recovery_bank.resolve()),
+        "recovery_fraction": args.recovery_fraction,
+        "successful_only": args.recovery_successful_only,
+      },
+    )
+    cfg.events["a6_recovery_activate"] = EventTermCfg(
+      func=activate_a6_recovery_resets,
+      mode="step",
+      params={},
+    )
 
   for name, term in cfg.rewards.items():
     if not name.startswith("a6_"):
@@ -319,6 +351,11 @@ def main() -> None:
   try:
     env.reset()
     configure_flat_near_resets(env)
+    if args.recovery_bank is not None:
+      activate_a6_recovery_resets(env)
+      env.scene.write_data_to_sim()
+      env.sim.forward()
+      env.sim.sense()
     set_action_scale(env, source_action_scale)
 
     wrapper = RslRlVecEnvWrapper(env, clip_actions=agent.clip_actions)
@@ -428,6 +465,23 @@ def main() -> None:
     assert reset_counts["scene"] == [args.num_envs, 0, 0], reset_counts
     assert reset_counts["stratum"] == [0, 0, args.num_envs], reset_counts
     assert reset_counts["source"] == [args.num_envs, 0], reset_counts
+    recovery_mask = None
+    near_mask = None
+    recovery_reset_count = 0
+    if args.recovery_bank is not None:
+      recovery_mask = env._a6_recovery_reset.clone()
+      near_mask = ~recovery_mask
+      recovery_reset_count = int(recovery_mask.sum())
+      expected = round(args.num_envs * args.recovery_fraction)
+      assert recovery_reset_count == expected, (
+        recovery_reset_count,
+        expected,
+      )
+      assert not env._a6_recovery_pending.any()
+      assert torch.all(
+        env.episode_length_buf[recovery_mask] > UNACTUATED_STEPS
+      )
+      assert torch.all(env.episode_length_buf[near_mask] == 0)
 
     launch = {
       "checkpoint": str(args.checkpoint.resolve()),
@@ -450,6 +504,15 @@ def main() -> None:
       ),
       "action_scale_min_hold_steps": args.min_scale_hold_steps,
       "reset_mix": reset_counts,
+      "recovery_bank": (
+        str(args.recovery_bank.resolve())
+        if args.recovery_bank is not None
+        else None
+      ),
+      "recovery_fraction": args.recovery_fraction,
+      "recovery_successful_only": args.recovery_successful_only,
+      "recovery_reset_count": recovery_reset_count,
+      "recovery_motor_off_skipped": args.recovery_bank is not None,
       "nominal_dynamics": True,
       "observation_noise": False,
       "invalid_plate_termination": False,
@@ -499,14 +562,44 @@ def main() -> None:
     policy = runner.get_inference_policy(device="cuda:0")
     rollout_steps = 1100 if args.preflight else 200
     start_scale = float(env._host_action_rescale.mean())
+    recovery_baseline = {}
+    probe_alive = torch.ones(args.num_envs, dtype=torch.bool, device=env.device)
+
+    def capture_recovery_baseline(step: int) -> None:
+      if recovery_mask is None or near_mask is None:
+        return
+      height = _a6_height(env)
+      upright = _a6_upright(env)
+      for label, mask in (("recovery", recovery_mask), ("near", near_mask)):
+        alive = mask & probe_alive
+        retained = (height[alive] > args.standing_height) & (
+          upright[alive] > args.retention_upright
+        )
+        recovery_baseline[f"{label}_step{step}"] = {
+          "count": int(mask.sum()),
+          "alive_count": int(alive.sum()),
+          "survival_fraction": float(alive.sum() / mask.sum()),
+          "retained_fraction": (
+            float(retained.float().mean()) if alive.any() else 0.0
+          ),
+          "height_mean": float(height[alive].mean()) if alive.any() else 0.0,
+          "upright_mean": (
+            float(upright[alive].mean()) if alive.any() else 0.0
+          ),
+        }
+
+    capture_recovery_baseline(0)
     with torch.inference_mode():
-      for _ in range(rollout_steps):
+      for rollout_step in range(1, rollout_steps + 1):
         actions = policy(observations["actor"])
-        observations, rewards, _, _ = wrapper.step(actions)
+        observations, rewards, terminated, timeouts = wrapper.step(actions)
+        probe_alive &= ~(terminated | timeouts)
         reward_abs_sum += env.reward_manager._step_reward.abs().mean(dim=0)
         assert torch.isfinite(actions).all()
         assert torch.isfinite(rewards).all()
         assert all(torch.isfinite(value).all() for value in observations.values())
+        if rollout_step in (100, 400):
+          capture_recovery_baseline(rollout_step)
     reward_abs_mean = {
       name: float(value)
       for name, value in zip(
@@ -580,6 +673,12 @@ def main() -> None:
       ),
       flush=True,
     )
+    if recovery_baseline:
+      print(
+        f"{args.log_tag}_RECOVERY_BASELINE",
+        json.dumps(recovery_baseline),
+        flush=True,
+      )
     print(f"{args.log_tag}_PREFLIGHT_PASS", json.dumps(launch), flush=True)
     if args.preflight:
       return
