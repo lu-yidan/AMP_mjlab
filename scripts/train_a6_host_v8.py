@@ -592,8 +592,8 @@ def main() -> None:
     with torch.inference_mode():
       for rollout_step in range(1, rollout_steps + 1):
         actions = policy(observations["actor"])
-        observations, rewards, terminated, timeouts = wrapper.step(actions)
-        probe_alive &= ~(terminated | timeouts)
+        observations, rewards, dones, _ = wrapper.step(actions)
+        probe_alive &= ~dones
         reward_abs_sum += env.reward_manager._step_reward.abs().mean(dim=0)
         assert torch.isfinite(actions).all()
         assert torch.isfinite(rewards).all()
