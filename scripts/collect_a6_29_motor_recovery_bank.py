@@ -181,9 +181,10 @@ def main() -> None:
       "failure_upright": args.failure_upright,
       "rows": int(len(arrays["height"])),
       "direction_counts": direction_counts,
-      "step_counts": dict(
-        zip(step_values.astype(str), step_counts.astype(int), strict=True)
-      ),
+      "step_counts": {
+        str(step): int(count)
+        for step, count in zip(step_values, step_counts, strict=True)
+      },
       "eventually_recovered_rate": float(
         arrays["eventually_recovered"].mean()
       ),
