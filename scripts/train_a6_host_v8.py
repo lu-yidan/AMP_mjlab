@@ -351,14 +351,14 @@ def main() -> None:
   try:
     env.reset()
     configure_flat_near_resets(env)
+    set_action_scale(env, source_action_scale)
+
+    wrapper = RslRlVecEnvWrapper(env, clip_actions=agent.clip_actions)
     if args.recovery_bank is not None:
       activate_a6_recovery_resets(env)
       env.scene.write_data_to_sim()
       env.sim.forward()
       env.sim.sense()
-    set_action_scale(env, source_action_scale)
-
-    wrapper = RslRlVecEnvWrapper(env, clip_actions=agent.clip_actions)
     runner = HoSTOnPolicyRunner(wrapper, asdict(agent), str(args.log_dir), "cuda:0")
     fresh_critic = copy.deepcopy(runner.alg.policy.critic.state_dict())
     fresh_critic_normalizer = copy.deepcopy(
