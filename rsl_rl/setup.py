@@ -1,22 +1,16 @@
-# Copyright (c) 2021-2024, The RSL-RL Project Developers.
-# All rights reserved.
-# Original code is licensed under the BSD-3-Clause license.
-#
-# Copyright (c) 2022-2025, The Isaac Lab Project Developers.
-# All rights reserved.
-#
-# Copyright (c) 2025-2026, The Legged Lab Project Developers.
-# All rights reserved.
-#
-# Copyright (c) 2025-2026, The TienKung-Lab Project Developers.
-# All rights reserved.
-# Modifications are licensed under the BSD-3-Clause license.
-#
-# This file contains code derived from the RSL-RL, Isaac Lab, and Legged Lab Projects,
-# with additional modifications by the TienKung-Lab Project,
-# and is distributed under the BSD-3-Clause license.
-from setuptools import find_packages
-from distutils.core import setup
+from setuptools import setup, find_packages
 
-setup(name='rsl_rl'
-)
+setup(name='rsl_rl',
+      version='1.0.2',
+      author='Nikita Rudin',
+      author_email='rudinn@ethz.ch',
+      license="BSD-3-Clause",
+      packages=find_packages(),
+      description='Fast and simple RL algorithms implemented in pytorch',
+      python_requires='>=3.6',
+      install_requires=[
+            "torch>=1.4.0",
+            "torchvision>=0.5.0",
+            "numpy>=1.16.4"
+      ],
+      )

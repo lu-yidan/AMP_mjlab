@@ -1,0 +1,16 @@
+{
+  "checkpoint": "/home/ray1/code/G1Recovery_HoST/logs/host_ground_mjlab/host_urdf_capsule_guard_stylev2_512_seed42/model_02099.pt",
+  "seed": 50,
+  "model_source": "host_urdf_capsule",
+  "action_beta": 0.25,
+  "assistance_force_n": 0.0,
+  "steps": 250,
+  "ever_stood": true,
+  "fell_after_standing": false,
+  "paper_height_criterion_success": true,
+  "max_pelvis_height_m": 0.7630868554115295,
+  "final_pelvis_height_m": 0.7379107475280762,
+  "longest_continuous_above_0_7m_s": 3.3200000000000003,
+  "last_second_above_0_7m": true,
+  "video_saved": true
+}

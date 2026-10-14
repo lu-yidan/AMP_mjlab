@@ -1,0 +1,13 @@
+{
+  "source_checkpoint": "logs/host_a6_v10_prone_arms_from1599_4096_seed42_1800/model_01699.pt",
+  "source_iteration": 1699,
+  "source_reward_variant": "historical_a6_G+_29dof_pose_v6_v8_edge_curriculum_v1_frozen_flat_teacher_v1_preescape_knee_v2_staged_escape_v5_focused_guided_v1_safe_actions_v1_progress_aux_v1_aligned_edge_v1_lateral_actions_v1_lift_guard_v1_knee_straight_prior_v1_footprint_edge_v1_arm_extraction_v1_prone_full_arms_v1",
+  "seed": 42,
+  "num_envs": 256,
+  "steps_run": 1243,
+  "num_samples": 512,
+  "guided_offset_m": 0.15,
+  "min_xy_clearance_m": 0.05612293630838394,
+  "max_xy_clearance_m": 0.4128323495388031,
+  "mean_root_height_m": 0.11243504285812378
+}

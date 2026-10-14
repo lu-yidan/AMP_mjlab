@@ -1,0 +1,14 @@
+[project]
+name = "g1recovery-host"
+version = "0.1.0"
+description = "HoST G1 flat recovery and 29-DoF A6 escape tasks for mjlab"
+readme = "REPRODUCE_G1_GROUND_23DOF.md"
+requires-python = ">=3.13,<3.14"
+dependencies = ["mjlab[cu128]==1.6.0"]
+
+[build-system]
+requires = ["uv_build>=0.12.13,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.uv.sources]
+mjlab = { path = "../mjlab", editable = true }

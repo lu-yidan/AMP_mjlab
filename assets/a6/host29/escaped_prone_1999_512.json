@@ -1,0 +1,13 @@
+{
+  "source_checkpoint": "logs/host_a6_v13_prone_recovery_from1919_4096_seed42/model_01999.pt",
+  "source_iteration": 1999,
+  "source_reward_variant": "historical_a6_G+_29dof_pose_v6_v8_edge_curriculum_v1_frozen_flat_teacher_v1_preescape_knee_v2_staged_escape_v5_focused_guided_v1_safe_actions_v1_progress_aux_v1_aligned_edge_v1_lateral_actions_v1_lift_guard_v1_knee_straight_prior_v1_footprint_edge_v1_arm_extraction_v1_prone_full_arms_v1_postescape_prone_replay_v1_prone_recovery_v1_frozen_supine_teacher_v1",
+  "seed": 43,
+  "num_envs": 256,
+  "steps_run": 1219,
+  "num_samples": 512,
+  "guided_offset_m": 0.125,
+  "min_xy_clearance_m": 0.05109989643096924,
+  "max_xy_clearance_m": 0.43029317259788513,
+  "mean_root_height_m": 0.12196378409862518
+}
