@@ -91,6 +91,19 @@ def near_retention_reward(
   return height * upright
 
 
+def early_recovery_reward(
+  env: ManagerBasedRlEnv,
+  window_steps: int = 120,
+) -> torch.Tensor:
+  controlled_step = env.episode_length_buf - UNACTUATED_STEPS
+  active = (controlled_step > 0) & (controlled_step <= window_steps)
+  height = smooth_gate(_a6_height(env), 0.62, 0.98)
+  upright = smooth_gate(_a6_upright(env), 0.62, 0.88)
+  progress = controlled_step.float().clamp(1, window_steps) / window_steps
+  time_weight = 1.0 - 0.5 * progress
+  return active.float() * height * upright * time_weight
+
+
 def near_action_scale_decay(
   env: ManagerBasedRlEnv,
   env_ids: torch.Tensor,
@@ -199,6 +212,11 @@ def main() -> None:
     default=RETENTION_STEP_FRACTION,
   )
   parser.add_argument("--retention-reward-weight", type=float, default=4.0)
+  parser.add_argument("--early-recovery-weight", type=float, default=0.0)
+  parser.add_argument("--early-recovery-window", type=int, default=120)
+  parser.add_argument(
+    "--actor-scope", choices=("full", "final-layer"), default="full"
+  )
   parser.add_argument("--min-scale-hold-steps", type=int, default=0)
   parser.add_argument("--train-std", type=float, default=TRAIN_STD)
   parser.add_argument("--learning-rate", type=float, default=LEARNING_RATE)
@@ -268,6 +286,12 @@ def main() -> None:
       "gate_upright": args.retention_upright,
     },
   )
+  if args.early_recovery_weight > 0.0:
+    cfg.rewards["a6_early_recovery"] = RewardTermCfg(
+      func=early_recovery_reward,
+      weight=args.early_recovery_weight * CONTROL_DT,
+      params={"window_steps": args.early_recovery_window},
+    )
 
   agent = unitree_g1_host_standup_ppo_runner_cfg()
   agent.seed = args.seed
@@ -322,9 +346,16 @@ def main() -> None:
       assert torch.equal(policy_state[mapped].detach().cpu(), value.cpu()), mapped
     if not args.resume_training_state:
       assert len(runner.alg.optimizer.state) == 0
-    assert all(
-      parameter.requires_grad for parameter in runner.alg.policy.actor.parameters()
-    )
+    if args.actor_scope == "final-layer":
+      for parameter in runner.alg.policy.actor.parameters():
+        parameter.requires_grad_(False)
+      for parameter in runner.alg.policy.actor[6].parameters():
+        parameter.requires_grad_(True)
+    else:
+      assert all(
+        parameter.requires_grad
+        for parameter in runner.alg.policy.actor.parameters()
+      )
 
     scale_indices = action_scale_indices(
       env, runner.obs_normalizer._mean.shape[-1]
@@ -375,7 +406,7 @@ def main() -> None:
       "train_std": args.train_std,
       "learning_rate": args.learning_rate,
       "learning_epochs": 2,
-      "actor_trainable_scope": "full actor",
+      "actor_trainable_scope": args.actor_scope,
       "actor_normalizer": "frozen except scale means synchronized to runtime scale",
       "actor_normalizer_scale_indices": scale_indices.tolist(),
       "legacy_style_target_rewards": "disabled",
@@ -392,7 +423,12 @@ def main() -> None:
     probe = runner.alg.policy.actor(normalized)
     runner.alg.optimizer.zero_grad(set_to_none=True)
     probe.square().mean().backward()
-    actor_layers = (runner.alg.policy.actor[0], runner.alg.policy.actor[6])
+    if args.actor_scope == "final-layer":
+      assert runner.alg.policy.actor[0].weight.grad is None
+      assert runner.alg.policy.actor[0].bias.grad is None
+      actor_layers = (runner.alg.policy.actor[6],)
+    else:
+      actor_layers = (runner.alg.policy.actor[0], runner.alg.policy.actor[6])
     assert all(layer.weight.grad.abs().sum() > 0 for layer in actor_layers)
     assert all(layer.bias.grad.abs().sum() > 0 for layer in actor_layers)
     runner.alg.optimizer.zero_grad(set_to_none=True)
@@ -429,6 +465,9 @@ def main() -> None:
       "a6_near_retention",
     ):
       assert 0.0 < reward_abs_mean[name] < 0.20, (name, reward_abs_mean[name])
+    if args.early_recovery_weight > 0.0:
+      value = reward_abs_mean["a6_early_recovery"]
+      assert 0.0 < value < 0.20, ("a6_early_recovery", value)
     end_scale = float(env._host_action_rescale.mean())
     metric_state = HoSTMetrics.get()
     assert metric_state.last_episode_head_height is not None
