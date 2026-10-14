@@ -217,6 +217,11 @@ def main() -> None:
   parser.add_argument(
     "--actor-scope", choices=("full", "final-layer"), default="full"
   )
+  parser.add_argument("--trainable-output-rows", type=int, nargs="*")
+  parser.add_argument("--max-weight-delta", type=float, default=0.0)
+  parser.add_argument("--max-bias-delta", type=float, default=0.0)
+  parser.add_argument("--frozen-std", type=float)
+  parser.add_argument("--reset-optimizer-state", action="store_true")
   parser.add_argument("--min-scale-hold-steps", type=int, default=0)
   parser.add_argument("--train-std", type=float, default=TRAIN_STD)
   parser.add_argument("--learning-rate", type=float, default=LEARNING_RATE)
@@ -331,6 +336,8 @@ def main() -> None:
     if not args.resume_training_state:
       runner.alg.policy.critic.load_state_dict(fresh_critic)
       runner.privileged_obs_normalizer.load_state_dict(fresh_critic_normalizer)
+    if args.reset_optimizer_state:
+      runner.alg.optimizer.state.clear()
     runner.current_learning_iteration = 0
     set_action_scale(env, source_action_scale)
     env._a6_scale_success_streak = 0
@@ -346,11 +353,50 @@ def main() -> None:
       assert torch.equal(policy_state[mapped].detach().cpu(), value.cpu()), mapped
     if not args.resume_training_state:
       assert len(runner.alg.optimizer.state) == 0
+    trainable_rows = None
+    frozen_rows = None
     if args.actor_scope == "final-layer":
       for parameter in runner.alg.policy.actor.parameters():
         parameter.requires_grad_(False)
-      for parameter in runner.alg.policy.actor[6].parameters():
+      output_layer = runner.alg.policy.actor[6]
+      for parameter in output_layer.parameters():
         parameter.requires_grad_(True)
+      source_weight = output_layer.weight.detach().clone()
+      source_bias = output_layer.bias.detach().clone()
+      if args.trainable_output_rows:
+        trainable_rows = sorted(set(args.trainable_output_rows))
+        assert all(0 <= row < output_layer.out_features for row in trainable_rows)
+        frozen_rows = [
+          row for row in range(output_layer.out_features) if row not in trainable_rows
+        ]
+        weight_mask = torch.zeros_like(output_layer.weight)
+        bias_mask = torch.zeros_like(output_layer.bias)
+        weight_mask[trainable_rows] = 1.0
+        bias_mask[trainable_rows] = 1.0
+        output_layer.weight.register_hook(lambda gradient: gradient * weight_mask)
+        output_layer.bias.register_hook(lambda gradient: gradient * bias_mask)
+
+      def constrain_output_layer(_optimizer, _args, _kwargs) -> None:
+        with torch.no_grad():
+          if frozen_rows:
+            output_layer.weight[frozen_rows] = source_weight[frozen_rows]
+            output_layer.bias[frozen_rows] = source_bias[frozen_rows]
+          if args.max_weight_delta > 0.0:
+            output_layer.weight.copy_(
+              source_weight
+              + (output_layer.weight - source_weight).clamp(
+                -args.max_weight_delta, args.max_weight_delta
+              )
+            )
+          if args.max_bias_delta > 0.0:
+            output_layer.bias.copy_(
+              source_bias
+              + (output_layer.bias - source_bias).clamp(
+                -args.max_bias_delta, args.max_bias_delta
+              )
+            )
+
+      runner.alg.optimizer.register_step_post_hook(constrain_output_layer)
     else:
       assert all(
         parameter.requires_grad
@@ -370,7 +416,11 @@ def main() -> None:
     sync_action_scale_mean(runner.obs_normalizer, ())
 
     with torch.no_grad():
-      runner.alg.policy.std.fill_(args.train_std)
+      if trainable_rows is not None and args.frozen_std is not None:
+        runner.alg.policy.std.fill_(args.frozen_std)
+        runner.alg.policy.std[trainable_rows] = args.train_std
+      else:
+        runner.alg.policy.std.fill_(args.train_std)
     runner.alg.policy.std.requires_grad_(False)
     env._a6_adaptation_start_step = int(env.common_step_counter)
 
@@ -407,6 +457,11 @@ def main() -> None:
       "learning_rate": args.learning_rate,
       "learning_epochs": 2,
       "actor_trainable_scope": args.actor_scope,
+      "trainable_output_rows": trainable_rows,
+      "max_weight_delta": args.max_weight_delta,
+      "max_bias_delta": args.max_bias_delta,
+      "frozen_std": args.frozen_std,
+      "optimizer_state_reset": args.reset_optimizer_state,
       "actor_normalizer": "frozen except scale means synchronized to runtime scale",
       "actor_normalizer_scale_indices": scale_indices.tolist(),
       "legacy_style_target_rewards": "disabled",
@@ -431,6 +486,11 @@ def main() -> None:
       actor_layers = (runner.alg.policy.actor[0], runner.alg.policy.actor[6])
     assert all(layer.weight.grad.abs().sum() > 0 for layer in actor_layers)
     assert all(layer.bias.grad.abs().sum() > 0 for layer in actor_layers)
+    if trainable_rows is not None:
+      assert output_layer.weight.grad[frozen_rows].abs().sum() == 0
+      assert output_layer.bias.grad[frozen_rows].abs().sum() == 0
+      assert output_layer.weight.grad[trainable_rows].abs().sum() > 0
+      assert output_layer.bias.grad[trainable_rows].abs().sum() > 0
     runner.alg.optimizer.zero_grad(set_to_none=True)
 
     reward_abs_sum = torch.zeros(
