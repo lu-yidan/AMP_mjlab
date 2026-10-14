@@ -750,6 +750,33 @@ def target_action_l2(
   return mean_sq * _standup_gate(env, phase3_height, root_cfg)
 
 
+def target_action_rate_l2(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  action_indices: tuple[int, ...] = (),
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Penalise selected raw-action changes only after standing."""
+  action = env.action_manager.action
+  previous = env.action_manager.prev_action
+  if action_indices:
+    action = action[:, action_indices]
+    previous = previous[:, action_indices]
+  mean_sq = torch.mean(torch.square(action - previous), dim=1)
+  return mean_sq * _standup_gate(env, phase3_height, root_cfg)
+
+
+def target_root_angular_speed(
+  env: ManagerBasedRlEnv,
+  phase3_height: float = 0.65,
+  root_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+  """Penalise body-frame root angular velocity only after standing."""
+  asset: Entity = env.scene[root_cfg.name]
+  mean_sq = torch.mean(torch.square(asset.data.root_link_ang_vel_b), dim=1)
+  return mean_sq * _standup_gate(env, phase3_height, root_cfg)
+
+
 def target_dof_stillness(
   env: ManagerBasedRlEnv,
   phase3_height: float = 0.65,

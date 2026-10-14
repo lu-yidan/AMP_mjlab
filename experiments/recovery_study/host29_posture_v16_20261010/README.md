@@ -699,3 +699,29 @@ repeated corrective step, but the torso lean, split crouched stance, and raised
 right arm are visually indistinguishable from V35. V36 therefore provides no
 usable posture improvement. V35 final remains the selected A6 source, and no
 V37 posture run is started.
+
+## V37 post-standing damping fine-tune (2026-10-14)
+
+User review judged the accepted V35 stance still visibly under-damped. V37
+therefore returns to the immutable V35 final actor and optimizes stability
+rather than straightening. Unlike V35's seven-row lateral-only update, V37
+permits the entire final actor layer to learn, but applies row-specific trust
+regions: the seven lateral/yaw outputs receive at most `0.002/0.010`
+weight/bias change, while the six sagittal and sixteen upper-body outputs
+receive only `0.00075/0.004`. Exploration standard deviation is `0.008` on
+lateral rows and `0.004` elsewhere; the learning rate is `8e-6`, with two PPO
+epochs and dense 25-update checkpoints.
+
+The objective remains actor-observable. Existing yaw, selected joint-velocity,
+stillness, and action penalties are joined by gated all-joint stillness,
+all-joint velocity, all-action magnitude, action-rate, and body-frame root
+angular-speed terms. They activate only above root height `0.66 m`, just below
+V35's measured standing root height of about `0.68 m`, so the main get-up phase
+is not forced rigid. A 64-environment, 400-step preflight passed: every new term
+activated, the largest mean absolute single-step target contribution was
+`2.907`, actor gradients and row-wise standard deviations were correct, and all
+actions, rewards, and observations remained finite. Formal training started on
+GPU4 from `logs/host29_posture_v35_4096_u400_20261012/model_400_final.pt` in
+`logs/host29_posture_v37_4096_u300_20261014`. Selection will prioritize lower
+joint/yaw/horizontal motion with unchanged four-posture recovery and will reject
+any return of knee walking, repeated stepping, or sustained turning.
