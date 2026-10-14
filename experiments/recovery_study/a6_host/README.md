@@ -442,6 +442,20 @@ finite lower-row gradients/rewards, bounded scale, and no NaN/Inf. The
 1,200-update run is active in
 `logs/a6_29_v35_v13_bounded_recovery_4096_u1200_20261014` on GPU 0.
 
+V13 completed 1,200 updates without numerical failures; final SHA256 is
+`dc8c28cf16e751c5369b8b03cd27348d3f8bd5b09bf4747d34bef89291a40f8c`.
+The bounded lower-body residual did not exceed the V10 update-1200 source.
+At updates 600, 800, and 1200, fixed-seed near-standing held counts were
+`115/128`, `118/128`, and `118/128`, with final-standing rates of `62.50%`,
+`67.97%`, and `66.41%`. Retention audits at update 800 and final measured
+`71.88%` and `83.59%` retained cohorts, both below the source's `85.16%`.
+Scale therefore correctly remained `0.622388`. The final checkpoint recovered
+most of the source retention but did not improve it, rejecting ordinary PPO
+adaptation of a tightly bounded lower-body output residual. The next attempt
+must change the state distribution or supervision: use motor-on recovery
+resets collected from actual early-failure trajectories, or offline action
+distillation, rather than another reward-weight or output-bound variant.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
