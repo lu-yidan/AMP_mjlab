@@ -403,6 +403,26 @@ an `85.94%` retained cohort and `83.43%` retained-step fraction, and verified
 finite rewards and gradients. The 1,200-update run is active in
 `logs/a6_29_v35_v11_retention_consolidation_4096_u1200_20261014` on GPU 0.
 
+V11 completed 1,200 updates without numerical failures; the final checkpoint
+SHA256 is
+`eb727712d0c2e0976e84167c896b70473ba5480e468a4b09a81d51d09be78d25`.
+The stronger all-episode retention reward did not improve the gate metric:
+updates 600, 800, and 1200 reached only `70.31%`, `68.75%`, and `70.31%`
+retained cohorts, versus V10 update 1200's `85.16%`. Their fixed-seed held
+counts were `117/128`, `116/128`, and `113/128`; scale correctly remained
+`0.622388`. This rejects further simple retention-weight increases or smaller
+learning-rate/noise variants.
+
+V12 changes the optimization scope and timing rather than reward magnitude.
+It returns to V10 update 1200, freezes the actor backbone, trains only the
+final output layer, restores the retention weight to `4`, and adds a bounded
+early-recovery reward over the first 120 controlled steps after motor
+activation. Standard deviation is `0.04` and learning rate is `1e-5`. A
+64-environment preflight verified that only the output layer receives actor
+gradients, the new reward is active and finite, scale stays `0.622388`, and
+the rollout has no NaN/Inf. The 1,200-update run is active in
+`logs/a6_29_v35_v12_early_recovery_4096_u1200_20261014` on GPU 0.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
