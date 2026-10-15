@@ -756,3 +756,9 @@ change, repeated corrective stepping, or visible leg jitter. Frames at
 requested stability objective while intentionally not claiming a straight-pose
 improvement; update 100 is preferred over the final checkpoint and becomes the
 current 29-DoF post-standing stability result.
+
+The selected checkpoint is also published as the repository artifact
+`artifacts/host29_v37_stable_20261015/model_100.pt`. Obsolete tracked model
+snapshots and generated evaluation media are intentionally excluded; Git keeps
+only this selected model plus its compact manifest and the reproducible source
+and evaluation documentation.
