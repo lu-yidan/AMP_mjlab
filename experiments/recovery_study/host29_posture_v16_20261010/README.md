@@ -762,3 +762,24 @@ The selected checkpoint is also published as the repository artifact
 snapshots and generated evaluation media are intentionally excluded; Git keeps
 only this selected model plus its compact manifest and the reproducible source
 and evaluation documentation.
+
+## V38 late-settle damping refinement (2026-10-15)
+
+V38 starts from the selected V37 update-100 checkpoint and targets the residual
+motion only after the robot has remained above `0.66 m` and upright for 100
+consecutive control steps. This avoids applying the strongest damping credit
+during recovery. The five settled-only terms cover all-joint stillness and
+velocity, action rate, body-frame horizontal root speed, and body-frame root
+angular speed.
+
+Only the final actor layer is trainable. The lateral/yaw rows use std `0.004`
+with source-relative weight/bias limits `0.00060/0.0025`; sagittal and upper
+rows use std `0.002` with tighter limits `0.00025/0.0010`. The critic and
+optimizer are fresh, the actor normalizer and action scale are frozen, and the
+fixed learning rate is `4e-6` for two epochs.
+
+The 64-environment, 500-step preflight passed. All five delayed reward terms
+were nonzero, the largest mean absolute target contribution was `2.947`, all
+actions, observations, rewards, and gradients were finite, and no NaN/Inf or
+termination fault occurred. The formal 4096-environment run uses a new log
+directory and preserves V37 and all prior checkpoints as read-only sources.
