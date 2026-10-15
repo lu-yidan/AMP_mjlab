@@ -551,12 +551,32 @@ protocol caveats, and the reset-time gate diagnosis are in
 
 The V15 scale gate was then corrected to cache the episode-final retained
 predicate before reset instead of recomputing uprightness from the newly reset
-pose. A 64-environment, 1,100-step V16 preflight at scale `0.8123875` measured
-`98.44%` retained cohort and `92.31%` mean retained-step fraction; the scale
-correctly stayed fixed during the mandatory hold interval, with finite rewards
-and gradients and no NaN/Inf. V16 continues from V15 update 800 in
-`logs/a6_29_v37_v16_cached_retention_4096_u2400_20261015`. This validates the
-gate implementation only; formal action-scale `0.25` A6 success remains zero.
+pose. V16 completed 2,400 updates from V15 update 800 without numerical or
+termination failure. The corrected gate authorized exactly three `0.005`
+decrements after their mandatory hold periods: action scale moved from
+`0.8123875` to `0.8073874`, `0.8023873`, and finally `0.7973875`, with no jump
+or premature change.
+
+Every V16 checkpoint from update 200 through final retained the same `126/128`
+environments in the uninterrupted 1,150-step audit. At the final checkpoint,
+mean retained-step fraction is `96.58%`, final retained is `98.44%`, and final
+head height/uprightness are `1.092 m / 0.908`. Final SHA256 is
+`346064cbcc80ef34fb3d58cf1497ecfceb3f9fb1d6314e371a45957db1e6dac8`.
+This proves the cache fix supports real scale migration while preserving near
+retention, but `0.7974` is still far from formal action scale `0.25`; no formal
+A6 success is claimed. Full results are in `A6_29_V16_FINAL_20261015.md`.
+
+V17 continues from the V16 final checkpoint with the same full-state resume,
+`0.005` decrement, three-cohort `90%` retained gate, std `0.04`, and learning
+rate `7.5e-6`. Because V16 showed stable `98.44%` external retention across all
+three migrations, only the redundant minimum hold is shortened from 14,400 to
+2,400 control steps. The gate remains the safety stop; middle, low, and
+obstacle resets remain disabled during this flat near-scale continuation.
+Its 64-environment, 1,100-step preflight retained `98.44%` of the cohort,
+averaged `92.07%` retained controlled steps, kept scale exactly `0.7973875`,
+and passed finite reward/gradient checks. The 4,096-environment, 6,000-update
+run is active in
+`logs/a6_29_v37_v17_accelerated_cached_4096_u6000_20261015`.
 
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
