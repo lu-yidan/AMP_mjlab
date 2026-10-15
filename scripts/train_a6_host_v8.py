@@ -202,8 +202,11 @@ def main() -> None:
   parser.add_argument("--log-dir", type=Path, required=True)
   parser.add_argument("--num-envs", type=int, default=4096)
   parser.add_argument("--updates", type=int, default=1800)
+  parser.add_argument("--save-interval", type=int, default=50)
   parser.add_argument("--seed", type=int, default=20261013)
   parser.add_argument("--preflight", action="store_true")
+  parser.add_argument("--preflight-steps", type=int, default=1100)
+  parser.add_argument("--episode-length-steps", type=int, default=0)
   parser.add_argument("--recovery-bank", type=Path)
   parser.add_argument("--recovery-fraction", type=float, default=0.0)
   parser.add_argument("--recovery-successful-only", action="store_true")
@@ -250,6 +253,13 @@ def main() -> None:
   parser.add_argument("--log-tag", default="A6_V8")
   args = parser.parse_args()
 
+  if args.preflight_steps <= UNACTUATED_STEPS:
+    raise ValueError("--preflight-steps must include a controlled interval")
+  if args.episode_length_steps < 0:
+    raise ValueError("--episode-length-steps must be non-negative")
+  if args.save_interval <= 0:
+    raise ValueError("--save-interval must be positive")
+
   if args.recovery_bank is None and args.recovery_fraction != 0.0:
     raise ValueError("--recovery-fraction requires --recovery-bank")
   if args.recovery_bank is not None:
@@ -267,6 +277,8 @@ def main() -> None:
   cfg = a6_env_cfg(seed=args.seed, dynamics=False, group="G+")
   cfg.scene.num_envs = args.num_envs
   cfg.seed = args.seed
+  if args.episode_length_steps:
+    cfg.episode_length_s = args.episode_length_steps * CONTROL_DT
   cfg.curriculum["action_scale"].func = near_action_scale_decay
   cfg.curriculum["action_scale"].params = {
     "standing_height": args.standing_height,
@@ -341,7 +353,7 @@ def main() -> None:
   agent.experiment_name = args.experiment_name
   agent.max_iterations = args.updates
   agent.num_steps_per_env = 24
-  agent.save_interval = 50
+  agent.save_interval = args.save_interval
   agent.algorithm.learning_rate = args.learning_rate
   agent.algorithm.schedule = "fixed"
   agent.algorithm.entropy_coef = 0.0
@@ -495,7 +507,12 @@ def main() -> None:
       "group": "G+",
       "num_envs": args.num_envs,
       "updates": args.updates,
+      "save_interval": args.save_interval,
       "seed": args.seed,
+      "episode_length_steps": (
+        args.episode_length_steps or round(cfg.episode_length_s / CONTROL_DT)
+      ),
+      "preflight_steps": args.preflight_steps,
       "action_scale_start": source_action_scale,
       "action_scale_target": FORMAL_ACTION_SCALE,
       "action_scale_decay": args.action_scale_decay,
@@ -565,7 +582,7 @@ def main() -> None:
       len(env.reward_manager.active_terms), device=env.device
     )
     policy = runner.get_inference_policy(device="cuda:0")
-    rollout_steps = 1100 if args.preflight else 200
+    rollout_steps = args.preflight_steps if args.preflight else 200
     start_scale = float(env._host_action_rescale.mean())
     recovery_baseline = {}
     probe_alive = torch.ones(args.num_envs, dtype=torch.bool, device=env.device)

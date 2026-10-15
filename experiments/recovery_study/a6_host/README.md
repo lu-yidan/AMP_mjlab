@@ -566,17 +566,33 @@ This proves the cache fix supports real scale migration while preserving near
 retention, but `0.7974` is still far from formal action scale `0.25`; no formal
 A6 success is claimed. Full results are in `A6_29_V16_FINAL_20261015.md`.
 
-V17 continues from the V16 final checkpoint with the same full-state resume,
-`0.005` decrement, three-cohort `90%` retained gate, std `0.04`, and learning
-rate `7.5e-6`. Because V16 showed stable `98.44%` external retention across all
-three migrations, only the redundant minimum hold is shortened from 14,400 to
-2,400 control steps. The gate remains the safety stop; middle, low, and
-obstacle resets remain disabled during this flat near-scale continuation.
-Its 64-environment, 1,100-step preflight retained `98.44%` of the cohort,
-averaged `92.07%` retained controlled steps, kept scale exactly `0.7973875`,
-and passed finite reward/gradient checks. The 4,096-environment, 6,000-update
-run is active in
-`logs/a6_29_v37_v17_accelerated_cached_4096_u6000_20261015`.
+V17 completed 6,000 updates from the V16 final checkpoint with the same
+full-state resume, `0.005` decrement, three-cohort `90%` retained gate, std
+`0.04`, and learning rate `7.5e-6`. Shortening the redundant minimum hold from
+14,400 to 2,400 control steps enabled 21 valid reductions from scale
+`0.7973875` to `0.6923876`; every decrement was exactly `0.005`, and training
+finished without numerical or velocity-termination faults.
+
+All ten fixed-seed 1,150-step audits retained `126/128` environments. The V17
+final checkpoint has `96.68%` mean retained-step fraction, 100% final retained,
+and final head height/uprightness `1.157 m / 0.948`. Its SHA256 is
+`ee57c15de6c1f1034ba44c4df02aff7d2bd907e4238d7a1ae8fbf7e2bfbb9101`.
+The scale stopped at `0.6924` because the 500-step training cohort measured
+`88.79%` retention over 4,096 environments, just below the unchanged 90%
+gate, even though uninterrupted long-horizon retention remained `98.44%`.
+The short episode was therefore measuring early recovery latency more
+strictly than the 1,150-step retention audit. Full results and the gate audit
+are in `A6_29_V17_FINAL_20261016.md`.
+
+V18 aligns training episodes with the 1,150-step near audit instead of
+weakening any retention threshold. It keeps the `0.005` decrement, three
+consecutive 90% cohorts, 80%-of-steps rule, 2,400-step hold, and V17 optimizer
+settings. A 64-environment, 2,400-step preflight retained `98.44%`, averaged
+`93.82%` retained steps, kept scale exactly `0.6923876`, and passed finite
+reward/gradient checks. The 4,096-environment, 14,000-update V18 run is active
+in `logs/a6_29_v37_v18_horizon_aligned_4096_u14000_20261016`. It remains a
+flat near-standing acquisition stage; middle, low, and obstacle resets remain
+disabled until retention is stable at or near formal scale `0.25`.
 
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
