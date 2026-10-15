@@ -536,6 +536,28 @@ Formal 4,096-environment training runs on GPU 0 in
 `logs/a6_29_v37_v15_retained_homotopy_4096_u2400_20261015`. This remains a
 29-DoF HoST A6 adapter acquisition experiment, not formal A6 success.
 
+V15 completed all 2,400 updates without numerical or termination faults. The
+scale reached `0.8123875` by update 800 and then stopped. A new uninterrupted
+128-environment audit removes the historical diagnostic's 20-second reset:
+update 800 retains `126/128` environments, has a `97.04%` mean retained-step
+fraction, and finishes retained in `99.22%`. It is the selected V15 checkpoint
+(SHA256 `4ee30c668ba7bc3ac04a575c5ebb48d85a6a01e9ddf1e7c0df1cf946f17f22bd`).
+At formal action scale `0.25`, source, update 800, update 1200, update 1600, and
+final all score `0/256` primary for both G- and G+; escape remains only
+`0-1/256`, with zero abnormal termination. V15 is therefore meaningful
+high-scale acquisition progress but not formal A6 progress. Full metrics,
+protocol caveats, and the reset-time gate diagnosis are in
+`A6_29_V15_FINAL_20261015.md`.
+
+The V15 scale gate was then corrected to cache the episode-final retained
+predicate before reset instead of recomputing uprightness from the newly reset
+pose. A 64-environment, 1,100-step V16 preflight at scale `0.8123875` measured
+`98.44%` retained cohort and `92.31%` mean retained-step fraction; the scale
+correctly stayed fixed during the mandatory hold interval, with finite rewards
+and gradients and no NaN/Inf. V16 continues from V15 update 800 in
+`logs/a6_29_v37_v16_cached_retention_4096_u2400_20261015`. This validates the
+gate implementation only; formal action-scale `0.25` A6 success remains zero.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from

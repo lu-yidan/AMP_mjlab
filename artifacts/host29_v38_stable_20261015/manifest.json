@@ -1,0 +1,33 @@
+{
+  "artifact": "host29_v38_stable_20261015",
+  "model": "model_175.pt",
+  "source": "logs/host29_posture_v38_4096_u200_20261015/model_175.pt",
+  "sha256": "68089b0dd13c13e01f0bd54cab6a4d41d1a5d470e474c6a7d932b4f2e201e03b",
+  "size_bytes": 6970878,
+  "selected_update": 175,
+  "evaluation": {
+    "num_envs": 256,
+    "steps": 1000,
+    "postures": ["prone", "supine", "left_side", "right_side"],
+    "seed_42": {
+      "held_rate": [1.0, 1.0, 1.0, 1.0],
+      "final_standing_rate": [1.0, 1.0, 1.0, 1.0],
+      "termination_rate": [0.0, 0.0, 0.0, 0.0],
+      "final_joint_speed_rms": [0.876862, 0.645140, 0.902028, 0.768513],
+      "standing_yaw_rate_rms": [0.479101, 0.740178, 0.575874, 0.700832],
+      "standing_horizontal_speed_rms": [0.081608, 0.111629, 0.102628, 0.113175],
+      "final_root_linear_speed_mean": [0.036614, 0.060073, 0.046268, 0.053201]
+    },
+    "seed_43": {
+      "held_rate": [1.0, 1.0, 1.0, 1.0],
+      "final_standing_rate": [1.0, 1.0, 1.0, 1.0],
+      "termination_rate": [0.0, 0.0, 0.0, 0.0],
+      "final_joint_speed_rms": [0.887721, 0.695784, 0.893211, 0.785056],
+      "standing_yaw_rate_rms": [0.494558, 0.752212, 0.572097, 0.716084],
+      "standing_horizontal_speed_rms": [0.079838, 0.111580, 0.102749, 0.114010],
+      "final_root_linear_speed_mean": [0.035650, 0.060159, 0.044867, 0.054303]
+    }
+  },
+  "visual_result": "stable after recovery; inherited lean, split stance, and raised right arm remain",
+  "role": "selected latest stable standing source"
+}

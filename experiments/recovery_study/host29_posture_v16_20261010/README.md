@@ -783,3 +783,31 @@ were nonzero, the largest mean absolute target contribution was `2.947`, all
 actions, observations, rewards, and gradients were finite, and no NaN/Inf or
 termination fault occurred. The formal 4096-environment run uses a new log
 directory and preserves V37 and all prior checkpoints as read-only sources.
+
+## V37 reproducibility correction and V38 result (2026-10-15)
+
+The original V37 update-100 evaluation reported unusually low post-settle
+motion, but that result could not be reproduced. Two new seed-42 evaluations
+of the exact same checkpoint produced four-posture mean final joint-speed RMS
+of `0.813` and `0.815`, mean standing yaw-rate RMS of `0.628` and `0.631`, and
+mean final root speed of `0.0495` and `0.0508 m/s`. A seed-43 run produced
+`0.820`, `0.638`, and `0.0492 m/s`. All repeats still had 100% held/final
+standing and zero terminations. The earlier one-off values remain historical
+data, but are withdrawn as evidence for a large V37 damping improvement.
+
+V38 completed 200 updates without numerical or termination faults. A dense
+checkpoint sweep selected update 175. At seed 42 its aggregate final
+joint-speed, standing yaw-rate, horizontal-speed, final root-speed, and final
+yaw-rate RMS were `0.798`, `0.624`, `0.1023`, `0.0490 m/s`, and `0.533`; at
+seed 43 they were `0.815`, `0.634`, `0.1020`, `0.0487 m/s`, and `0.512`.
+Relative to repeated V37 measurements this is a small, repeatable improvement,
+not the previously claimed order-of-magnitude change. Both seeds retained
+100% held/final standing with zero terminations.
+
+The 128-environment diagnosis reports torso tilt `0.511-0.530 rad`, final
+feet-forward offset `0.321-0.345 m`, and unchanged arm/waist errors. Four
+20-second videos show a stationary post-recovery pose without knee walking,
+sustained turning, periodic direction changes, or repeated corrective steps,
+but the inherited lean, split stance, and raised right arm remain. V38 update
+175 is therefore the latest selected stability checkpoint and replaces the
+tracked V37 model artifact; it is not claimed as a straight-standing result.

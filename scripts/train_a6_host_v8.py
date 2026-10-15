@@ -71,6 +71,10 @@ def _ensure_retention_state(env: ManagerBasedRlEnv) -> None:
     )
     env._a6_last_retention_cohort_fraction = 0.0
     env._a6_last_retention_step_fraction = 0.0
+  if not hasattr(env, "_a6_retention_final_good"):
+    env._a6_retention_final_good = torch.zeros(
+      env.num_envs, device=env.device, dtype=torch.bool
+    )
 
 
 def near_retention_reward(
@@ -91,6 +95,7 @@ def near_retention_reward(
     )
     env._a6_retention_good_steps += retained.float()
     env._a6_retention_control_steps += controlled.float()
+    env._a6_retention_final_good.copy_(retained)
   height = smooth_gate(raw_height, 0.72, 1.08)
   upright = smooth_gate(raw_upright, 0.55, 0.90)
   return height * upright
@@ -130,14 +135,13 @@ def near_action_scale_decay(
   reached = False
   if require_retention:
     _ensure_retention_state(env)
-    if state.initialized and state.current_head_height is not None:
-      final_retained = (
-        (state.current_head_height[env_ids] > standing_height)
-        & (_a6_upright(env)[env_ids] > retention_upright)
-      )
-      total_steps = env._a6_retention_control_steps[env_ids].clamp_min(1.0)
+    raw_total_steps = env._a6_retention_control_steps[env_ids]
+    valid_episode = raw_total_steps > 0
+    if valid_episode.any():
+      final_retained = env._a6_retention_final_good[env_ids]
+      total_steps = raw_total_steps.clamp_min(1.0)
       step_fraction = env._a6_retention_good_steps[env_ids] / total_steps
-      episode_retained = final_retained & (
+      episode_retained = valid_episode & final_retained & (
         step_fraction >= retention_step_fraction
       )
       cohort_fraction = float(episode_retained.float().mean())
@@ -146,6 +150,7 @@ def near_action_scale_decay(
       reached = cohort_fraction >= min_fraction
     env._a6_retention_good_steps[env_ids] = 0.0
     env._a6_retention_control_steps[env_ids] = 0.0
+    env._a6_retention_final_good[env_ids] = False
   elif state.initialized and state.last_episode_head_height is not None:
     standing = state.last_episode_head_height[env_ids] > standing_height
     reached = bool(standing.float().mean() >= min_fraction)
