@@ -507,6 +507,35 @@ on paired failure/recovery trajectories, while constraining behavior on the
 V10 source distribution. These results remain a 29-DoF HoST A6 adapter
 diagnostic and are not formal full-method A6 success.
 
+## V15: V37-seeded retained high-scale homotopy (2026-10-15)
+
+V15 restarts A6 acquisition from the selected V37 update-100 stability actor,
+not from V14. The immutable source is
+`logs/host29_posture_v37_4096_u300_20261014/model_100.pt`, SHA256
+`6317a1990393bcb603cec449042f30302b71a70a25e50a894e7af57e41945e09`.
+At its native action scale `0.9323874`, the fixed-seed 128-environment near
+baseline retained HoST standing in `128/128` environments and finished
+standing in `98.44%`, so the quieter V37 actor is a materially stronger A6
+restart point than forcing the previous `0.622388` controller through more
+ordinary PPO variants.
+
+V15 uses flat near-standing resets, nominal dynamics, no obstacle reward, a
+fresh critic and optimizer, and the full inherited actor. The action scale is
+allowed to fall by `0.01` only after two complete reset cohorts each reach at
+least 90% episode retention, where retention requires height above `0.70 m`
+and uprightness above `0.80` for at least 80% of controlled steps and at the
+episode end. This high-scale bridge stops descending automatically when
+continuous retention weakens; later low-scale consolidation remains a
+separate stage.
+
+The 64-environment, 1,100-step preflight passed with finite rewards, gradients,
+actions and observations. It measured `98.44%` retained cohort and `93.49%`
+mean retained-step fraction; after two successful cohorts the scale changed
+exactly once from `0.9323874` to `0.9223874`, validating the gate and decrement.
+Formal 4,096-environment training runs on GPU 0 in
+`logs/a6_29_v37_v15_retained_homotopy_4096_u2400_20261015`. This remains a
+29-DoF HoST A6 adapter acquisition experiment, not formal A6 success.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
