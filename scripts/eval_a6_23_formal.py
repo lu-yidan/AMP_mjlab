@@ -25,6 +25,7 @@ import torch
 from mjlab.envs import ManagerBasedRlEnv
 from mjlab.rl import RslRlVecEnvWrapper
 
+from scripts.train_host29_v7 import set_action_scale
 from src.tasks.host_recovery.a6_runtime_23 import (
   SCENE_NAMES,
   _a6_completion_clearance,
@@ -38,6 +39,7 @@ from src.tasks.host_recovery.config.g1.rl_cfg import (
   unitree_g1_host_standup_ppo_runner_cfg,
 )
 from src.tasks.host_recovery.mdp.a6_geometry import DIRECTIONS
+from src.tasks.host_recovery.residual_control import TeacherResidualVecEnvWrapper
 from src.tasks.host_recovery.rl import HoSTOnPolicyRunner
 
 
@@ -133,6 +135,9 @@ def main() -> None:
   parser.add_argument("--steps", type=int, default=1150)
   parser.add_argument("--seed", type=int, default=42)
   parser.add_argument("--bank-split", choices=("train", "validation"), default="train")
+  parser.add_argument("--action-scale", type=float)
+  parser.add_argument("--residual-checkpoint", type=Path)
+  parser.add_argument("--residual-scale", type=float, default=0.25)
   args = parser.parse_args()
 
   if args.num_envs < 32 or args.num_envs % 32:
@@ -160,12 +165,46 @@ def main() -> None:
   env = ManagerBasedRlEnv(cfg=cfg, device="cuda:0", render_mode=None)
   env.reset()
   configure_all_low(env)
+  if args.action_scale is not None:
+    set_action_scale(env, args.action_scale)
 
-  wrapper = RslRlVecEnvWrapper(env, clip_actions=agent.clip_actions)
+  base_wrapper = RslRlVecEnvWrapper(env, clip_actions=agent.clip_actions)
   try:
-    runner = HoSTOnPolicyRunner(wrapper, asdict(agent), device="cuda:0")
+    runner = HoSTOnPolicyRunner(base_wrapper, asdict(agent), device="cuda:0")
     runner.load(str(args.checkpoint), load_optimizer=False, map_location="cuda:0")
-    policy = runner.get_inference_policy(device="cuda:0")
+    if args.action_scale is not None:
+      set_action_scale(env, args.action_scale)
+      action = env.action_manager.get_term("joint_pos")
+      num_joints = env.scene["robot"].data.joint_pos.shape[-1]
+      single_step_dim = 7 + 2 * num_joints + action.action_dim
+      scale_indices = torch.arange(
+        single_step_dim - 1,
+        runner.obs_normalizer._mean.shape[-1],
+        single_step_dim,
+        device=runner.obs_normalizer._mean.device,
+      )
+      runner.obs_normalizer._mean[:, scale_indices] = args.action_scale
+    base_policy = runner.get_inference_policy(device="cuda:0")
+    residual_runner = None
+    if args.residual_checkpoint is None:
+      wrapper = base_wrapper
+      policy = base_policy
+    else:
+      wrapper = TeacherResidualVecEnvWrapper(
+        env,
+        base_policy=base_policy,
+        residual_scale=args.residual_scale,
+        clip_actions=agent.clip_actions,
+      )
+      residual_runner = HoSTOnPolicyRunner(
+        wrapper, asdict(agent), device="cuda:0"
+      )
+      residual_runner.load(
+        str(args.residual_checkpoint),
+        load_optimizer=False,
+        map_location="cuda:0",
+      )
+      policy = residual_runner.get_inference_policy(device="cuda:0")
     obs = wrapper.get_observations()
 
     robot = env.scene["robot"]
@@ -292,6 +331,19 @@ def main() -> None:
     summary = {
       "checkpoint": str(args.checkpoint.resolve()),
       "checkpoint_sha256": sha256_file(args.checkpoint),
+      "residual_checkpoint": (
+        str(args.residual_checkpoint.resolve())
+        if args.residual_checkpoint is not None
+        else None
+      ),
+      "residual_checkpoint_sha256": (
+        sha256_file(args.residual_checkpoint)
+        if args.residual_checkpoint is not None
+        else None
+      ),
+      "residual_scale": args.residual_scale if residual_runner is not None else None,
+      "action_scale_requested": args.action_scale,
+      "action_scale": float(env._host_action_rescale.mean()),
       "group": args.group,
       "bank_split": args.bank_split,
       "seed": args.seed,

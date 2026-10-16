@@ -584,15 +584,41 @@ The short episode was therefore measuring early recovery latency more
 strictly than the 1,150-step retention audit. Full results and the gate audit
 are in `A6_29_V17_FINAL_20261016.md`.
 
-V18 aligns training episodes with the 1,150-step near audit instead of
-weakening any retention threshold. It keeps the `0.005` decrement, three
+V18 aligned training episodes with the 1,150-step near audit instead of
+weakening any retention threshold. It retained the `0.005` decrement, three
 consecutive 90% cohorts, 80%-of-steps rule, 2,400-step hold, and V17 optimizer
-settings. A 64-environment, 2,400-step preflight retained `98.44%`, averaged
-`93.82%` retained steps, kept scale exactly `0.6923876`, and passed finite
-reward/gradient checks. The 4,096-environment, 14,000-update V18 run is active
-in `logs/a6_29_v37_v18_horizon_aligned_4096_u14000_20261016`. It remains a
-flat near-standing acquisition stage; middle, low, and obstacle resets remain
-disabled until retention is stable at or near formal scale `0.25`.
+settings. The 4,096-environment, 14,000-update run completed normally and
+reached action scale `0.5723878` after 24 valid reductions. A follow-up audit
+showed that frozen V38 itself remains stable at this scale: G-/G+ near retained
+cohorts were `96.88%` and `99.22%`. The scale path therefore identified a
+usable adapter scale, but did not establish formal `0.25` control or low-reset
+get-up success.
+
+## V19: scene-isolated obstacle residual (2026-10-16)
+
+V19 corrects the source of the earlier flat regression by freezing the V38
+actor and observation normalizer and training a separate PPO residual. The
+residual is applied only while an obstacle scene is active, the plate has not
+been escaped, and motors are on. Flat and post-escape actions are exactly the
+frozen V38 action. Corrected G-/G+ preflights explicitly mixed flat, guided,
+and free-plate scenes and verified a zero initial residual, exactly zero
+applied residual on flat, finite reward/gradient statistics, and no NaN/Inf.
+The final flat audits independently recorded the same exact-zero residual.
+
+Both 4,096-environment runs completed 1,200 updates normally. Final flat near
+retention is `126/128` (`98.44%`) for both groups, so the scene-isolation
+contract succeeds. The obstacle objective does not: every evaluated G-/G+
+checkpoint remains `0/256` primary. G- update 200 provides only a small
+free-plate escape increase from `51/64` (`79.69%`) to `54/64` (`84.38%`),
+while vertical escape is `1/64`; later G- checkpoints lose the gain. Every
+trained G+ checkpoint is worse than the update-0 no-op residual baseline.
+
+The only retained residual is therefore G- update 200 as a diagnostic point;
+no trained G+ residual is selected and the repository V38 model is unchanged.
+These are adapter-scale `0.5724` diagnostics, not formal `0.25` results.
+Direct scale compensation is rejected because it saturates about 68% of V38
+actions. Full protocol, checkpoint hashes, tables, and limitations are in
+`A6_29_V19_FINAL_20261016.md`.
 
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is

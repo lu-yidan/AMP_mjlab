@@ -22,7 +22,9 @@ from src.tasks.host_recovery.config.g1.rl_cfg import (
   unitree_g1_host_standup_ppo_runner_cfg,
 )
 from src.tasks.host_recovery.mdp.observations import UNACTUATED_STEPS
+from src.tasks.host_recovery.residual_control import TeacherResidualVecEnvWrapper
 from src.tasks.host_recovery.rl import HoSTOnPolicyRunner
+from src.tasks.host_recovery.scale_compensation import ScaleCompensatedPolicy
 
 
 def main() -> None:
@@ -34,6 +36,9 @@ def main() -> None:
   parser.add_argument("--steps", type=int, default=1150)
   parser.add_argument("--seed", type=int, default=42)
   parser.add_argument("--action-scale", type=float, required=True)
+  parser.add_argument("--compensate-source-scale", type=float)
+  parser.add_argument("--residual-checkpoint", type=Path)
+  parser.add_argument("--residual-scale", type=float, default=0.25)
   parser.add_argument("--height-threshold", type=float, default=0.70)
   parser.add_argument("--upright-threshold", type=float, default=0.80)
   parser.add_argument("--required-step-fraction", type=float, default=0.80)
@@ -72,8 +77,8 @@ def main() -> None:
     env._reset_idx(torch.arange(env.num_envs, device=env.device))
     set_action_scale(env, args.action_scale)
 
-    wrapper = RslRlVecEnvWrapper(env, clip_actions=agent.clip_actions)
-    runner = HoSTOnPolicyRunner(wrapper, asdict(agent), device="cuda:0")
+    base_wrapper = RslRlVecEnvWrapper(env, clip_actions=agent.clip_actions)
+    runner = HoSTOnPolicyRunner(base_wrapper, asdict(agent), device="cuda:0")
     runner.load(str(args.checkpoint), load_optimizer=False, map_location="cuda:0")
     set_action_scale(env, args.action_scale)
 
@@ -86,15 +91,51 @@ def main() -> None:
       single_step_dim,
       device=runner.obs_normalizer._mean.device,
     )
-    runner.obs_normalizer._mean[:, scale_indices] = args.action_scale
-
-    policy = runner.get_inference_policy(device="cuda:0")
+    base_policy = runner.get_inference_policy(device="cuda:0")
+    compensated_policy = None
+    residual_runner = None
+    if args.compensate_source_scale is None:
+      runner.obs_normalizer._mean[:, scale_indices] = args.action_scale
+      if args.residual_checkpoint is None:
+        wrapper = base_wrapper
+        policy = base_policy
+      else:
+        wrapper = TeacherResidualVecEnvWrapper(
+          env,
+          base_policy=base_policy,
+          residual_scale=args.residual_scale,
+          clip_actions=agent.clip_actions,
+        )
+        residual_runner = HoSTOnPolicyRunner(
+          wrapper, asdict(agent), device="cuda:0"
+        )
+        residual_runner.load(
+          str(args.residual_checkpoint),
+          load_optimizer=False,
+          map_location="cuda:0",
+        )
+        policy = residual_runner.get_inference_policy(device="cuda:0")
+    else:
+      if args.residual_checkpoint is not None:
+        raise ValueError("scale compensation and a residual are mutually exclusive")
+      wrapper = base_wrapper
+      compensated_policy = ScaleCompensatedPolicy(
+        base_policy,
+        source_scale=args.compensate_source_scale,
+        target_scale=args.action_scale,
+        num_joints=num_joints,
+        num_actions=action.action_dim,
+      )
+      policy = compensated_policy
     observations = wrapper.get_observations()
     alive = torch.ones(env.num_envs, dtype=torch.bool, device=env.device)
     good_steps = torch.zeros(env.num_envs, device=env.device)
     controlled_steps = 0
     final_retained = torch.zeros_like(alive)
     trajectory = {}
+    saturation_sum = 0.0
+    saturation_steps = 0
+    flat_applied_residual_max = 0.0
     capture_steps = {
       UNACTUATED_STEPS,
       50,
@@ -108,7 +149,15 @@ def main() -> None:
     with torch.inference_mode():
       for step in range(args.steps):
         actions = policy(observations["actor"])
+        if compensated_policy is not None:
+          saturation_sum += compensated_policy.saturation_fraction()
+          saturation_steps += 1
         observations, _, dones, _ = wrapper.step(actions)
+        if residual_runner is not None:
+          flat_applied_residual_max = max(
+            flat_applied_residual_max,
+            float(env._a6_gated_residual_action.abs().max()),
+          )
         alive &= ~dones.bool()
         height = _a6_height(env)
         upright = _a6_upright(env)
@@ -137,12 +186,30 @@ def main() -> None:
     )
     result = {
       "checkpoint": str(args.checkpoint.resolve()),
+      "residual_checkpoint": (
+        str(args.residual_checkpoint.resolve())
+        if args.residual_checkpoint is not None
+        else None
+      ),
+      "residual_scale": args.residual_scale if residual_runner is not None else None,
       "group": args.group,
       "num_envs": args.num_envs,
       "steps": args.steps,
       "seed": args.seed,
       "action_scale_requested": args.action_scale,
       "action_scale": float(env._host_action_rescale.mean()),
+      "compensate_source_scale": args.compensate_source_scale,
+      "compensation_ratio": (
+        args.compensate_source_scale / args.action_scale
+        if args.compensate_source_scale is not None
+        else 1.0
+      ),
+      "mean_action_saturation_fraction": (
+        saturation_sum / saturation_steps if saturation_steps else 0.0
+      ),
+      "flat_applied_residual_max": (
+        flat_applied_residual_max if residual_runner is not None else None
+      ),
       "unactuated_steps": UNACTUATED_STEPS,
       "height_threshold": args.height_threshold,
       "upright_threshold": args.upright_threshold,
