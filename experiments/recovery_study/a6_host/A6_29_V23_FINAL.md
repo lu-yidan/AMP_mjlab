@@ -99,4 +99,3 @@ the base actor while preserving its flat-stability contract, or to introduce
 a broader full-body post-escape posture optimizer whose reachable pose is
 verified before policy training. The three-pair frozen-base adapter line ends
 here.
-
