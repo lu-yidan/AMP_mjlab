@@ -23,6 +23,9 @@ from scripts.train_a6_host_v6 import action_scale_indices
 from scripts.train_host29_v7 import set_action_scale
 from src.tasks.host_recovery.a6_runtime import (
   A6_POSITIVE_NAMES,
+  _a6_ground_force,
+  _a6_height,
+  _a6_upright,
   a6_env_cfg,
   a6_reset_counts,
 )
@@ -34,10 +37,38 @@ from src.tasks.host_recovery.residual_control import (
   obstacle_residual_gate,
   residual_effort,
 )
+from src.tasks.host_recovery.mdp.observations import UNACTUATED_STEPS
 from src.tasks.host_recovery.rl import HoSTOnPolicyRunner
 
 
 CONTROL_DT = 0.02
+
+
+def smooth_gate(value: torch.Tensor, low: float, high: float) -> torch.Tensor:
+  scaled = ((value - low) / (high - low)).clamp(0.0, 1.0)
+  return scaled.square() * (3.0 - 2.0 * scaled)
+
+
+def post_escape_height_reward(env: ManagerBasedRlEnv) -> torch.Tensor:
+  gate = (
+    (env._a6_scene > 0)
+    & env._a6_escaped
+    & (env.episode_length_buf > UNACTUATED_STEPS)
+  )
+  return gate.float() * smooth_gate(_a6_height(env), 1.04, 1.17)
+
+
+def post_escape_stance_reward(env: ManagerBasedRlEnv) -> torch.Tensor:
+  gate = (
+    (env._a6_scene > 0)
+    & env._a6_escaped
+    & (env.episode_length_buf > UNACTUATED_STEPS)
+  )
+  height = smooth_gate(_a6_height(env), 1.07, 1.17)
+  upright = smooth_gate(_a6_upright(env), 0.84, 0.93)
+  load = _a6_ground_force(env, "quality_feet")[..., 2].abs().amin(-1)
+  support = smooth_gate(load, 10.0, 30.0)
+  return gate.float() * height * upright * support
 
 
 def sha256(path: Path) -> str:
@@ -51,6 +82,7 @@ def sha256(path: Path) -> str:
 def main() -> None:
   parser = argparse.ArgumentParser()
   parser.add_argument("--base-checkpoint", type=Path, required=True)
+  parser.add_argument("--residual-checkpoint", type=Path)
   parser.add_argument("--log-dir", type=Path, required=True)
   parser.add_argument("--group", choices=("G-", "G+"), required=True)
   parser.add_argument("--num-envs", type=int, default=4096)
@@ -63,6 +95,8 @@ def main() -> None:
   parser.add_argument("--train-std", type=float, default=0.06)
   parser.add_argument("--save-interval", type=int, default=100)
   parser.add_argument("--episode-length-steps", type=int, default=1150)
+  parser.add_argument("--post-escape-height-weight", type=float, default=0.0)
+  parser.add_argument("--post-escape-stance-weight", type=float, default=0.0)
   parser.add_argument("--preflight", action="store_true")
   parser.add_argument("--preflight-steps", type=int, default=1150)
   parser.add_argument(
@@ -101,6 +135,16 @@ def main() -> None:
     func=residual_effort,
     weight=-0.20 * CONTROL_DT,
   )
+  if args.post_escape_height_weight:
+    cfg.rewards["a6_post_escape_height"] = RewardTermCfg(
+      func=post_escape_height_reward,
+      weight=args.post_escape_height_weight * CONTROL_DT,
+    )
+  if args.post_escape_stance_weight:
+    cfg.rewards["a6_post_escape_stance"] = RewardTermCfg(
+      func=post_escape_stance_reward,
+      weight=args.post_escape_stance_weight * CONTROL_DT,
+    )
 
   args.log_dir.mkdir(parents=True, exist_ok=False)
   agent = unitree_g1_host_standup_ppo_runner_cfg()
@@ -160,9 +204,16 @@ def main() -> None:
       wrapper, asdict(agent), str(args.log_dir), "cuda:0"
     )
     output_layer = runner.alg.policy.actor[6]
+    if args.residual_checkpoint is not None:
+      runner.load(
+        str(args.residual_checkpoint),
+        load_optimizer=False,
+        map_location="cuda:0",
+      )
     with torch.no_grad():
-      output_layer.weight.zero_()
-      output_layer.bias.zero_()
+      if args.residual_checkpoint is None:
+        output_layer.weight.zero_()
+        output_layer.bias.zero_()
       runner.alg.policy.std.fill_(args.train_std)
     runner.alg.policy.std.requires_grad_(False)
     for param_group in runner.alg.optimizer.param_groups:
@@ -172,6 +223,16 @@ def main() -> None:
       "base_checkpoint": str(args.base_checkpoint.resolve()),
       "base_checkpoint_sha256": sha256(args.base_checkpoint),
       "base_actor": "frozen V38",
+      "residual_checkpoint": (
+        str(args.residual_checkpoint.resolve())
+        if args.residual_checkpoint is not None
+        else None
+      ),
+      "residual_checkpoint_sha256": (
+        sha256(args.residual_checkpoint)
+        if args.residual_checkpoint is not None
+        else None
+      ),
       "method": args.method_name,
       "group": args.group,
       "num_envs": args.num_envs,
@@ -180,6 +241,8 @@ def main() -> None:
       "action_scale": args.action_scale,
       "residual_scale": args.residual_scale,
       "residual_after_escape": args.residual_after_escape,
+      "post_escape_height_weight": args.post_escape_height_weight,
+      "post_escape_stance_weight": args.post_escape_stance_weight,
       "episode_length_steps": args.episode_length_steps,
       "learning_rate": args.learning_rate,
       "train_std": args.train_std,
@@ -218,6 +281,9 @@ def main() -> None:
     flat_applied_residual_max = 0.0
     obstacle_gate_count = 0
     finite_reward = True
+    reward_abs_sum = torch.zeros(
+      len(env.reward_manager.active_terms), device=env.device
+    )
     gate_contract = obstacle_residual_gate(
       torch.tensor([0, 1, 1, 2], device=env.device),
       torch.tensor([False, False, True, True], device=env.device),
@@ -228,6 +294,7 @@ def main() -> None:
       for _ in range(rollout_steps):
         residual_actions = residual_policy(observations["actor"])
         observations, rewards, _, _ = wrapper.step(residual_actions)
+        reward_abs_sum += env.reward_manager._step_reward.abs().mean(dim=0)
         gate = env._a6_residual_gate.squeeze(-1)
         gate_sum += float(gate.mean())
         flat = env._a6_scene == 0
@@ -241,6 +308,14 @@ def main() -> None:
         assert torch.isfinite(env._a6_combined_action).all()
         assert torch.isfinite(observations["actor"]).all()
 
+    reward_abs_mean = {
+      name: float(value)
+      for name, value in zip(
+        env.reward_manager.active_terms,
+        reward_abs_sum.cpu() / rollout_steps,
+        strict=True,
+      )
+    }
     preflight = {
       "steps": rollout_steps,
       "mean_gate": gate_sum / rollout_steps,
@@ -254,10 +329,16 @@ def main() -> None:
       "finite_reward": finite_reward,
       "action_scale": float(env._host_action_rescale.mean()),
       "reset_mix": a6_reset_counts(env),
+      "post_escape_reward_abs_mean": {
+        name: reward_abs_mean[name]
+        for name in ("a6_post_escape_height", "a6_post_escape_stance")
+        if name in reward_abs_mean
+      },
     }
     print(f"{args.log_tag}_PREFLIGHT", json.dumps(preflight), flush=True)
     assert finite_reward
-    assert preflight["gated_residual_mean_abs"] < 1e-7
+    if args.residual_checkpoint is None:
+      assert preflight["gated_residual_mean_abs"] < 1e-7
     assert preflight["flat_applied_residual_max"] == 0.0
     if args.preflight:
       assert preflight["reset_mix"]["scene"][0] > 0
@@ -267,6 +348,10 @@ def main() -> None:
       expected_gate_contract
     )
     assert abs(preflight["action_scale"] - args.action_scale) < 1e-6
+    if args.post_escape_height_weight:
+      assert reward_abs_mean["a6_post_escape_height"] > 0.0
+    if args.post_escape_stance_weight:
+      assert reward_abs_mean["a6_post_escape_stance"] > 0.0
     if args.preflight:
       print(f"{args.log_tag}_PREFLIGHT_PASS", json.dumps(launch), flush=True)
       return

@@ -231,6 +231,21 @@ def main() -> None:
     escape_hold = torch.zeros(n, dtype=torch.long, device=device)
     primary_first_second = torch.full((n,), -1.0, device=device)
     escape_first_second = torch.full((n,), -1.0, device=device)
+    final_height = torch.zeros(n, device=device)
+    final_upright = torch.zeros(n, device=device)
+    final_min_foot_load = torch.zeros(n, device=device)
+    post_escape_height_max = torch.zeros(n, device=device)
+    post_escape_upright_max = torch.zeros(n, device=device)
+    post_escape_height_upright_hold = torch.zeros(
+      n, dtype=torch.long, device=device
+    )
+    post_escape_height_upright_hold_max = torch.zeros(
+      n, dtype=torch.long, device=device
+    )
+    post_escape_primary_hold = torch.zeros(n, dtype=torch.long, device=device)
+    post_escape_primary_hold_max = torch.zeros(
+      n, dtype=torch.long, device=device
+    )
 
     with torch.no_grad():
       for step in range(args.steps):
@@ -277,6 +292,45 @@ def main() -> None:
         )
         escaped_seen |= escape_new
 
+        height = _a6_height(env)
+        upright = _a6_upright(env)
+        min_foot_load = _a6_ground_force(env, "quality_feet")[..., 2].abs().amin(-1)
+        final_height = torch.where(alive, height, final_height)
+        final_upright = torch.where(alive, upright, final_upright)
+        final_min_foot_load = torch.where(alive, min_foot_load, final_min_foot_load)
+        post_escape_alive = escaped_seen & alive
+        post_escape_height_max = torch.where(
+          post_escape_alive,
+          torch.maximum(post_escape_height_max, height),
+          post_escape_height_max,
+        )
+        post_escape_upright_max = torch.where(
+          post_escape_alive,
+          torch.maximum(post_escape_upright_max, upright),
+          post_escape_upright_max,
+        )
+        height_upright_now = (
+          post_escape_alive & (height >= 1.15) & (upright >= 0.90)
+        )
+        post_escape_height_upright_hold = torch.where(
+          height_upright_now,
+          post_escape_height_upright_hold + 1,
+          torch.zeros_like(post_escape_height_upright_hold),
+        )
+        post_escape_height_upright_hold_max = torch.maximum(
+          post_escape_height_upright_hold_max,
+          post_escape_height_upright_hold,
+        )
+        post_escape_primary_hold = torch.where(
+          post_escape_alive & primary_now,
+          post_escape_primary_hold + 1,
+          torch.zeros_like(post_escape_primary_hold),
+        )
+        post_escape_primary_hold_max = torch.maximum(
+          post_escape_primary_hold_max,
+          post_escape_primary_hold,
+        )
+
     timeout_events = int(
       (dones.bool() & (env.episode_length_buf >= int(env.max_episode_length))).sum()
     )
@@ -294,10 +348,11 @@ def main() -> None:
           "abnormal_force": 0,
           "abnormal_depth": 0,
           "other_early_done": 0,
+          "escaped_post_escape": None,
         }
       success = int(primary_success[ids].sum())
       escaped = int(escaped_seen[ids].sum())
-      return {
+      row = {
         "n": total,
         "primary_success": _fmt_frac(success, total),
         "primary_success_rate": success / total,
@@ -307,6 +362,31 @@ def main() -> None:
         "abnormal_depth": int(abnormal_depth[ids].sum()),
         "other_early_done": int(other_early_done[ids].sum()),
       }
+      escaped_ids = ids[escaped_seen[ids]]
+      if escaped_ids.numel():
+        row["escaped_post_escape"] = {
+          "n": int(escaped_ids.numel()),
+          "final_head_height_mean_m": float(final_height[escaped_ids].mean()),
+          "final_upright_mean": float(final_upright[escaped_ids].mean()),
+          "final_min_foot_load_mean_n": float(
+            final_min_foot_load[escaped_ids].mean()
+          ),
+          "max_head_height_mean_m": float(
+            post_escape_height_max[escaped_ids].mean()
+          ),
+          "max_upright_mean": float(post_escape_upright_max[escaped_ids].mean()),
+          "height_upright_hold_max_mean_s": float(
+            post_escape_height_upright_hold_max[escaped_ids].float().mean()
+            * env.step_dt
+          ),
+          "primary_hold_max_mean_s": float(
+            post_escape_primary_hold_max[escaped_ids].float().mean()
+            * env.step_dt
+          ),
+        }
+      else:
+        row["escaped_post_escape"] = None
+      return row
 
     summary_by_scene = {
       scene_name: rows_for_mask(env._a6_scene == scene_id)
@@ -411,6 +491,17 @@ def main() -> None:
           "other_early_done": bool(other_early_done[index]),
           "first_primary_second": float(primary_first_second[index]),
           "first_escape_second": float(escape_first_second[index]),
+          "final_head_height_m": float(final_height[index]),
+          "final_upright": float(final_upright[index]),
+          "final_min_foot_load_n": float(final_min_foot_load[index]),
+          "post_escape_head_height_max_m": float(post_escape_height_max[index]),
+          "post_escape_upright_max": float(post_escape_upright_max[index]),
+          "post_escape_height_upright_hold_max_s": float(
+            post_escape_height_upright_hold_max[index] * env.step_dt
+          ),
+          "post_escape_primary_hold_max_s": float(
+            post_escape_primary_hold_max[index] * env.step_dt
+          ),
           "initial_sha256": per_env_initial_sha256[index],
         }
         stream.write(json.dumps(row, ensure_ascii=True) + "\n")

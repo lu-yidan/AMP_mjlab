@@ -644,6 +644,33 @@ residual scale `0.25`, std `0.04`, learning rate `1e-5`, two PPO epochs, and
 1,600 updates. These remain native-scale adapter diagnostics; no formal
 `0.25` result is claimed.
 
+Both groups completed normally. All evaluated checkpoints retained `128/128`
+flat-near environments with exactly zero flat residual. Escape improved from
+the roughly `33/256` frozen-base baseline to first-sweep best values of
+`42/256` for G- and `48/256` for G+, but every checkpoint remained `0/256`
+primary. Repeat diagnostics preserved the escape improvement while showing
+the precise remaining blocker: escaped trials ended upright with bilateral
+support, but final/max head height remained about `1.09/1.10 m`, and no trial
+held the formal `1.15 m` height threshold. G-/G+ update 200 are retained as
+diagnostic residuals; the repository model remains V38. Full results are in
+`A6_29_V20_FINAL.md`.
+
+## V21: post-escape formal-height continuation
+
+V20 isolated the remaining failure to head height: escaped trials were already
+upright and bilaterally supported, but their maximum mean head height stayed
+near `1.10 m`, below the formal `1.15 m` threshold. V21 therefore resumes the
+selected V20 update-200 residuals and adds two rewards only after escape: a
+non-saturated height margin over `1.04--1.17 m`, and a joint height/upright/
+two-foot-load stance term. Their pre-dt weights are `2.0` and `3.0`.
+
+The frozen V38 base, native action scale `0.9323874`, obstacle-only residual
+gate, exact-zero flat contract, and residual scale `0.25` are unchanged. Both
+64-environment, 1,150-step preflights passed with finite gradients, exact-zero
+flat residual, nonzero bounded shaping signals, and the expected post-escape
+gate. Paired 4,096-environment runs are active for 1,200 updates with std
+`0.035`, learning rate `7.5e-6`, two PPO epochs, and fresh optimizer state.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
