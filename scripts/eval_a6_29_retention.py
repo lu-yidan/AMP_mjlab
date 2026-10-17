@@ -39,6 +39,7 @@ def main() -> None:
   parser.add_argument("--compensate-source-scale", type=float)
   parser.add_argument("--residual-checkpoint", type=Path)
   parser.add_argument("--residual-scale", type=float, default=0.25)
+  parser.add_argument("--residual-after-escape", action="store_true")
   parser.add_argument("--height-threshold", type=float, default=0.70)
   parser.add_argument("--upright-threshold", type=float, default=0.80)
   parser.add_argument("--required-step-fraction", type=float, default=0.80)
@@ -105,6 +106,7 @@ def main() -> None:
           base_policy=base_policy,
           residual_scale=args.residual_scale,
           clip_actions=agent.clip_actions,
+          apply_after_escape=args.residual_after_escape,
         )
         residual_runner = HoSTOnPolicyRunner(
           wrapper, asdict(agent), device="cuda:0"
@@ -192,6 +194,9 @@ def main() -> None:
         else None
       ),
       "residual_scale": args.residual_scale if residual_runner is not None else None,
+      "residual_after_escape": (
+        args.residual_after_escape if residual_runner is not None else None
+      ),
       "group": args.group,
       "num_envs": args.num_envs,
       "steps": args.steps,

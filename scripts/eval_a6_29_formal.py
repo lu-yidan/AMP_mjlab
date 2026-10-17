@@ -2,7 +2,7 @@
 
 from src.tasks.host_recovery import a6_runtime
 
-import eval_a6_23_formal as protocol
+from scripts import eval_a6_23_formal as protocol
 
 
 protocol.SCENE_NAMES = a6_runtime.SCENE_NAMES

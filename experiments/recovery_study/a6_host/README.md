@@ -620,6 +620,30 @@ Direct scale compensation is rejected because it saturates about 68% of V38
 actions. Full protocol, checkpoint hashes, tables, and limitations are in
 `A6_29_V19_FINAL_20261016.md`.
 
+## V20: native-scale post-escape residual (2026-10-17)
+
+The V19 failure audit found two independent method mismatches. First, V38 can
+recover from the flat low reset at its native action scale `0.9323874`, while
+the same frozen actor is substantially degraded at the V18 adapter scale
+`0.5723878` (the G- 64-environment check fell from `64/64` held and 100% final
+standing to `42/64` held and 26.56% final standing). Second, V19 disabled its
+residual immediately after escape. The frozen base then remained near its
+roughly `1.09 m` standing height, so it could not optimize the formal
+post-escape height requirement of `1.15 m`. At native scale the frozen base
+already escaped `33/256` scenes in each group, but still produced `0/256`
+primary successes.
+
+V20 therefore keeps V38 and its normalizer frozen, restores native action
+scale `0.9323874`, preserves the exact-zero residual contract on flat, and
+keeps the obstacle residual active from motor-on through the rest of an
+obstacle episode, including after escape. G-/G+ 64-environment, 1,150-step
+preflights passed with finite rewards and gradients, exact zero flat residual,
+and an explicit gate contract of `[flat=false, active=true,
+escaped=true, motor-off=false]`. The paired 4,096-environment runs use
+residual scale `0.25`, std `0.04`, learning rate `1e-5`, two PPO epochs, and
+1,600 updates. These remain native-scale adapter diagnostics; no formal
+`0.25` result is claimed.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from

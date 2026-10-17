@@ -31,6 +31,7 @@ from src.tasks.host_recovery.config.g1.rl_cfg import (
 )
 from src.tasks.host_recovery.residual_control import (
   TeacherResidualVecEnvWrapper,
+  obstacle_residual_gate,
   residual_effort,
 )
 from src.tasks.host_recovery.rl import HoSTOnPolicyRunner
@@ -57,12 +58,21 @@ def main() -> None:
   parser.add_argument("--seed", type=int, default=20261016)
   parser.add_argument("--action-scale", type=float, default=0.5723877549171448)
   parser.add_argument("--residual-scale", type=float, default=0.25)
+  parser.add_argument("--residual-after-escape", action="store_true")
   parser.add_argument("--learning-rate", type=float, default=1e-5)
   parser.add_argument("--train-std", type=float, default=0.06)
   parser.add_argument("--save-interval", type=int, default=100)
   parser.add_argument("--episode-length-steps", type=int, default=1150)
   parser.add_argument("--preflight", action="store_true")
   parser.add_argument("--preflight-steps", type=int, default=1150)
+  parser.add_argument(
+    "--method-name",
+    default="obstacle-scene-isolated residual around frozen base",
+  )
+  parser.add_argument(
+    "--experiment-name", default="g1_host_a6_v19_v38_recovery_residual"
+  )
+  parser.add_argument("--log-tag", default="A6_V19")
   args = parser.parse_args()
 
   if args.log_dir.exists():
@@ -96,7 +106,7 @@ def main() -> None:
   agent = unitree_g1_host_standup_ppo_runner_cfg()
   agent.seed = args.seed
   agent.logger = "tensorboard"
-  agent.experiment_name = "g1_host_a6_v19_v38_recovery_residual"
+  agent.experiment_name = args.experiment_name
   agent.max_iterations = args.updates
   agent.save_interval = args.save_interval
   agent.algorithm.learning_rate = args.learning_rate
@@ -139,6 +149,7 @@ def main() -> None:
       base_policy=base_policy,
       residual_scale=args.residual_scale,
       clip_actions=agent.clip_actions,
+      apply_after_escape=args.residual_after_escape,
     )
     if args.preflight:
       env_ids = torch.arange(env.num_envs, device=env.device)
@@ -161,13 +172,14 @@ def main() -> None:
       "base_checkpoint": str(args.base_checkpoint.resolve()),
       "base_checkpoint_sha256": sha256(args.base_checkpoint),
       "base_actor": "frozen V38",
-      "method": "obstacle-scene-isolated residual around frozen base",
+      "method": args.method_name,
       "group": args.group,
       "num_envs": args.num_envs,
       "updates": args.updates,
       "seed": args.seed,
       "action_scale": args.action_scale,
       "residual_scale": args.residual_scale,
+      "residual_after_escape": args.residual_after_escape,
       "episode_length_steps": args.episode_length_steps,
       "learning_rate": args.learning_rate,
       "train_std": args.train_std,
@@ -175,7 +187,11 @@ def main() -> None:
       "training_scenes": "obstacle-only, balanced guided/free",
       "teacher_scale_history_center": args.action_scale,
       "flat_action_contract": "exact frozen V38 action",
-      "residual_gate": "scene>0 and not escaped and motor-on",
+      "residual_gate": (
+        "scene>0 and motor-on"
+        if args.residual_after_escape
+        else "scene>0 and not escaped and motor-on"
+      ),
       "legacy_style_target_rewards": "disabled",
       "a6_and_obstacle_rewards": "enabled",
       "common_task_alpha": 1.0,
@@ -202,6 +218,12 @@ def main() -> None:
     flat_applied_residual_max = 0.0
     obstacle_gate_count = 0
     finite_reward = True
+    gate_contract = obstacle_residual_gate(
+      torch.tensor([0, 1, 1, 2], device=env.device),
+      torch.tensor([False, False, True, True], device=env.device),
+      torch.tensor([True, True, True, False], device=env.device),
+      apply_after_escape=args.residual_after_escape,
+    ).tolist()
     with torch.inference_mode():
       for _ in range(rollout_steps):
         residual_actions = residual_policy(observations["actor"])
@@ -224,6 +246,7 @@ def main() -> None:
       "mean_gate": gate_sum / rollout_steps,
       "flat_applied_residual_max": flat_applied_residual_max,
       "obstacle_gate_count": obstacle_gate_count,
+      "gate_contract_flat_active_escaped_motor_off": gate_contract,
       "residual_mean_abs": float(env._a6_residual_action.abs().mean()),
       "gated_residual_mean_abs": float(
         env._a6_gated_residual_action.abs().mean()
@@ -232,15 +255,20 @@ def main() -> None:
       "action_scale": float(env._host_action_rescale.mean()),
       "reset_mix": a6_reset_counts(env),
     }
-    print("A6_V19_PREFLIGHT", json.dumps(preflight), flush=True)
+    print(f"{args.log_tag}_PREFLIGHT", json.dumps(preflight), flush=True)
     assert finite_reward
     assert preflight["gated_residual_mean_abs"] < 1e-7
     assert preflight["flat_applied_residual_max"] == 0.0
-    assert preflight["reset_mix"]["scene"][0] > 0
+    if args.preflight:
+      assert preflight["reset_mix"]["scene"][0] > 0
     assert preflight["obstacle_gate_count"] > 0
+    expected_gate_contract = [False, True, args.residual_after_escape, False]
+    assert preflight["gate_contract_flat_active_escaped_motor_off"] == (
+      expected_gate_contract
+    )
     assert abs(preflight["action_scale"] - args.action_scale) < 1e-6
     if args.preflight:
-      print("A6_V19_PREFLIGHT_PASS", json.dumps(launch), flush=True)
+      print(f"{args.log_tag}_PREFLIGHT_PASS", json.dumps(launch), flush=True)
       return
 
     runner.alg.policy.train()
@@ -253,7 +281,7 @@ def main() -> None:
       str(args.log_dir / f"model_{args.updates}_final.pt"),
       infos={"residual_control": launch},
     )
-    print("A6_V19_TRAINING_DONE", flush=True)
+    print(f"{args.log_tag}_TRAINING_DONE", flush=True)
   finally:
     env.close()
 
