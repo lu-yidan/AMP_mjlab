@@ -22,7 +22,11 @@ from src.tasks.host_recovery.config.g1.rl_cfg import (
   unitree_g1_host_standup_ppo_runner_cfg,
 )
 from src.tasks.host_recovery.mdp.observations import UNACTUATED_STEPS
-from src.tasks.host_recovery.residual_control import TeacherResidualVecEnvWrapper
+from src.tasks.host_recovery.residual_control import (
+  FrozenRecoveryPostEscapeCorrectionVecEnvWrapper,
+  SymmetricSagittalCorrectionProjection,
+  TeacherResidualVecEnvWrapper,
+)
 from src.tasks.host_recovery.rl import HoSTOnPolicyRunner
 from src.tasks.host_recovery.scale_compensation import ScaleCompensatedPolicy
 
@@ -40,6 +44,9 @@ def main() -> None:
   parser.add_argument("--residual-checkpoint", type=Path)
   parser.add_argument("--residual-scale", type=float, default=0.25)
   parser.add_argument("--residual-after-escape", action="store_true")
+  parser.add_argument("--frozen-recovery-checkpoint", type=Path)
+  parser.add_argument("--correction-checkpoint", type=Path)
+  parser.add_argument("--correction-scale", type=float, default=0.15)
   parser.add_argument("--height-threshold", type=float, default=0.70)
   parser.add_argument("--upright-threshold", type=float, default=0.80)
   parser.add_argument("--required-step-fraction", type=float, default=0.80)
@@ -51,6 +58,19 @@ def main() -> None:
     raise ValueError("num-envs must be >= 32 and divisible by 32")
   if args.steps <= UNACTUATED_STEPS:
     raise ValueError("steps must include a controlled interval")
+  dual_residual = (
+    args.frozen_recovery_checkpoint is not None
+    or args.correction_checkpoint is not None
+  )
+  if dual_residual and (
+    args.frozen_recovery_checkpoint is None
+    or args.correction_checkpoint is None
+  ):
+    raise ValueError(
+      "--frozen-recovery-checkpoint and --correction-checkpoint are required together"
+    )
+  if dual_residual and args.residual_checkpoint is not None:
+    raise ValueError("single and dual residual checkpoints are mutually exclusive")
 
   cfg = a6_env_cfg(
     play=False,
@@ -95,9 +115,41 @@ def main() -> None:
     base_policy = runner.get_inference_policy(device="cuda:0")
     compensated_policy = None
     residual_runner = None
+    recovery_runner = None
     if args.compensate_source_scale is None:
       runner.obs_normalizer._mean[:, scale_indices] = args.action_scale
-      if args.residual_checkpoint is None:
+      if dual_residual:
+        recovery_runner = HoSTOnPolicyRunner(
+          base_wrapper, asdict(agent), device="cuda:0"
+        )
+        recovery_runner.load(
+          str(args.frozen_recovery_checkpoint),
+          load_optimizer=False,
+          map_location="cuda:0",
+        )
+        recovery_runner.obs_normalizer._mean[:, scale_indices] = args.action_scale
+        recovery_policy = recovery_runner.get_inference_policy(device="cuda:0")
+        wrapper = FrozenRecoveryPostEscapeCorrectionVecEnvWrapper(
+          env,
+          base_policy=base_policy,
+          recovery_policy=recovery_policy,
+          recovery_scale=args.residual_scale,
+          correction_scale=args.correction_scale,
+          clip_actions=agent.clip_actions,
+        )
+        residual_runner = HoSTOnPolicyRunner(
+          wrapper, asdict(agent), device="cuda:0"
+        )
+        residual_runner.alg.policy.actor.append(
+          SymmetricSagittalCorrectionProjection(wrapper._pair_action_ids)
+        )
+        residual_runner.load(
+          str(args.correction_checkpoint),
+          load_optimizer=False,
+          map_location="cuda:0",
+        )
+        policy = residual_runner.get_inference_policy(device="cuda:0")
+      elif args.residual_checkpoint is None:
         wrapper = base_wrapper
         policy = base_policy
       else:
@@ -118,7 +170,7 @@ def main() -> None:
         )
         policy = residual_runner.get_inference_policy(device="cuda:0")
     else:
-      if args.residual_checkpoint is not None:
+      if args.residual_checkpoint is not None or dual_residual:
         raise ValueError("scale compensation and a residual are mutually exclusive")
       wrapper = base_wrapper
       compensated_policy = ScaleCompensatedPolicy(
@@ -138,6 +190,7 @@ def main() -> None:
     saturation_sum = 0.0
     saturation_steps = 0
     flat_applied_residual_max = 0.0
+    flat_action_contract_max_error = 0.0
     capture_steps = {
       UNACTUATED_STEPS,
       50,
@@ -159,6 +212,10 @@ def main() -> None:
           flat_applied_residual_max = max(
             flat_applied_residual_max,
             float(env._a6_gated_residual_action.abs().max()),
+          )
+          flat_action_contract_max_error = max(
+            flat_action_contract_max_error,
+            float((env._a6_combined_action - env._a6_base_action).abs().max()),
           )
         alive &= ~dones.bool()
         height = _a6_height(env)
@@ -197,6 +254,17 @@ def main() -> None:
       "residual_after_escape": (
         args.residual_after_escape if residual_runner is not None else None
       ),
+      "frozen_recovery_checkpoint": (
+        str(args.frozen_recovery_checkpoint.resolve())
+        if args.frozen_recovery_checkpoint is not None
+        else None
+      ),
+      "correction_checkpoint": (
+        str(args.correction_checkpoint.resolve())
+        if args.correction_checkpoint is not None
+        else None
+      ),
+      "correction_scale": args.correction_scale if dual_residual else None,
       "group": args.group,
       "num_envs": args.num_envs,
       "steps": args.steps,
@@ -214,6 +282,9 @@ def main() -> None:
       ),
       "flat_applied_residual_max": (
         flat_applied_residual_max if residual_runner is not None else None
+      ),
+      "flat_action_contract_max_error": (
+        flat_action_contract_max_error if residual_runner is not None else None
       ),
       "unactuated_steps": UNACTUATED_STEPS,
       "height_threshold": args.height_threshold,

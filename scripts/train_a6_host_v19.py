@@ -33,8 +33,11 @@ from src.tasks.host_recovery.config.g1.rl_cfg import (
   unitree_g1_host_standup_ppo_runner_cfg,
 )
 from src.tasks.host_recovery.residual_control import (
+  FrozenRecoveryPostEscapeCorrectionVecEnvWrapper,
+  SymmetricSagittalCorrectionProjection,
   TeacherResidualVecEnvWrapper,
   obstacle_residual_gate,
+  post_escape_correction_gate,
   residual_effort,
 )
 from src.tasks.host_recovery.mdp.observations import UNACTUATED_STEPS
@@ -83,6 +86,7 @@ def main() -> None:
   parser = argparse.ArgumentParser()
   parser.add_argument("--base-checkpoint", type=Path, required=True)
   parser.add_argument("--residual-checkpoint", type=Path)
+  parser.add_argument("--frozen-recovery-checkpoint", type=Path)
   parser.add_argument("--log-dir", type=Path, required=True)
   parser.add_argument("--group", choices=("G-", "G+"), required=True)
   parser.add_argument("--num-envs", type=int, default=4096)
@@ -90,7 +94,9 @@ def main() -> None:
   parser.add_argument("--seed", type=int, default=20261016)
   parser.add_argument("--action-scale", type=float, default=0.5723877549171448)
   parser.add_argument("--residual-scale", type=float, default=0.25)
+  parser.add_argument("--correction-scale", type=float, default=0.15)
   parser.add_argument("--residual-after-escape", action="store_true")
+  parser.add_argument("--symmetric-postescape-correction", action="store_true")
   parser.add_argument("--learning-rate", type=float, default=1e-5)
   parser.add_argument("--train-std", type=float, default=0.06)
   parser.add_argument("--save-interval", type=int, default=100)
@@ -115,6 +121,14 @@ def main() -> None:
     raise ValueError("--num-envs must be >= 32 and divisible by 32")
   if not 0.0 < args.action_scale <= 1.0:
     raise ValueError(args.action_scale)
+  dual_residual = args.frozen_recovery_checkpoint is not None
+  if dual_residual != args.symmetric_postescape_correction:
+    raise ValueError(
+      "--frozen-recovery-checkpoint and --symmetric-postescape-correction "
+      "must be used together"
+    )
+  if dual_residual and args.residual_checkpoint is not None:
+    raise ValueError("dual residual training starts a fresh correction policy")
 
   cfg = a6_env_cfg(seed=args.seed, dynamics=False, group=args.group)
   cfg.scene.num_envs = args.num_envs
@@ -188,13 +202,45 @@ def main() -> None:
       parameter.requires_grad_(False)
     base_policy = teacher_runner.get_inference_policy(device="cuda:0")
 
-    wrapper = TeacherResidualVecEnvWrapper(
-      env,
-      base_policy=base_policy,
-      residual_scale=args.residual_scale,
-      clip_actions=agent.clip_actions,
-      apply_after_escape=args.residual_after_escape,
-    )
+    recovery_runner = None
+    recovery_policy = None
+    if dual_residual:
+      recovery_runner = HoSTOnPolicyRunner(
+        teacher_wrapper, asdict(agent), device="cuda:0"
+      )
+      recovery_runner.load(
+        str(args.frozen_recovery_checkpoint),
+        load_optimizer=False,
+        map_location="cuda:0",
+      )
+      set_action_scale(env, args.action_scale)
+      recovery_scale_indices = action_scale_indices(
+        env, recovery_runner.obs_normalizer._mean.shape[-1]
+      )
+      recovery_runner.obs_normalizer._mean[
+        :, recovery_scale_indices
+      ] = args.action_scale
+      recovery_runner.alg.policy.eval()
+      recovery_runner.obs_normalizer.eval()
+      for parameter in recovery_runner.alg.policy.parameters():
+        parameter.requires_grad_(False)
+      recovery_policy = recovery_runner.get_inference_policy(device="cuda:0")
+      wrapper = FrozenRecoveryPostEscapeCorrectionVecEnvWrapper(
+        env,
+        base_policy=base_policy,
+        recovery_policy=recovery_policy,
+        recovery_scale=args.residual_scale,
+        correction_scale=args.correction_scale,
+        clip_actions=agent.clip_actions,
+      )
+    else:
+      wrapper = TeacherResidualVecEnvWrapper(
+        env,
+        base_policy=base_policy,
+        residual_scale=args.residual_scale,
+        clip_actions=agent.clip_actions,
+        apply_after_escape=args.residual_after_escape,
+      )
     if args.preflight:
       env_ids = torch.arange(env.num_envs, device=env.device)
       env._a6_scene.copy_((env_ids * 3 // env.num_envs).clamp(max=2))
@@ -203,6 +249,14 @@ def main() -> None:
     runner = HoSTOnPolicyRunner(
       wrapper, asdict(agent), str(args.log_dir), "cuda:0"
     )
+    if recovery_runner is not None:
+      runner.alg.policy.actor.append(
+        SymmetricSagittalCorrectionProjection(wrapper._pair_action_ids)
+      )
+      runner.obs_normalizer.load_state_dict(
+        recovery_runner.obs_normalizer.state_dict()
+      )
+      runner.obs_normalizer.eval()
     output_layer = runner.alg.policy.actor[6]
     if args.residual_checkpoint is not None:
       runner.load(
@@ -233,6 +287,16 @@ def main() -> None:
         if args.residual_checkpoint is not None
         else None
       ),
+      "frozen_recovery_checkpoint": (
+        str(args.frozen_recovery_checkpoint.resolve())
+        if args.frozen_recovery_checkpoint is not None
+        else None
+      ),
+      "frozen_recovery_checkpoint_sha256": (
+        sha256(args.frozen_recovery_checkpoint)
+        if args.frozen_recovery_checkpoint is not None
+        else None
+      ),
       "method": args.method_name,
       "group": args.group,
       "num_envs": args.num_envs,
@@ -240,7 +304,11 @@ def main() -> None:
       "seed": args.seed,
       "action_scale": args.action_scale,
       "residual_scale": args.residual_scale,
+      "correction_scale": args.correction_scale if dual_residual else None,
       "residual_after_escape": args.residual_after_escape,
+      "symmetric_postescape_correction": (
+        args.symmetric_postescape_correction
+      ),
       "post_escape_height_weight": args.post_escape_height_weight,
       "post_escape_stance_weight": args.post_escape_stance_weight,
       "episode_length_steps": args.episode_length_steps,
@@ -251,9 +319,13 @@ def main() -> None:
       "teacher_scale_history_center": args.action_scale,
       "flat_action_contract": "exact frozen V38 action",
       "residual_gate": (
-        "scene>0 and motor-on"
-        if args.residual_after_escape
-        else "scene>0 and not escaped and motor-on"
+        "scene>0 and escaped and motor-on; frozen recovery remains active"
+        if dual_residual
+        else (
+          "scene>0 and motor-on"
+          if args.residual_after_escape
+          else "scene>0 and not escaped and motor-on"
+        )
       ),
       "legacy_style_target_rewards": "disabled",
       "a6_and_obstacle_rewards": "enabled",
@@ -273,6 +345,20 @@ def main() -> None:
     assert output_layer.weight.grad is not None
     assert output_layer.weight.grad.abs().sum() > 0
     assert all(parameter.grad is None for parameter in teacher_runner.alg.policy.parameters())
+    if recovery_runner is not None:
+      assert all(
+        parameter.grad is None
+        for parameter in recovery_runner.alg.policy.parameters()
+      )
+      pair_ids = wrapper._pair_action_ids.flatten()
+      inactive = torch.ones(output_layer.out_features, dtype=torch.bool, device=env.device)
+      inactive[pair_ids] = False
+      assert output_layer.weight.grad[inactive].abs().max() == 0
+      assert output_layer.bias.grad is not None
+      assert output_layer.bias.grad[inactive].abs().max() == 0
+      assert probe[:, inactive].abs().max() == 0
+      for left_id, right_id in wrapper._pair_action_ids:
+        assert (probe[:, left_id] - probe[:, right_id]).abs().max() == 0
     runner.alg.optimizer.zero_grad(set_to_none=True)
 
     rollout_steps = args.preflight_steps if args.preflight else 200
@@ -284,14 +370,27 @@ def main() -> None:
     reward_abs_sum = torch.zeros(
       len(env.reward_manager.active_terms), device=env.device
     )
-    gate_contract = obstacle_residual_gate(
-      torch.tensor([0, 1, 1, 2], device=env.device),
-      torch.tensor([False, False, True, True], device=env.device),
-      torch.tensor([True, True, True, False], device=env.device),
-      apply_after_escape=args.residual_after_escape,
-    ).tolist()
+    contract_scene = torch.tensor([0, 1, 1, 2], device=env.device)
+    contract_escaped = torch.tensor([False, False, True, True], device=env.device)
+    contract_motor_on = torch.tensor([True, True, True, False], device=env.device)
+    if dual_residual:
+      gate_contract = post_escape_correction_gate(
+        contract_scene, contract_escaped, contract_motor_on
+      ).tolist()
+    else:
+      gate_contract = obstacle_residual_gate(
+        contract_scene,
+        contract_escaped,
+        contract_motor_on,
+        apply_after_escape=args.residual_after_escape,
+      ).tolist()
+    recovery_action_max_error = 0.0
+    correction_pair_max_error = 0.0
+    correction_inactive_max = 0.0
     with torch.inference_mode():
       for _ in range(rollout_steps):
+        if recovery_policy is not None:
+          expected_recovery = recovery_policy(observations["actor"])
         residual_actions = residual_policy(observations["actor"])
         observations, rewards, _, _ = wrapper.step(residual_actions)
         reward_abs_sum += env.reward_manager._step_reward.abs().mean(dim=0)
@@ -304,6 +403,28 @@ def main() -> None:
             float(env._a6_gated_residual_action[flat].abs().max()),
           )
         obstacle_gate_count += int(gate.sum())
+        if recovery_policy is not None:
+          recovery_action_max_error = max(
+            recovery_action_max_error,
+            float(
+              (env._a6_recovery_residual_action - expected_recovery).abs().max()
+            ),
+          )
+          projected = env._a6_projected_residual_action
+          pair_ids = wrapper._pair_action_ids
+          for left_id, right_id in pair_ids:
+            correction_pair_max_error = max(
+              correction_pair_max_error,
+              float((projected[:, left_id] - projected[:, right_id]).abs().max()),
+            )
+          inactive = torch.ones(
+            projected.shape[-1], dtype=torch.bool, device=env.device
+          )
+          inactive[pair_ids.flatten()] = False
+          correction_inactive_max = max(
+            correction_inactive_max,
+            float(projected[:, inactive].abs().max()),
+          )
         finite_reward &= bool(torch.isfinite(rewards).all())
         assert torch.isfinite(env._a6_combined_action).all()
         assert torch.isfinite(observations["actor"]).all()
@@ -334,6 +455,15 @@ def main() -> None:
         for name in ("a6_post_escape_height", "a6_post_escape_stance")
         if name in reward_abs_mean
       },
+      "recovery_action_max_error": (
+        recovery_action_max_error if recovery_policy is not None else None
+      ),
+      "correction_pair_max_error": (
+        correction_pair_max_error if recovery_policy is not None else None
+      ),
+      "correction_inactive_max": (
+        correction_inactive_max if recovery_policy is not None else None
+      ),
     }
     print(f"{args.log_tag}_PREFLIGHT", json.dumps(preflight), flush=True)
     assert finite_reward
@@ -343,11 +473,19 @@ def main() -> None:
     if args.preflight:
       assert preflight["reset_mix"]["scene"][0] > 0
     assert preflight["obstacle_gate_count"] > 0
-    expected_gate_contract = [False, True, args.residual_after_escape, False]
+    expected_gate_contract = (
+      [False, False, True, False]
+      if dual_residual
+      else [False, True, args.residual_after_escape, False]
+    )
     assert preflight["gate_contract_flat_active_escaped_motor_off"] == (
       expected_gate_contract
     )
     assert abs(preflight["action_scale"] - args.action_scale) < 1e-6
+    if dual_residual:
+      assert preflight["recovery_action_max_error"] == 0.0
+      assert preflight["correction_pair_max_error"] == 0.0
+      assert preflight["correction_inactive_max"] == 0.0
     if args.post_escape_height_weight:
       assert reward_abs_mean["a6_post_escape_height"] > 0.0
     if args.post_escape_stance_weight:
@@ -357,7 +495,7 @@ def main() -> None:
       return
 
     runner.alg.policy.train()
-    runner.obs_normalizer.train()
+    runner.obs_normalizer.train(not dual_residual)
     if runner.privileged_obs_normalizer is not None:
       runner.privileged_obs_normalizer.train()
     runner.save(str(args.log_dir / "model_0.pt"), infos={"residual_control": launch})

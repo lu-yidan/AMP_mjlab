@@ -39,7 +39,11 @@ from src.tasks.host_recovery.config.g1.rl_cfg import (
   unitree_g1_host_standup_ppo_runner_cfg,
 )
 from src.tasks.host_recovery.mdp.a6_geometry import DIRECTIONS
-from src.tasks.host_recovery.residual_control import TeacherResidualVecEnvWrapper
+from src.tasks.host_recovery.residual_control import (
+  FrozenRecoveryPostEscapeCorrectionVecEnvWrapper,
+  SymmetricSagittalCorrectionProjection,
+  TeacherResidualVecEnvWrapper,
+)
 from src.tasks.host_recovery.rl import HoSTOnPolicyRunner
 
 
@@ -139,10 +143,26 @@ def main() -> None:
   parser.add_argument("--residual-checkpoint", type=Path)
   parser.add_argument("--residual-scale", type=float, default=0.25)
   parser.add_argument("--residual-after-escape", action="store_true")
+  parser.add_argument("--frozen-recovery-checkpoint", type=Path)
+  parser.add_argument("--correction-checkpoint", type=Path)
+  parser.add_argument("--correction-scale", type=float, default=0.15)
   args = parser.parse_args()
 
   if args.num_envs < 32 or args.num_envs % 32:
     raise ValueError("--num-envs must be >= 32 and divisible by 32")
+  dual_residual = (
+    args.frozen_recovery_checkpoint is not None
+    or args.correction_checkpoint is not None
+  )
+  if dual_residual and (
+    args.frozen_recovery_checkpoint is None
+    or args.correction_checkpoint is None
+  ):
+    raise ValueError(
+      "--frozen-recovery-checkpoint and --correction-checkpoint are required together"
+    )
+  if dual_residual and args.residual_checkpoint is not None:
+    raise ValueError("single and dual residual checkpoints are mutually exclusive")
 
   cfg = a6_env_cfg(
     play=True,
@@ -187,7 +207,40 @@ def main() -> None:
       runner.obs_normalizer._mean[:, scale_indices] = args.action_scale
     base_policy = runner.get_inference_policy(device="cuda:0")
     residual_runner = None
-    if args.residual_checkpoint is None:
+    recovery_runner = None
+    if dual_residual:
+      recovery_runner = HoSTOnPolicyRunner(
+        base_wrapper, asdict(agent), device="cuda:0"
+      )
+      recovery_runner.load(
+        str(args.frozen_recovery_checkpoint),
+        load_optimizer=False,
+        map_location="cuda:0",
+      )
+      if args.action_scale is not None:
+        recovery_runner.obs_normalizer._mean[:, scale_indices] = args.action_scale
+      recovery_policy = recovery_runner.get_inference_policy(device="cuda:0")
+      wrapper = FrozenRecoveryPostEscapeCorrectionVecEnvWrapper(
+        env,
+        base_policy=base_policy,
+        recovery_policy=recovery_policy,
+        recovery_scale=args.residual_scale,
+        correction_scale=args.correction_scale,
+        clip_actions=agent.clip_actions,
+      )
+      residual_runner = HoSTOnPolicyRunner(
+        wrapper, asdict(agent), device="cuda:0"
+      )
+      residual_runner.alg.policy.actor.append(
+        SymmetricSagittalCorrectionProjection(wrapper._pair_action_ids)
+      )
+      residual_runner.load(
+        str(args.correction_checkpoint),
+        load_optimizer=False,
+        map_location="cuda:0",
+      )
+      policy = residual_runner.get_inference_policy(device="cuda:0")
+    elif args.residual_checkpoint is None:
       wrapper = base_wrapper
       policy = base_policy
     else:
@@ -343,7 +396,14 @@ def main() -> None:
         if residual_runner is not None:
           residual_action = env._a6_residual_action
           gated_residual = env._a6_gated_residual_action
-          preclip_action = env._a6_base_action + gated_residual
+          recovery_residual = getattr(
+            env,
+            "_a6_gated_recovery_residual_action",
+            torch.zeros_like(gated_residual),
+          )
+          preclip_action = (
+            env._a6_base_action + recovery_residual + gated_residual
+          )
           active = post_escape_alive.float()
           post_escape_residual_steps += active
           post_escape_residual_abs_sum += (
@@ -507,6 +567,27 @@ def main() -> None:
       "residual_after_escape": (
         args.residual_after_escape if residual_runner is not None else None
       ),
+      "frozen_recovery_checkpoint": (
+        str(args.frozen_recovery_checkpoint.resolve())
+        if args.frozen_recovery_checkpoint is not None
+        else None
+      ),
+      "frozen_recovery_checkpoint_sha256": (
+        sha256_file(args.frozen_recovery_checkpoint)
+        if args.frozen_recovery_checkpoint is not None
+        else None
+      ),
+      "correction_checkpoint": (
+        str(args.correction_checkpoint.resolve())
+        if args.correction_checkpoint is not None
+        else None
+      ),
+      "correction_checkpoint_sha256": (
+        sha256_file(args.correction_checkpoint)
+        if args.correction_checkpoint is not None
+        else None
+      ),
+      "correction_scale": args.correction_scale if dual_residual else None,
       "action_scale_requested": args.action_scale,
       "action_scale": float(env._host_action_rescale.mean()),
       "group": args.group,

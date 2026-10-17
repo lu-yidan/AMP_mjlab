@@ -682,6 +682,31 @@ reward scaling or blind continuation. The next adapter must freeze recovery
 and isolate a symmetric low-dimensional post-escape sagittal controller trained
 from escaped-state data. Full results are in `A6_29_V21_FINAL.md`.
 
+## V22: frozen recovery plus symmetric post-escape correction
+
+V22 separates the two obstacle responsibilities instead of asking one 29-D
+residual to solve both. The selected V20 update-200 residual is frozen and
+continues to handle obstacle recovery from motor-on through the remainder of
+the episode. A second fresh correction policy is gated strictly to obstacle
+scenes after confirmed escape. Its effective action is limited to mirrored
+left/right hip-pitch, knee, and ankle-pitch pairs; all other action rows are
+identically zero. The V38 base actor and both inherited normalizers remain
+frozen. The correction scale is `0.15`, with fixed std `0.03`, learning rate
+`5e-6`, and fresh critic/optimizer state.
+
+The actor itself includes the sagittal projection, so PPO gradients cannot
+flow through inactive output rows; the environment wrapper repeats the same
+projection as a safety boundary. Paired 64-environment, 1,150-step preflights
+verified the gate contract `[flat=false, pre-escape=false, post-escape=true,
+motor-off=false]`, bit-exact frozen V20 recovery output, equal actions within
+all three bilateral pairs, zero actions on the other 23 rows, exact-zero flat
+correction, finite rewards/normalizers, and no NaN/Inf. The bounded
+post-escape height and stance rewards were nonzero in both groups. The initial
+pilot retains full obstacle trajectories rather than injecting isolated
+escaped states because exact stacked observation/action-history replay has not
+yet been validated; a replay bank must not be used until one-step actor output
+is reproducible from its stored history.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
