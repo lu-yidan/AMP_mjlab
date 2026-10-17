@@ -707,6 +707,21 @@ escaped states because exact stacked observation/action-history replay has not
 yet been validated; a replay bank must not be used until one-step actor output
 is reproducible from its stored history.
 
+Both 4,096-environment runs completed 1,200 updates without numerical or
+termination faults. Update 200 and final preserve `128/128` flat-near
+retention with exact-zero flat correction and exact-zero flat action error.
+The symmetric controller does learn nonzero bilateral extension, especially
+at the knees, without correction saturation. It does not solve the formal
+height gap: every G-/G+ checkpoint remains `0/256` primary with zero seconds
+of `1.15 m` height/upright hold. G- final raises escaped final head height to
+`1.0966 m` and max height to `1.1032 m`, only about 5 mm and 2--3 mm above the
+V20 region; G+ is smaller. Best escape is `45/256` for both groups, which does
+not reliably exceed V20 (`42/256` G-, `48/256` G+). V22 therefore validates
+scene and symmetry isolation but rejects another reward-only continuation.
+The next step is a bounded post-escape hip/knee/ankle action-response sweep,
+not a longer run or blind correction-scale increase. Full results are in
+`A6_29_V22_FINAL.md`.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
