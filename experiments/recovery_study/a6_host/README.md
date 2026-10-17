@@ -722,6 +722,29 @@ The next step is a bounded post-escape hip/knee/ankle action-response sweep,
 not a longer run or blind correction-scale increase. Full results are in
 `A6_29_V22_FINAL.md`.
 
+## V23: paired symmetric action-response sweep
+
+V23 freezes V38 and the selected V20 update-200 recovery residuals, then
+scans the complete symmetric post-escape hip-pitch/knee/ankle-pitch grid with
+each actual additive action in `{-0.15, -0.075, 0, 0.075, 0.15}`. The 125
+combinations use 32 strictly paired all-low environments each, balanced over
+both plate scenes, all four directions, and natural/procedural sources. Paired
+initial robot states and actor observations are bit-identical, frozen recovery
+outputs are bit-identical, and correction is exactly zero before escape and
+during motor-off.
+
+Both 4,000-environment native-scale scans are negative. G-/G+ produce
+`0/4000` primary, zero environments with even one step of formal
+height/upright hold, and zero escaped environments reaching `1.15 m` maximum
+head height. The largest isolated maxima are `1.14144 m` for G- and
+`1.13659 m` for G+; neither is held. No combination exceeds 5% mean combined
+action clipping, so broad saturation does not explain the failure. The full
+three-pair `[-0.15, 0.15]^3` correction box therefore has no validated formal
+height region around the frozen V38+V20 control flow. Finer scanning and
+another anchored three-pair policy are rejected. The next method must change
+the base standing target or use a broader verified full-body posture
+optimizer. Full results are in `A6_29_V23_FINAL.md`.
+
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is
 kept at `../smp-a6-baseline` on branch `baseline/a6-adaptation`; files from
