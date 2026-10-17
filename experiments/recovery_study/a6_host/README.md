@@ -668,8 +668,19 @@ The frozen V38 base, native action scale `0.9323874`, obstacle-only residual
 gate, exact-zero flat contract, and residual scale `0.25` are unchanged. Both
 64-environment, 1,150-step preflights passed with finite gradients, exact-zero
 flat residual, nonzero bounded shaping signals, and the expected post-escape
-gate. Paired 4,096-environment runs are active for 1,200 updates with std
-`0.035`, learning rate `7.5e-6`, two PPO epochs, and fresh optimizer state.
+gate. Paired 4,096-environment runs completed 1,200 updates with std `0.035`,
+learning rate `7.5e-6`, two PPO epochs, and fresh optimizer state.
+
+Every evaluated checkpoint preserved the `128/128` flat contract, but all
+native-scale all-low evaluations remained `0/256` primary and no escaped trial
+held the formal `1.15 m` height threshold. V21 increased mean post-escape raw
+residual magnitude by about `5.4x` for G- and `8.7x` for G+ without saturation,
+yet maximum escaped head height improved by only about `3 mm`. The learned
+response concentrated on unilateral right-knee and asymmetric upper-body
+corrections instead of bilateral extension. V21 therefore rejects further
+reward scaling or blind continuation. The next adapter must freeze recovery
+and isolate a symmetric low-dimensional post-escape sagittal controller trained
+from escaped-state data. Full results are in `A6_29_V21_FINAL.md`.
 
 As of 2026-10-10, the source of truth for this migration is the frozen SMP
 commit `1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2`. A dedicated local checkout is

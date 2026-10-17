@@ -246,6 +246,16 @@ def main() -> None:
     post_escape_primary_hold_max = torch.zeros(
       n, dtype=torch.long, device=device
     )
+    post_escape_residual_steps = torch.zeros(n, device=device)
+    post_escape_residual_abs_sum = torch.zeros(n, device=device)
+    post_escape_residual_saturation_sum = torch.zeros(n, device=device)
+    post_escape_combined_clip_sum = torch.zeros(n, device=device)
+    post_escape_residual_joint_sum = torch.zeros(
+      n, robot.data.joint_pos.shape[-1], device=device
+    )
+    post_escape_residual_joint_abs_sum = torch.zeros_like(
+      post_escape_residual_joint_sum
+    )
 
     with torch.no_grad():
       for step in range(args.steps):
@@ -330,6 +340,25 @@ def main() -> None:
           post_escape_primary_hold_max,
           post_escape_primary_hold,
         )
+        if residual_runner is not None:
+          residual_action = env._a6_residual_action
+          gated_residual = env._a6_gated_residual_action
+          preclip_action = env._a6_base_action + gated_residual
+          active = post_escape_alive.float()
+          post_escape_residual_steps += active
+          post_escape_residual_abs_sum += (
+            residual_action.abs().mean(dim=-1) * active
+          )
+          post_escape_residual_saturation_sum += (
+            (residual_action.abs() >= 0.95).float().mean(dim=-1) * active
+          )
+          post_escape_combined_clip_sum += (
+            (preclip_action.abs() > 1.0).float().mean(dim=-1) * active
+          )
+          post_escape_residual_joint_sum += gated_residual * active.unsqueeze(-1)
+          post_escape_residual_joint_abs_sum += (
+            gated_residual.abs() * active.unsqueeze(-1)
+          )
 
     timeout_events = int(
       (dones.bool() & (env.episode_length_buf >= int(env.max_episode_length))).sum()
@@ -364,6 +393,7 @@ def main() -> None:
       }
       escaped_ids = ids[escaped_seen[ids]]
       if escaped_ids.numel():
+        residual_steps = post_escape_residual_steps[escaped_ids].clamp_min(1.0)
         row["escaped_post_escape"] = {
           "n": int(escaped_ids.numel()),
           "final_head_height_mean_m": float(final_height[escaped_ids].mean()),
@@ -382,6 +412,34 @@ def main() -> None:
           "primary_hold_max_mean_s": float(
             post_escape_primary_hold_max[escaped_ids].float().mean()
             * env.step_dt
+          ),
+          "residual_action_abs_mean": (
+            float(
+              (
+                post_escape_residual_abs_sum[escaped_ids] / residual_steps
+              ).mean()
+            )
+            if residual_runner is not None
+            else None
+          ),
+          "residual_action_saturation_fraction": (
+            float(
+              (
+                post_escape_residual_saturation_sum[escaped_ids]
+                / residual_steps
+              ).mean()
+            )
+            if residual_runner is not None
+            else None
+          ),
+          "combined_action_clip_fraction": (
+            float(
+              (
+                post_escape_combined_clip_sum[escaped_ids] / residual_steps
+              ).mean()
+            )
+            if residual_runner is not None
+            else None
           ),
         }
       else:
@@ -408,6 +466,28 @@ def main() -> None:
         scene_source_detail[f"{scene_name}/{source_name}"] = rows_for_mask(mask)
 
     total = rows_for_mask(torch.ones(n, dtype=torch.bool, device=device))
+    post_escape_residual_joint_response = None
+    escaped_ids = torch.nonzero(escaped_seen, as_tuple=False).flatten()
+    if residual_runner is not None and escaped_ids.numel():
+      residual_steps = post_escape_residual_steps[escaped_ids].clamp_min(1.0)
+      signed = (
+        post_escape_residual_joint_sum[escaped_ids]
+        / residual_steps.unsqueeze(-1)
+      ).mean(dim=0)
+      absolute = (
+        post_escape_residual_joint_abs_sum[escaped_ids]
+        / residual_steps.unsqueeze(-1)
+      ).mean(dim=0)
+      order = torch.argsort(absolute, descending=True)
+      joint_names = list(robot.joint_names)
+      post_escape_residual_joint_response = [
+        {
+          "joint": joint_names[int(index)],
+          "signed_scaled_residual_mean": float(signed[index]),
+          "abs_scaled_residual_mean": float(absolute[index]),
+        }
+        for index in order
+      ]
 
     args.output.mkdir(parents=True, exist_ok=False)
     summary = {
@@ -461,6 +541,7 @@ def main() -> None:
       },
       "timeout_events": timeout_events,
       "total": total,
+      "post_escape_residual_joint_response": post_escape_residual_joint_response,
       "by_scene": summary_by_scene,
       "by_direction": direction_detail,
       "by_source": source_detail,
