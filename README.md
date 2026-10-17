@@ -2,7 +2,7 @@
 
 > **CZRay_HoST 分支**：本分支在 [InternRobotics/HoST](https://github.com/InternRobotics/HoST) 基础上增加 Unitree G1 29 DoF 的 mjlab 平地起身与 A6 持续约束脱困实现。原 HoST Isaac Gym 代码、论文说明和许可证保留在本仓库；新增实现位于 `src/g1recovery_host/`，训练与回放入口位于 `scripts/`。原 23 DoF 平地移植见 [REPRODUCE_G1_GROUND_23DOF.md](REPRODUCE_G1_GROUND_23DOF.md)，29 DoF 任务、关节配置和奖励说明见 [A6_HOST29.md](A6_HOST29.md)，最新实验与限制见 [A6_FINAL_HANDOFF_20261013.md](A6_FINAL_HANDOFF_20261013.md)。以下保留 HoST 官方 Isaac Gym 说明。
 
-训练日志、模型权重和虚拟环境没有纳入 Git。`pyproject.toml` 默认使用同级目录的 `../mjlab` 源码（Python 3.13、mjlab 1.6.0）；回放前需将所需 checkpoint 放入文档所述的 `logs/` 路径。项目代码和重置状态数据、机器人模型、测试及诊断文档均已包含在本分支。
+本分支包含一份可直接回放的 G+、29 DoF、A6 第 2999 轮权重：[`logs/downloaded/a6_v24_lrcap5e5/model_02999.pt`](logs/downloaded/a6_v24_lrcap5e5/model_02999.pt)，SHA-256 为 `22d4b0a0b5499dd67b66820a4f245b7e69aac966589b011fa41073d9cdb9dfaa`。训练日志、其他模型权重和虚拟环境未纳入 Git。`pyproject.toml` 默认使用同级目录的 `../mjlab` 源码（Python 3.13、mjlab 1.6.0）；四场景回放命令见 [A6_FINAL_HANDOFF_20261013.md](A6_FINAL_HANDOFF_20261013.md)。项目代码和重置状态数据、机器人模型、测试及诊断文档均已包含在本分支。
 
 [![arXiv](https://img.shields.io/badge/arXiv-2502.08378-brown)](https://arxiv.org/abs/2502.08378)
 [![](https://img.shields.io/badge/Website-%F0%9F%9A%80-yellow)](https://taohuang13.github.io/humanoid-standingup.github.io/)
