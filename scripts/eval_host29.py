@@ -11,6 +11,7 @@ os.environ.setdefault("TORCHDYNAMO_DISABLE", "1")
 import torch
 from mjlab.envs import ManagerBasedRlEnv
 from mjlab.rl import RslRlVecEnvWrapper
+from mjlab.utils.lab_api.math import quat_apply
 
 from src.tasks.host_recovery.config.g1.rl_cfg import unitree_g1_host_standup_ppo_runner_cfg
 from src.tasks.host_recovery.flat29 import flat29_env_cfg
@@ -19,6 +20,9 @@ from src.tasks.host_recovery.rl import HoSTOnPolicyRunner
 
 
 POSTURES = ("prone", "supine", "left_side", "right_side")
+A6_HEAD_OFFSET = 0.43
+A6_FORMAL_HEAD_HEIGHT = 1.15
+A6_FORMAL_UPRIGHT = 0.90
 
 
 def _fraction(value: torch.Tensor) -> float:
@@ -94,6 +98,11 @@ def main() -> None:
             first_hold = torch.full_like(first_stand, -1)
             final_standing = torch.zeros_like(valid)
             final_upright = torch.zeros_like(valid)
+            a6_formal_ever = torch.zeros_like(valid)
+            a6_formal_held = torch.zeros_like(valid)
+            a6_formal_consecutive = torch.zeros_like(consecutive)
+            final_a6_formal = torch.zeros_like(valid)
+            final_a6_head_height = torch.zeros(args.num_envs, device=env.device)
             standing_sample_count = torch.zeros((), device=env.device)
             standing_yaw_rate_sum = torch.zeros((), device=env.device)
             standing_yaw_rate_abs_sum = torch.zeros((), device=env.device)
@@ -116,6 +125,27 @@ def main() -> None:
                     height = torso_z - feet_z
                     upright = robot.data.projected_gravity_b[:, 2] < -0.8
                     standing = (height > 0.6) & upright & valid
+                    head_local = torch.zeros((args.num_envs, 3), device=env.device)
+                    head_local[:, 2] = A6_HEAD_OFFSET
+                    a6_head_height = (
+                        torso_z
+                        + quat_apply(
+                            robot.data.body_link_quat_w[:, torso_id], head_local
+                        )[:, 2]
+                        - env.scene.env_origins[:, 2]
+                    )
+                    a6_formal = (
+                        (a6_head_height >= A6_FORMAL_HEAD_HEIGHT)
+                        & (robot.data.projected_gravity_b[:, 2] <= -A6_FORMAL_UPRIGHT)
+                        & valid
+                    )
+                    a6_formal_ever |= a6_formal
+                    a6_formal_consecutive = torch.where(
+                        a6_formal, a6_formal_consecutive + 1, 0
+                    )
+                    a6_formal_held |= a6_formal_consecutive >= args.hold_steps
+                    final_a6_formal = a6_formal
+                    final_a6_head_height = a6_head_height
                     newly_standing = standing & (first_stand < 0)
                     first_stand[newly_standing] = step
                     ever_standing |= standing
@@ -157,6 +187,13 @@ def main() -> None:
                 "held_fraction": _fraction(held & valid),
                 "final_standing_fraction": _fraction(final_standing),
                 "final_upright_fraction": _fraction(final_upright),
+                "a6_formal_ever_fraction": _fraction(a6_formal_ever),
+                "a6_formal_held_fraction": _fraction(a6_formal_held & valid),
+                "a6_formal_final_fraction": _fraction(final_a6_formal),
+                "a6_head_height_final_mean_m": final_a6_head_height[valid].mean().item()
+                if valid.any() else None,
+                "a6_head_height_final_min_m": final_a6_head_height[valid].amin().item()
+                if valid.any() else None,
                 "first_hold_seconds_median": (
                     held_times.median().item() if held_times.numel() else None
                 ),
@@ -212,6 +249,10 @@ def main() -> None:
             "hold_steps": args.hold_steps,
             "action_scale": action_scale,
             "success_definition": "torso-minus-feet > 0.6 m and projected gravity z < -0.8 for consecutive hold_steps",
+            "a6_formal_definition": (
+                "virtual head site >= 1.15 m and uprightness >= 0.90 for "
+                "consecutive hold_steps"
+            ),
             "results": results,
         }
         args.output.parent.mkdir(parents=True, exist_ok=True)

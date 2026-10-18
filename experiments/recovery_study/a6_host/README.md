@@ -1106,3 +1106,27 @@ counts, all three reset-bank hashes, seed, event order, and code SHA. The
 scene counts are `[2048, 1024, 1024, 0]` for flat, vertical guided plate,
 free plate, and the unused fourth scene slot; the low/middle/near-standing
 counts are `[2868, 820, 408]`.
+
+## HoST versus A6 height root cause and V39
+
+The V23 reachability result triggered a direct source/adapter audit. The A6
+head definition is correct: it matches the frozen SMP massless `head` site at
+`[0, 0, 0.43] m` on `torso_link` and the `1.15 m` formal boundary. The mismatch
+is upstream in the HoST base objective, which measures torso height relative
+to the feet and uses a soft `0.8 m` target.
+
+A plate-free four-posture V38 audit reproduces final SMP/A6 head heights of
+only `1.0887--1.0924 m`, with zero final formal-height environments. Because
+this occurs without A6 scenes or residuals, the low flat posture is not caused
+by obstacle training. V17's previously measured `1.157 m` final head height
+also confirms that the 29-DoF plant can cross the formal boundary.
+
+V39 fixes the HoST source rather than weakening A6. It adds a post-standing
+reward based on the authoritative rotated virtual-head site, targets `1.17 m`
+and uprightness `0.93`, and retains the `1.15 m / 0.90` formal contract. The V38
+actor is exact at launch; only its final actor layer is trainable under hard
+row-wise trust regions. Parallel trust-scale `1x` and `2x` 64-environment
+preflights both passed and reproduced the source at `1.0935 m` before training.
+The full audit and acceptance boundary are in
+`A6_29_HOST_VS_A6_ROOT_CAUSE.md`. V39 is not selected until four-posture
+recovery, stability, and sustained A6-height evaluations all pass.

@@ -12,7 +12,7 @@ os.environ.setdefault("TORCHDYNAMO_DISABLE", "1")
 import torch
 from mjlab.envs import ManagerBasedRlEnv
 from mjlab.rl import RslRlVecEnvWrapper
-from mjlab.utils.lab_api.math import quat_apply_inverse
+from mjlab.utils.lab_api.math import quat_apply, quat_apply_inverse
 
 from scripts.train_host29_v7 import set_action_scale
 from src.tasks.host_recovery.config.g1.rl_cfg import (
@@ -33,6 +33,9 @@ POSTURES = ("prone", "supine", "left_side", "right_side")
 WAIST_JOINTS = ("waist_roll_joint", "waist_pitch_joint")
 HAND_TARGETS = ((0.0, 0.28, -0.30), (0.0, -0.28, -0.30))
 SAGITTAL_TARGET = (-0.5287, 1.2749, -0.5947)
+A6_HEAD_OFFSET = 0.43
+A6_FORMAL_HEAD_HEIGHT = 1.15
+A6_FORMAL_UPRIGHT = 0.93
 STEP_PULSE_JOINT_NAMES = (
   "right_hip_roll_joint",
   "right_hip_pitch_joint",
@@ -83,6 +86,11 @@ def main() -> None:
   parser.add_argument("--sagittal-target-max-action", type=float, default=1.0)
   parser.add_argument(
     "--sagittal-target", type=float, nargs=3, default=SAGITTAL_TARGET
+  )
+  parser.add_argument(
+    "--sagittal-target-control-mode",
+    choices=("position", "error"),
+    default="error",
   )
   parser.add_argument(
     "--sagittal-target-delta", type=float, nargs=3, default=(0.0, 0.0, 0.0)
@@ -285,6 +293,8 @@ def main() -> None:
         "right_arm_target_mae_rad": torch.zeros((), device=env.device),
         "waist_target_mae_rad": torch.zeros((), device=env.device),
         "upper_action_abs_mean": torch.zeros((), device=env.device),
+        "a6_head_height_m": torch.zeros((), device=env.device),
+        "a6_formal_contract": torch.zeros((), device=env.device),
         "feet_forward_offset_m": torch.zeros((), device=env.device),
         "feet_height_offset_m": torch.zeros((), device=env.device),
         "feet_lateral_separation_m": torch.zeros((), device=env.device),
@@ -304,6 +314,13 @@ def main() -> None:
       feet_forward_offset_final = torch.full(
         (args.num_envs,), float("nan"), device=env.device
       )
+      a6_head_height_final = torch.full(
+        (args.num_envs,), float("nan"), device=env.device
+      )
+      a6_head_height_max = torch.full(
+        (args.num_envs,), -float("inf"), device=env.device
+      )
+      a6_contract_steps = torch.zeros(args.num_envs, device=env.device)
 
       with torch.no_grad():
         for _ in range(args.steps):
@@ -442,13 +459,18 @@ def main() -> None:
               actions[:, sagittal_action_ids[0]] = mixed_sagittal[:, 0]
               actions[:, sagittal_action_ids[1]] = mixed_sagittal[:, 1]
           if args.sagittal_target_blend > 0.0:
-            target_correction = (
-              args.sagittal_target_gain
-              * (
+            if args.sagittal_target_control_mode == "position":
+              target_error = (
+                sagittal_target[None, :, :]
+                - robot.data.default_joint_pos[:, sagittal_joint_ids]
+              )
+            else:
+              target_error = (
                 sagittal_target[None, :, :]
                 - robot.data.joint_pos[:, sagittal_joint_ids]
               )
-              / action_scale
+            target_correction = (
+              args.sagittal_target_gain * target_error / action_scale
             ).clamp(
               -args.sagittal_target_max_action,
               args.sagittal_target_max_action,
@@ -544,6 +566,28 @@ def main() -> None:
           count += sample_count
           torso_pos = robot.data.body_link_pos_w[:, torso_id]
           torso_quat = robot.data.body_link_quat_w[:, torso_id]
+          head_local = torch.zeros((args.num_envs, 3), device=env.device)
+          head_local[:, 2] = A6_HEAD_OFFSET
+          a6_head_height = (
+            torso_pos[:, 2]
+            + quat_apply(torso_quat, head_local)[:, 2]
+            - env.scene.env_origins[:, 2]
+          )
+          upright = -robot.data.projected_gravity_b[:, 2]
+          a6_contract = (
+            (a6_head_height >= A6_FORMAL_HEAD_HEIGHT)
+            & (upright >= A6_FORMAL_UPRIGHT)
+            & standing
+          )
+          a6_head_height_final = torch.where(
+            standing, a6_head_height, a6_head_height_final
+          )
+          a6_head_height_max = torch.where(
+            standing,
+            torch.maximum(a6_head_height_max, a6_head_height),
+            a6_head_height_max,
+          )
+          a6_contract_steps += a6_contract.float()
           gravity_torso = quat_apply_inverse(torso_quat, world_down)
           tilt = torch.acos((-gravity_torso[:, 2]).clamp(-1.0, 1.0))
           support = robot.data.body_link_pos_w[:, ankle_ids].mean(dim=1)
@@ -604,6 +648,8 @@ def main() -> None:
             "right_arm_target_mae_rad": torch.abs(right_q - right_target).mean(-1),
             "waist_target_mae_rad": torch.abs(waist_q - waist_target).mean(-1),
             "upper_action_abs_mean": torch.abs(actions[:, upper_action_ids]).mean(-1),
+            "a6_head_height_m": a6_head_height,
+            "a6_formal_contract": a6_contract.float(),
             "feet_forward_offset_m": forward_offset,
             "feet_height_offset_m": height_offset,
             "feet_lateral_separation_m": torch.abs(
@@ -632,6 +678,25 @@ def main() -> None:
         feet_forward_offset_final_m=float(
           feet_forward_offset_final[torch.isfinite(feet_forward_offset_final)].mean()
         ),
+        a6_head_height_final_mean_m=float(
+          a6_head_height_final[torch.isfinite(a6_head_height_final)].mean()
+        ),
+        a6_head_height_final_min_m=float(
+          a6_head_height_final[torch.isfinite(a6_head_height_final)].amin()
+        ),
+        a6_head_height_max_mean_m=float(
+          a6_head_height_max[torch.isfinite(a6_head_height_max)].mean()
+        ),
+        a6_formal_contract_final_fraction=float(
+          (
+            torch.isfinite(a6_head_height_final)
+            & (a6_head_height_final >= A6_FORMAL_HEAD_HEIGHT)
+            & (-robot.data.projected_gravity_b[:, 2] >= A6_FORMAL_UPRIGHT)
+            & valid
+          ).float().mean()
+        ),
+        a6_formal_contract_any_fraction=float((a6_contract_steps > 0).float().mean()),
+        a6_formal_contract_mean_steps=float(a6_contract_steps.mean()),
         left_arm_joint_mean={
           name: float(value)
           for name, value in zip(
@@ -689,6 +754,7 @@ def main() -> None:
         "sagittal_symmetry_delay_steps": args.sagittal_symmetry_delay_steps,
         "sagittal_symmetry_ramp_steps": args.sagittal_symmetry_ramp_steps,
         "sagittal_target_blend": args.sagittal_target_blend,
+        "sagittal_target_control_mode": args.sagittal_target_control_mode,
         "sagittal_target_gain": args.sagittal_target_gain,
         "sagittal_target_max_action": args.sagittal_target_max_action,
         "sagittal_target_delay_steps": args.sagittal_target_delay_steps,
