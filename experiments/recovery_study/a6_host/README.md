@@ -1127,6 +1127,16 @@ and uprightness `0.93`, and retains the `1.15 m / 0.90` formal contract. The V38
 actor is exact at launch; only its final actor layer is trainable under hard
 row-wise trust regions. Parallel trust-scale `1x` and `2x` 64-environment
 preflights both passed and reproduced the source at `1.0935 m` before training.
-The full audit and acceptance boundary are in
-`A6_29_HOST_VS_A6_ROOT_CAUSE.md`. V39 is not selected until four-posture
-recovery, stability, and sustained A6-height evaluations all pass.
+V39 completed but raised the best stable head height by only about `3 mm`;
+formal held/final remained zero and parameter deltas were not clamp-limited.
+
+V40 then delayed height credit until 100 stable-standing steps and compared
+final-two-layer with full-actor adaptation over 1,150-step episodes. Both runs
+kept four-posture recovery at `128/128` with zero terminations. Full-actor
+update 800 was the best point, raising posture means to `1.0992--1.1022 m`,
+about `10 mm` over V38, but still produced zero formal held/final cases. Later
+updates increased motion without reliable height gain, so no V39/V40 model
+replaces V38. Direct V17 evaluation confirms formal height is reachable but
+loses the V38 recovery/stability contract; the next method must distill a
+smooth post-standing transition rather than continue reward-only PPO. The full
+audit and acceptance boundary are in `A6_29_HOST_VS_A6_ROOT_CAUSE.md`.

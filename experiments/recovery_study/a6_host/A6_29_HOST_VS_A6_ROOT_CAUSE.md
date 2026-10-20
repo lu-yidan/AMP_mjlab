@@ -67,8 +67,53 @@ shortfall rewards, produced finite gradients, and passed without NaN/Inf.
 Formal training uses new versioned logs and does not overwrite V38 or any A6
 checkpoint.
 
-No V39 success is claimed until deterministic four-posture evaluation confirms
-the original V38 recovery/stability contract and sustained A6 formal height.
-After that, the selected high-standing base can replace V38 only through the
-normal artifact selection process and must be re-evaluated with the isolated
-obstacle residual. All A6 results remain **29-DoF HoST A6 adapter** results.
+## V39 result
+
+Both 1,200-update V39 runs completed without numerical faults or velocity
+terminations. The smaller trust region preserved four-posture recovery at
+`128/128` held and final standing, but increased mean final virtual-head height
+by only about `3 mm`; its best/final posture means remained
+`1.0904--1.0953 m`. The larger trust region did not improve height. Every V39
+checkpoint retained zero formal held/final environments.
+
+Checkpoint-delta audit showed that V39 did not hit its output-layer bounds.
+The failure was therefore not an overly tight clamp: changing only the final
+linear layer did not provide enough state representation or control authority
+to move the inherited V38 equilibrium by the required `~60 mm`.
+
+## V40 result
+
+V40 delayed all A6-height credit until 100 consecutive stable standing steps,
+extended the episode to 1,150 control steps, and compared bounded adaptation
+of the final two linear layers against bounded full-actor adaptation. Both
+1,600-update runs completed without NaN/Inf, abnormal termination, or recovery
+loss.
+
+The final-two-layer run was effectively flat: all four postures remained at
+`1.0900--1.0943 m`, with zero formal held/final environments. Full-actor V40
+did move the standing equilibrium. Update 800 was the best stable point:
+
+| Reset posture | V38 final mean head | V40 full u800 | Formal held/final |
+|---|---:|---:|---:|
+| prone | 1.0921 m | 1.1022 m | 0/128, 0/128 |
+| supine | 1.0887 m | 1.0992 m | 0/128, 0/128 |
+| left side | 1.0924 m | 1.1020 m | 0/128, 0/128 |
+| right side | 1.0908 m | 1.1004 m | 0/128, 0/128 |
+
+Recovery remained `128/128` held and final with zero terminations, but the
+approximately `10 mm` gain was still far below the formal boundary. Later
+full-actor checkpoints did not add reliable height and increased joint-speed
+RMS, so the final checkpoint is rejected. V40 does not replace the selected
+V38 artifact.
+
+As a reachability cross-check, the A6-homotopy V17 actor produced nonzero
+formal holds (`18.75--24.22%`) when evaluated directly from all four flat
+postures, proving again that the plant and metric are feasible. It did not
+preserve the V38 recovery contract: final standing fell to `73.44--81.25%`
+and joint-speed RMS rose to roughly `2.8`. A hard V38-to-V17 switch after 250
+steps likewise lost standing. The next repair must therefore learn or distill
+a smooth post-standing transition instead of applying either actor globally.
+
+No high-standing replacement model is selected. V38 remains the sole packaged
+artifact, and A6 thresholds remain unchanged. All results remain explicitly
+**29-DoF HoST A6 adapter** results.
