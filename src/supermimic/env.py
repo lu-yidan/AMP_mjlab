@@ -6,13 +6,19 @@ from .reset_bank import ResetBank, DEFAULT_BANK
 
 class VelocitySim:
     def __init__(self, num_envs=4096, device='cuda:0', seed=42, max_speed=5., render=False, reset_mode='stratified',
-                 bank_path=DEFAULT_BANK, episode_seconds=20., gamma=.99):
+                 bank_path=DEFAULT_BANK, episode_seconds=20., gamma=.99, locomotion_grace=.3, recovery_grace=5.):
         from mjlab.envs import ManagerBasedRlEnv
         from mjlab.managers.event_manager import EventTermCfg
         from src.tasks.amp_loco.config.g1.env_cfgs import g1_amp_flat_env_cfg
-        if reset_mode not in ('stratified','standing'):raise ValueError(reset_mode)
+        if reset_mode not in ('stratified','standing','grouped'):raise ValueError(reset_mode)
         if episode_seconds<=0:raise ValueError('episode_seconds must be positive')
         self.reset_mode=reset_mode;self.bank_path=bank_path;self.bank=None;self.gamma=gamma
+        self.locomotion_grace=locomotion_grace;self.recovery_grace=recovery_grace
+        self.recovery_env=torch.zeros(num_envs,dtype=torch.bool,device=device)
+        self.recovery_env[torch.randperm(num_envs,device=device)[:round(.4*num_envs)]]=True
+        self.bad_steps=torch.zeros(num_envs,dtype=torch.long,device=device)
+        self.attempt_steps=torch.zeros_like(self.bad_steps)
+        self.attempt_active=self.recovery_env.clone()
         self.reset_groups=torch.zeros(num_envs,dtype=torch.long,device=device)
         cfg = g1_amp_flat_env_cfg(play=True)
         cfg.seed = seed
@@ -47,12 +53,18 @@ class VelocitySim:
         root=r.data.default_root_state[ids].clone(); root[:,:3]+=env.scene.env_origins[ids]
         q=r.data.default_joint_pos[ids].clone()
         self.reset_groups[ids]=0
-        if self.reset_mode=='stratified':
+        if self.reset_mode in ('stratified','grouped'):
             if self.bank is None:self.bank=ResetBank(self.bank_path,r.joint_names,env.device)
-            groups,indices=self.bank.sample(len(ids));self.reset_groups[ids]=groups
+            groups,indices=self.bank.sample(len(ids),recovery_only=self.reset_mode=='grouped')
+            if self.reset_mode=='grouped':
+                groups=torch.where(self.recovery_env[ids],groups,0)
+                indices=torch.where(self.recovery_env[ids],indices,-1)
+            self.reset_groups[ids]=groups
             low=indices>=0;sample=self.bank.qpos[indices[low]]
             root[low,:7]=sample[:,:7];root[low,:3]+=env.scene.env_origins[ids[low]]
             q[low]=sample[:,7:]
+        self.bad_steps[ids]=0;self.attempt_steps[ids]=0
+        self.attempt_active[ids]=self.recovery_env[ids] if self.reset_mode=='grouped' else False
         r.write_root_link_pose_to_sim(root[:,:7],env_ids=ids)
         r.write_root_link_velocity_to_sim(torch.zeros_like(root[:,7:13]),env_ids=ids)
         r.write_joint_state_to_sim(q,torch.zeros_like(q),env_ids=ids)
@@ -88,11 +100,23 @@ class VelocitySim:
         done=terminated|(self.ep_step>=self.max_episode_steps)
         recovering=is_recovery(S1)
         self.stable_steps=torch.where(~recovering,self.stable_steps+1,0)
-        self.recovered|=self.stable_steps>=round(1/self.env.step_dt)
+        stable=self.stable_steps>=round(1/self.env.step_dt)
+        self.recovered|=stable
+        budget_reset=torch.zeros_like(done)
+        if self.reset_mode=='grouped':
+            # Fall threshold differs from the stricter successful-recovery criterion.
+            fallen=(S1[0][:,2]<.5)|(S1[1][:,2,2]<.3420201433)
+            self.bad_steps=torch.where(fallen,self.bad_steps+1,0)
+            self.attempt_active=(self.attempt_active|fallen)&~stable
+            self.attempt_steps=torch.where(self.attempt_active,self.attempt_steps+1,0)
+            budget_reset=torch.where(self.recovery_env,
+                self.attempt_steps>=round(self.recovery_grace/self.env.step_dt),
+                self.bad_steps>=round(self.locomotion_grace/self.env.step_dt))
+            done|=budget_reset
         transition=dict(s=s,s1=s1,a=action.clone(),a_prev=prev,xi=self.xi.clone(),
             r=reward(S1,command,action,prev,self.default_q,self.env.step_dt,previous_state=unflatten_state(s),gamma=self.gamma),
             command=command,ep_step=ep,done=done,recovery=is_recovery(unflatten_state(s)),
-            terminated=terminated, reset_group=self.reset_groups.clone(), recovered=self.recovered.clone())
+            terminated=terminated, budget_reset=budget_reset, recovery_env=self.recovery_env.clone(), episode_seconds=self.ep_step.float()*self.env.step_dt, reset_group=self.reset_groups.clone(), recovered=self.recovered.clone())
         self.a_prev.copy_(action)
         ids=done.nonzero().flatten()
         if auto_reset and len(ids):

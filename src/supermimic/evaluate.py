@@ -10,7 +10,7 @@ from .rotations import yaw_mat
 
 def load_policy(checkpoint, device):
     ck=torch.load(checkpoint,map_location=device,weights_only=False)
-    if ck.get('format')!='supermimic_recovery_velocity_v2':raise ValueError('Not a SuperMimic velocity checkpoint')
+    if ck.get('format') not in ('supermimic_recovery_velocity_v2','supermimic_grouped_curriculum_v3'):raise ValueError('Not a SuperMimic velocity checkpoint')
     c=ck['config']
     pi=Policy(OBS_DIM,3,hist=c['history'],hidden=(64,64) if c['small'] else (2048,1024,512,256)).to(device)
     pi.load_state_dict(ck['pi']);pi.eval()

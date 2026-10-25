@@ -33,10 +33,11 @@ class ResetBank:
         if any(len(x)==0 for x in self.pools):
             raise ValueError('Reset bank must contain late/middle and four natural/procedural low directions')
 
-    def sample(self, count):
+    def sample(self, count, recovery_only=False):
         # 30% standing (group 0), 15% late, 15% middle, 40% low.
         # Each low direction gets 10%, with 75/25 natural/procedural sources.
         probs = torch.tensor([.30,.15,.15]+[.075,.025]*4,device=self.qpos.device)
+        if recovery_only:probs[0]=0
         groups = torch.multinomial(probs,count,replacement=True)
         indices = torch.full((count,),-1,device=self.qpos.device,dtype=torch.long)
         for group,pool in enumerate(self.pools,1):

@@ -5,17 +5,20 @@ Adapted from supermimic_vibed train.py (MIT). No AMP/PPO policy update is used.
 import argparse
 from dataclasses import dataclass, asdict
 import json
+import time
 from pathlib import Path
 import torch
 from torch import nn
 from .buffer import ReplayBuffer
 from .reset_bank import DEFAULT_BANK
+from .curriculum import SpeedCurriculum
 
 from .mdp import (OBS_DIM, INV_DIM, unflatten_state, observation, reward,
-                  termination, critic_input)
+                  termination, critic_input, is_recovery)
+from .rotations import yaw_mat
 from .networks import WorldModel, Policy, Critic
 
-CHECKPOINT_FORMAT = "supermimic_recovery_velocity_v2"
+CHECKPOINT_FORMAT = "supermimic_grouped_curriculum_v3"
 
 
 @dataclass
@@ -38,7 +41,11 @@ class Config:
     save_interval: int = 1000
     seed: int = 42
     max_speed: float = 5.
-    reset_mode: str = "stratified"
+    reset_mode: str = "grouped"
+    initial_speed: float = 1.
+    curriculum_interval: int = 1000
+    locomotion_grace: float = .3
+    recovery_grace: float = 5.
     bank_path: str = DEFAULT_BANK
     episode_seconds: float = 20.
     recovery_fraction: float = .5
@@ -51,8 +58,10 @@ class Config:
             if getattr(self,k)<=0:raise ValueError(f'{k} must be positive')
         if self.warmup_steps<self.wm_window or self.buffer_steps<max(self.wm_window,self.history):
             raise ValueError('warmup/buffer must cover model windows and history')
-        if self.reset_mode not in ('standing','stratified'):raise ValueError('Unknown reset mode')
+        if self.reset_mode not in ('standing','stratified','grouped'):raise ValueError('Unknown reset mode')
         if not 0<=self.recovery_fraction<=1 or self.episode_seconds<=0:raise ValueError('Invalid recovery configuration')
+        if not .1<=self.initial_speed<=self.max_speed:raise ValueError('Invalid initial speed')
+        if self.curriculum_interval<=0 or self.locomotion_grace<=0 or self.recovery_grace<=0:raise ValueError('Invalid curriculum/reset timing')
         if not 0<self.gamma<1:raise ValueError('gamma must be in (0,1)')
         if not .1<=self.max_speed<=5:raise ValueError('max_speed must be in [0.1,5]')
 
@@ -66,12 +75,13 @@ class Trainer:
         self.optimizers=[torch.optim.Adam(m.parameters(),lr=cfg.lr) for m in (self.wm,self.pi,self.critic)]
         self.buffer=ReplayBuffer(cfg.buffer_steps,cfg.num_envs,cfg.device)
         self.history=torch.zeros(cfg.num_envs,cfg.history,OBS_DIM,device=cfg.device)
+        self.curriculum=SpeedCurriculum(cfg.max_speed,cfg.initial_speed)
         self.iteration=0;self.steps=0;self.reset_metadata={};self.collect_metrics={}
         self.error_floor=torch.tensor([.003]*3+[.005]*3+[.02]*3+[.05]*3+[.003]*29+[.05]*29,device=cfg.device)
 
     @torch.no_grad()
     def collect(self, sim, steps):
-        values=[];recoveries=[];completed=[];successes=[]
+        values=[];recoveries=[];completed=[];successes=[];lengths=[];budget_count=0
         for _ in range(steps):
             o=observation(sim.state(),sim.a_prev,self.default_q)
             self.history=torch.where((sim.ep_step==0)[:,None,None],o[:,None].expand_as(self.history),
@@ -84,11 +94,22 @@ class Trainer:
             self.wm.out_norm.update(self.wm.targets(S,S1))
             values.append(tr['r'].mean());self.steps+=sim.n
             recoveries.append(tr['recovery'].float().mean())
+            loco=~tr['recovery_env'];moving=loco&(tr['command'][:,0]>.05)
+            vx=(yaw_mat(S1[1]).transpose(-1,-2)@S1[2].unsqueeze(-1)).squeeze(-1)[:,0]
+            good=(vx-tr['command'][:,0]).abs()<torch.maximum(torch.full_like(vx,.2),.2*tr['command'][:,0])
+            ended=loco&tr['done']
+            self.curriculum.add(steps=int(loco.sum()),upright=int((loco&~is_recovery(S1)).sum()),
+                moving=int(moving.sum()),tracking=int((moving&good&~is_recovery(S1)).sum()),
+                episodes=int(ended.sum()),length=float(tr['episode_seconds'][ended].sum()))
+            lengths.extend(tr['episode_seconds'][tr['done']].tolist())
+            budget_count+=int(tr['budget_reset'].sum())
             eligible=tr['done']&(tr['reset_group']>0)
             completed.append(eligible.sum());successes.append((eligible&tr['recovered']).sum())
         count=int(torch.stack(completed).sum())
         self.collect_metrics=dict(recovery_state_fraction=float(torch.stack(recoveries).mean()),
-            completed_recovery_episodes=count, successful_recovery_episodes=int(torch.stack(successes).sum()))
+            completed_recovery_episodes=count, successful_recovery_episodes=int(torch.stack(successes).sum()),
+            budget_resets=budget_count,completed_episodes=len(lengths),curriculum_max_speed=self.curriculum.speed)
+        if lengths:self.collect_metrics['Train/mean_episode_length']=sum(lengths)/len(lengths)/self.dt
         return float(torch.stack(values).mean())
 
     @staticmethod
@@ -147,7 +168,7 @@ class Trainer:
 
     def save(self, path, joint_names):
         path=Path(path);path.parent.mkdir(parents=True,exist_ok=True)
-        payload=dict(format=CHECKPOINT_FORMAT,reset_metadata=self.reset_metadata,config=asdict(self.cfg),iteration=self.iteration,
+        payload=dict(format=CHECKPOINT_FORMAT,curriculum=self.curriculum.state_dict(),reset_metadata=self.reset_metadata,config=asdict(self.cfg),iteration=self.iteration,
             steps=self.steps,dt=self.dt,default_q=self.default_q, joint_names=list(joint_names),
             wm=self.wm.state_dict(),pi=self.pi.state_dict(),critic=self.critic.state_dict(),
             optimizers=[x.state_dict() for x in self.optimizers])
@@ -157,7 +178,7 @@ class Trainer:
         ck=torch.load(path,map_location=self.cfg.device,weights_only=False)
         if ck['format']!=CHECKPOINT_FORMAT or ck['joint_names']!=list(joint_names):
             raise ValueError('Incompatible checkpoint interface/joint order')
-        for key in ('history','small','max_speed','reset_mode','episode_seconds','recovery_fraction','gamma'):
+        for key in ('history','small','max_speed','reset_mode','episode_seconds','recovery_fraction','gamma','initial_speed','curriculum_interval','locomotion_grace','recovery_grace'):
             if ck['config'][key]!=getattr(self.cfg,key):raise ValueError(f'Resume mismatch: {key}')
         if abs(ck['dt']-self.dt)>1e-8 or not torch.allclose(ck['default_q'],self.default_q):
             raise ValueError('Resume robot/default pose/control dt mismatch')
@@ -165,7 +186,7 @@ class Trainer:
             raise ValueError('Resume reset bank mismatch')
         for key in ('wm','pi','critic'):getattr(self,key).load_state_dict(ck[key])
         for opt,state in zip(self.optimizers,ck['optimizers']):opt.load_state_dict(state)
-        self.iteration=ck['iteration'];self.steps=ck['steps']
+        self.iteration=ck['iteration'];self.steps=ck['steps'];self.curriculum.load_state_dict(ck['curriculum'])
         # Replay/simulator are intentionally refilled; this is not bitwise continuation.
 
 
@@ -178,8 +199,9 @@ def main():
     args=p.parse_args();values=vars(args);cfg=Config(**{k:values[k] for k in Config.__dataclass_fields__})
     cfg.validate();torch.manual_seed(cfg.seed)
     from .env import VelocitySim
-    sim=VelocitySim(cfg.num_envs,cfg.device,cfg.seed,cfg.max_speed,reset_mode=cfg.reset_mode,
-        bank_path=cfg.bank_path,episode_seconds=cfg.episode_seconds,gamma=cfg.gamma)
+    sim=VelocitySim(cfg.num_envs,cfg.device,cfg.seed,cfg.initial_speed,reset_mode=cfg.reset_mode,
+        bank_path=cfg.bank_path,episode_seconds=cfg.episode_seconds,gamma=cfg.gamma,
+        locomotion_grace=cfg.locomotion_grace,recovery_grace=cfg.recovery_grace)
     trainer=Trainer(cfg,sim.default_q,sim.env.step_dt)
     if sim.bank is not None:trainer.reset_metadata=dict(path=sim.bank.path,sha256=sim.bank.sha256)
     out=Path(args.output);out.mkdir(parents=True,exist_ok=True)
@@ -188,16 +210,24 @@ def main():
         if args.resume:trainer.load(args.resume,sim.robot.joint_names)
         if args.wandb_project:
             import wandb
-            wb=wandb.init(project=args.wandb_project,name=out.name,config=asdict(cfg))
+            wb=wandb.init(project=args.wandb_project,name=out.name,config=asdict(cfg),mode='online')
+            (out/'wandb_url.txt').write_text(wb.url+'\n')
+            print('WANDB_RUN_URL='+wb.url,flush=True)
         (out/'config.json').write_text(json.dumps(asdict(cfg),indent=2))
+        sim.max_speed=trainer.curriculum.speed
+        sim.resample(torch.arange(sim.n,device=sim.device))
         trainer.collect(sim,cfg.warmup_steps)
         with (out/'metrics.jsonl').open('a') as log:
             for it in range(trainer.iteration,cfg.iterations):
+                iteration_start=time.perf_counter()
                 metrics=dict(iteration=it+1,sim_reward=trainer.collect(sim,cfg.sim_steps))
                 metrics.update(trainer.collect_metrics)
                 metrics['wm_loss']=sum(trainer.wm_update() for _ in range(cfg.wm_batches))/cfg.wm_batches
                 if it>=cfg.wm_only_iters:metrics.update(trainer.policy_update())
+                if (it+1)%cfg.curriculum_interval==0:
+                    metrics.update(trainer.curriculum.update());sim.max_speed=trainer.curriculum.speed
                 trainer.iteration=it+1;metrics['sim_steps']=trainer.steps
+                metrics['iteration_seconds']=time.perf_counter()-iteration_start
                 log.write(json.dumps(metrics)+'\n');log.flush()
                 if wb:wb.log(metrics,step=it+1)
                 if it%10==0:print(json.dumps(metrics),flush=True)

@@ -113,3 +113,17 @@ class SuperMimicTest(unittest.TestCase):
         nxt=wm.step(S,a,torch.empty(4,0))
         reward(nxt,torch.ones(4,3),a,a.detach(),torch.zeros(29),previous_state=S).sum().backward()
         self.assertTrue(torch.isfinite(a.grad).all())
+
+    def test_speed_curriculum_requires_sustained_competence(self):
+        from src.supermimic.curriculum import SpeedCurriculum
+        c=SpeedCurriculum(5,1)
+        c.add(steps=10000,upright=1000,moving=5000,tracking=500,episodes=300,length=300)
+        c.update();self.assertEqual(c.speed,1)
+        for _ in range(2):
+            c.add(steps=10000,upright=9500,moving=5000,tracking=4500,episodes=300,length=5700)
+            c.update()
+        self.assertEqual(c.speed,1.5)
+        d=SpeedCurriculum(5,1);d.load_state_dict(c.state_dict());self.assertEqual(d.speed,1.5)
+        for _ in range(30):
+            c.add(steps=10000,upright=9500,moving=5000,tracking=4500,episodes=300,length=5700);c.update()
+        self.assertEqual(c.speed,5)

@@ -28,3 +28,20 @@ class SimulatorTest(unittest.TestCase):
             torch.testing.assert_close(flatten_state(sim.state())[:,:3],bank.qpos[ids,:3],atol=1e-5,rtol=1e-5)
             assert sim.bank.sha256 and (sim.reset_groups==0).all()
         finally:sim.close()
+
+    def test_grouped_reset_budgets(self):
+        sim=VelocitySim(128,reset_mode='grouped',max_speed=1)
+        try:
+            assert sim.recovery_env.sum()==round(.4*128)
+            assert (sim.reset_groups[~sim.recovery_env]==0).all()
+            assert (sim.reset_groups[sim.recovery_env]>0).all()
+            counters=torch.zeros(2,dtype=torch.long,device=sim.device)
+            for i in range(260):
+                tr=sim.step(torch.zeros(128,29,device=sim.device))
+                budget=tr['budget_reset'];rec=tr['recovery_env']
+                counters[0]+=(budget&~rec).sum();counters[1]+=(budget&rec).sum()
+                if i<249:assert not (budget&rec).any()
+                if budget.any():assert (sim.ep_step[budget]==0).all()
+            assert (counters>0).all(),counters
+            print('PASS fixed groups, recovery-only initial bank, 0.3s/5s budgets, post-reset episode counters:',counters.tolist())
+        finally:sim.close()
