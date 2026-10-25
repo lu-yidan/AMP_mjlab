@@ -462,3 +462,18 @@ v2 验证：18 项单元测试通过；另有 opt-in CUDA 仿真回归测试
 与初态分层独立；环境编号没有固定技能分组，全部共享一个 actor。倒地不清零命令，
 只按身体状态平滑调整奖励；20 秒是整个 episode 的时限，不是在每次摔倒后重新计时。
 此前约 21.3 小时/100k 轮的测速使用 3m/s 上限，5m/s 版本未重新测速。
+
+2026-10-26 已在 `10.177.36.91:28036` 启动两条独立的 from-scratch 训练，
+均为 4096 环境、100000 轮、seed 42、正式大网络、每 1000 轮存档：
+
+| 实验 | 代码 | GPU | W&B |
+| --- | --- | --- | --- |
+| 原分层 reset、直接 1–5m/s 跑步命令 | `dc21d99` | 0 | https://wandb.ai/tabletennis/lyd-supermimic/runs/f06857ac |
+| 分组 reset＋1→5m/s 自适应课程 | `c32c73c` | 1 | https://wandb.ai/tabletennis/lyd-supermimic/runs/c6af7843 |
+
+远端目录分别为 `/root/workplace/lyd-supermimic-original-dc21d99` 与
+`/root/workplace/lyd-supermimic-grouped-c32c73c`；启动清单为
+`/root/workplace/supermimic_pair_20261026.json`。两组前 500 轮只预热世界模型，之后更新 actor/critic。
+本次通过 W&B API 确认两个 run 为 running 且已有云端 iteration/loss 数据；这只是启动时状态记录。
+两组同时存在 reset 和速度课程差异，不能将最终差异单独归因于 reset。
+分组版本验证包括 21 项测试（含 CUDA 仿真回归）及小网络短训/续训。
