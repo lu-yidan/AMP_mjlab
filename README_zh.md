@@ -316,3 +316,15 @@ python -m unittest discover -s tests -p test_multi_amp.py -v
 本地模型备份与最终评测目录：`logs/eval100k_single/`（忽略目录，不随 Git 提交大权重）。
 服务器在本次检查时没有可用 CUDA 设备；最终评测尝试使用本机 GPU 与复制的原训练 mjlab runtime，
 环境差异与实际完成状态见该目录的评测记录。
+
+
+最终存档评测已完成，结果与模型 SHA-256 见 `reports/single_tracking_100k_evaluation.json`。
+本机 RTX 4070 Ti，使用服务器复制的 mjlab runtime，MuJoCo 3.5.0、mujoco-warp 3.5.0.2、
+Warp 1.13.0.dev20260225；本机 Python 3.13/PyTorch 2.8 与训练端 Python 3.12/PyTorch 2.10 不同。
+376 个自然低位姿态和 512 个程序低位姿态均 100% 成功，平均成功时间分别为 1.846s、1.881s。
+成功判据为 20 秒内根高度 >0.65m、gz<-0.9 连续 1 秒，统计时间含该 1 秒保持期。
+命令评测每指令 8 个配对初态，2s 站立后执行指令 10s，取末 5s；没有自动 reset、推扰或部署平滑。
+目标前进 3m/s 实际 2.889m/s，后退 -1m/s 实际 -1.013m/s，左右侧移目标 ±0.5m/s
+实际 0.439/-0.412m/s，左右转向目标 ±1rad/s 实际 0.827/-0.916rad/s。
+所有命令末段站立率 100%。这不是复杂地形、非零指令倒地恢复或实机验证。
+原服务器与本机隔离环境均通过 10 项单元测试；本地工作区保存为 Git 提交，大模型仍在忽略的 logs 目录。
