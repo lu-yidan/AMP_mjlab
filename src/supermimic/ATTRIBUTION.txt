@@ -1,0 +1,10 @@
+Derived from /home/luyd/workspace/supermimic_vibed, commit
+ a1508d42c9d1699a52e8233ab16d08c488441ab9
+Unofficial SuperMimic reproduction. Copyright (c) 2026 ETH Zurich, Chong Zhang.
+MIT license is reproduced in LICENSE and applies to copied/adapted code here.
+rotations.py is copied. networks.py and buffer.py are adapted. mdp.py and train.py
+reuse state representation and training concepts/code patterns, with a new
+velocity-goal MDP and mjlab adapter. No Isaac Lab, reference dataset or trained
+upstream weights are copied.
+This is a SuperMimic-inspired velocity-control variant, NOT a faithful reproduction
+of its future-reference motion-tracking task or its reported benchmark results.

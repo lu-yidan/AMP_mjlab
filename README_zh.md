@@ -328,3 +328,74 @@ Warp 1.13.0.dev20260225；本机 Python 3.13/PyTorch 2.8 与训练端 Python 3.1
 实际 0.439/-0.412m/s，左右转向目标 ±1rad/s 实际 0.827/-0.916rad/s。
 所有命令末段站立率 100%。这不是复杂地形、非零指令倒地恢复或实机验证。
 原服务器与本机隔离环境均通过 10 项单元测试；本地工作区保存为 Git 提交，大模型仍在忽略的 logs 目录。
+
+### SuperMimic 站立／行走／跑步速度指令版
+
+分支：`lyd-supermimic-stand-walk-run`，基于 `lyd-multi-discriminator-amp` 的
+`40a8a0c`。代码位于 `src/supermimic/`，独立入口，不改变原 AMP/PPO 任务。
+来源为本地 `supermimic_vibed` 的 `a1508d42c9d1699a52e8233ab16d08c488441ab9`，
+作者、MIT 许可和改动边界保存在该目录的 `ATTRIBUTION.txt` 和 `LICENSE`。
+
+这是 **SuperMimic-inspired 速度控制改编版**，不是原论文或原实现的动作跟踪基准复现。
+原实现输入未来参考动作，使用 Isaac Lab/Newton；本版输入 `[vx, vy, wz]`，
+使用本仓库 G1/mjlab/MuJoCo-Warp、电机顺序和逐关节动作缩放。
+保留可微旋转/状态表示、预测局部状态增量的世界模型、多步自回归模型拟合、
+想象轨迹 BPTT 策略优化、soft survival 和 lambda-return critic。
+不运行 PPO 或 AMP 判别器，不使用动作示范或旧 AMP 策略权重。
+因此本版本只证明训练链路集成，不保证动作自然度，也不声称复现原项目的训练效率。
+
+第一版范围：平地、标称动力学、默认站姿 reset、站立/前进走跑命令等概率采样，
+走路速度 0.1–1m/s，跑步 1–3m/s（可用 `--max-speed` 限制）；尚未训练侧移/转向，
+也没有加入倒地恢复、复杂地形、域随机化、示范跟踪、数据驱动 reset 课程。
+“站”在本版指零速度站立，**不等于跌倒后站起**。
+真实和想象环境共用解析跟随/站立/动作平滑奖励与终止头。
+仿真先记录终止前的 `s1`，再手动 reset；世界模型窗口不能跨 episode，
+历史观测同样不能跨 reset。非有限损失/梯度会报错，不静默继续训练。
+
+默认规模按普通 GPU 下调：1024 环境，256 步回放，256 模型 batch、256 想象 batch；
+网络仍默认使用原实现的大网络。使用与本仓库兼容的 mjlab runtime 和 Python 环境运行，
+本机验证环境为 `/tmp/amp-eval100k-venv/bin/python`，
+`PYTHONPATH=/tmp/amp-eval100k-runtime:.`；这些临时路径不是安装包的一部分。
+
+```bash
+# 在仓库根目录，先激活兼容 mjlab 的 Python 环境并配置 PYTHONPATH。
+python -m src.supermimic.train --output logs/supermimic/stand_walk_run \
+  --num-envs 1024 --iterations 100000 --max-speed 3 \
+  --wandb-project lyd-supermimic
+
+# 资源有限时先跑小规模端到端检查，不能用其模型判断最终能力。
+python -m src.supermimic.train --num-envs 8 --iterations 2 \
+  --buffer-steps 16 --history 2 --horizon 2 --wm-window 2 \
+  --wm-batches 1 --wm-batch 8 --policy-batch 8 --warmup-steps 4 \
+  --wm-only-iters 0 --small --output logs/supermimic/smoke
+
+python -m src.supermimic.evaluate \
+  --checkpoint logs/supermimic/stand_walk_run/model_100000.pt \
+  --output logs/supermimic/stand_walk_run/evaluation.json
+
+python -m src.supermimic.export \
+  --checkpoint logs/supermimic/stand_walk_run/model_100000.pt \
+  --output logs/supermimic/stand_walk_run/policy.onnx
+```
+
+恢复训练使用 `--resume PATH`，其余网络/历史参数必须匹配；`--iterations` 是目标总轮数。
+保存网络、优化器、已完成轮数、关节顺序和默认关节姿态。恢复时重新填充 replay、
+重置仿真，故不是逐位一致续训。默认每 1000 轮和结束时保存，文件编号为已完成轮数。
+可选 W&B；默认只写本地 `metrics.jsonl`，没有自动启动后台长期训练或自动上传。
+
+策略输入：`[batch, history, 93]`，历史从旧到新，内容依次为
+`q-default_q(29), qd*0.1(29), pelvis body-frame angular velocity*0.25(3),
+projected gravity(3), previous normalized action(29)`；另输入 `[batch,3]` 速度指令。
+输出 29 个电机顺序的归一化位置偏移，限幅 ±5；使用本仓库 G1_ACTION_SCALE 与默认姿态。
+actor 自带运行统计归一化，世界模型只用于训练，部署只需要 actor 和历史缓冲。
+这**不兼容旧 AMP 的 384 维单输入／0.25 标量动作接口**，不能直接只替换部署模型路径。
+导出同时写接口说明 JSON；未实现旧部署接口适配。
+
+评测从同一默认站姿发出 0/0.5/1/2/3m/s 指令，无自动 reset；默认每命令重复 8 次，
+在无噪声标称仿真下这些重复不构成独立统计样本，报告不可当作随机初态泛化成功率。
+当前只完成训练、checkpoint 恢复、评测、ONNX 导出的短流程验证，尚无充分训练的模型。
+
+本次验证：14 项单元测试通过；8 环境、2 轮小网络训练包含世界模型和 BPTT/critic 更新，
+从第 2 轮存档恢复到第 3 轮成功；5 条速度指令的短评测入口跑通（短训模型不具备任务能力）。
+强制 timeout 的仿真检查确认终止前状态进入 replay、奖励与解析头一致、reset 后 previous action 清零。
+导出 ONNX 在随机 batch=3 输入下与 PyTorch 最大误差为 1.19e-7。
