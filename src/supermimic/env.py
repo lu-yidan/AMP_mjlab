@@ -5,7 +5,7 @@ from .reset_bank import ResetBank, DEFAULT_BANK
 
 
 class VelocitySim:
-    def __init__(self, num_envs=4096, device='cuda:0', seed=42, max_speed=3., render=False, reset_mode='stratified',
+    def __init__(self, num_envs=4096, device='cuda:0', seed=42, max_speed=5., render=False, reset_mode='stratified',
                  bank_path=DEFAULT_BANK, episode_seconds=20., gamma=.99):
         from mjlab.envs import ManagerBasedRlEnv
         from mjlab.managers.event_manager import EventTermCfg

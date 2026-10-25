@@ -25,8 +25,9 @@ def main():
     a=p.parse_args()
     if a.seconds<=2 or a.repeats<=0:p.error('seconds must exceed 2; repeats must be positive')
     from .env import VelocitySim
-    speeds=[0.,.5,1.,2.,3.]
     pi,ck=load_policy(a.checkpoint,a.device)
+    maximum=ck["config"]["max_speed"]
+    speeds=sorted(set([v for v in (0.,.5,1.,2.,3.,4.,5.) if v<=maximum]+[maximum]))
     sim=VelocitySim(len(speeds)*a.repeats,a.device,42,reset_mode="standing")
     try:
         if ck['joint_names']!=list(sim.robot.joint_names):raise ValueError('Joint order mismatch')

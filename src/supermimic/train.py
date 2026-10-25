@@ -37,7 +37,7 @@ class Config:
     lam: float = .95
     save_interval: int = 1000
     seed: int = 42
-    max_speed: float = 3.
+    max_speed: float = 5.
     reset_mode: str = "stratified"
     bank_path: str = DEFAULT_BANK
     episode_seconds: float = 20.
@@ -54,7 +54,7 @@ class Config:
         if self.reset_mode not in ('standing','stratified'):raise ValueError('Unknown reset mode')
         if not 0<=self.recovery_fraction<=1 or self.episode_seconds<=0:raise ValueError('Invalid recovery configuration')
         if not 0<self.gamma<1:raise ValueError('gamma must be in (0,1)')
-        if not .1<=self.max_speed<=3:raise ValueError('max_speed must be in [0.1,3]')
+        if not .1<=self.max_speed<=5:raise ValueError('max_speed must be in [0.1,5]')
 
 
 class Trainer:

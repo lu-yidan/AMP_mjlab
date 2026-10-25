@@ -17,7 +17,7 @@ def main():
     p.add_argument('--seconds',type=float,default=20.);p.add_argument('--speed',type=float,default=0.)
     p.add_argument('--max-cases',type=int,default=0)
     a=p.parse_args()
-    if a.seconds<=1 or a.max_cases<0 or not 0<=a.speed<=3:p.error('Invalid duration/cases/speed')
+    if a.seconds<=1 or a.max_cases<0 or not 0<=a.speed<=5:p.error('Invalid duration/cases/speed')
     pi,ck=load_policy(a.checkpoint,a.device)
     bank=ResetBank(a.bank,ck['joint_names'],a.device)
     if bank.sha256==ck.get('reset_metadata',{}).get('sha256'):
