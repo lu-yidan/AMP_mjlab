@@ -12,6 +12,7 @@ from torch import nn
 from .buffer import ReplayBuffer
 from .reset_bank import DEFAULT_BANK
 from .curriculum import SpeedCurriculum
+from .metrics import TrainingMetrics
 
 from .mdp import (OBS_DIM, INV_DIM, unflatten_state, observation, reward,
                   termination, critic_input, is_recovery)
@@ -74,6 +75,7 @@ class Trainer:
         self.critic=Critic(INV_DIM+3+29).to(cfg.device)
         self.optimizers=[torch.optim.Adam(m.parameters(),lr=cfg.lr) for m in (self.wm,self.pi,self.critic)]
         self.buffer=ReplayBuffer(cfg.buffer_steps,cfg.num_envs,cfg.device)
+        self.monitor=TrainingMetrics(cfg.num_envs,cfg.device,dt)
         self.history=torch.zeros(cfg.num_envs,cfg.history,OBS_DIM,device=cfg.device)
         self.curriculum=SpeedCurriculum(cfg.max_speed,cfg.initial_speed)
         self.iteration=0;self.steps=0;self.reset_metadata={};self.collect_metrics={}
@@ -90,6 +92,7 @@ class Trainer:
             a=(self.pi(self.history,sim.command)+.1*torch.randn_like(sim.a_prev)).clamp(-5,5)
             tr=sim.step(a);self.buffer.add(tr)
             S,S1=unflatten_state(tr['s']),unflatten_state(tr['s1'])
+            self.monitor.observe(tr,S,S1)
             self.wm.in_norm.update(self.wm.inputs(S,tr['a'],tr['xi']))
             self.wm.out_norm.update(self.wm.targets(S,S1))
             values.append(tr['r'].mean());self.steps+=sim.n
@@ -227,6 +230,7 @@ def main():
                 if (it+1)%cfg.curriculum_interval==0:
                     metrics.update(trainer.curriculum.update());sim.max_speed=trainer.curriculum.speed
                 trainer.iteration=it+1;metrics['sim_steps']=trainer.steps
+                if (it+1)%100==0:metrics.update(trainer.monitor.flush())
                 metrics['iteration_seconds']=time.perf_counter()-iteration_start
                 log.write(json.dumps(metrics)+'\n');log.flush()
                 if wb:wb.log(metrics,step=it+1)

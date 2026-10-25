@@ -477,3 +477,19 @@ v2 验证：18 项单元测试通过；另有 opt-in CUDA 仿真回归测试
 本次通过 W&B API 确认两个 run 为 running 且已有云端 iteration/loss 数据；这只是启动时状态记录。
 两组同时存在 reset 和速度课程差异，不能将最终差异单独归因于 reset。
 分组版本验证包括 21 项测试（含 CUDA 仿真回归）及小网络短训/续训。
+
+2026-10-26 为两个现有 run 增加真实仿真监控（每 100 轮汇总），在 2k 存档处续训，
+不改奖励/采样/课程/网络。原版 `dc21d99` 仅回移同一 `TrainingMetrics` 与调用点，仍使用 v2 存档。
+
+- `Tracking/vx_mae_moving`：非零前进命令的速度绝对误差；
+  `Tracking/vx_mae_upright_moving` 仅统计直立运动步，须结合 `Tracking/upright_moving_coverage` 阅读，避免幸存者偏差。
+  同时记录命令/实际 vx 均值、侧向及 yaw 误差。
+- `Survival/upright_fraction`：真实仿真 root_z>=0.65m 且 Rzz>=0.9 的步占比；
+  `Survival/mean_episode_seconds` 为窗口内结束 episode 的平均总时长，包括躺倒时间，不是持续直立时间。
+  `imagined_survival` 仅为想象轨迹未严重越界概率，不能当作真实存活率。
+- `Recovery/success_rate`：窗口内已结算的恢复尝试中成功比例。低位/倾斜时开始，连续直立 1 秒算成功，
+  成功前 episode 结束算失败；尚未结算的尝试不计入分母。包含走跑组摔倒，快重置会影响该口径。
+  `Recovery/reset_pose_success_rate` 仅统计从恢复库初始化的 episode 内的尝试，适合单独看恢复组；
+  两个实验初态/时限不同，仍不等于统一评测成功率。记录对应分母、成功/失败数与成功耗时。
+  没有结算样本时不填成功率，没有成功时不填成功耗时，不能把缺失值当作零。
+- 重启后 episode/replay 重新初始化，监控窗口也重新开始；不能补造前 2k 缺失的速度统计。

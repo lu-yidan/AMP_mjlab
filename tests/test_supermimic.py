@@ -127,3 +127,23 @@ class SuperMimicTest(unittest.TestCase):
         for _ in range(30):
             c.add(steps=10000,upright=9500,moving=5000,tracking=4500,episodes=300,length=5700);c.update()
         self.assertEqual(c.speed,5)
+
+    def test_monitor_recovery_denominator_and_tracking(self):
+        from src.supermimic.metrics import TrainingMetrics
+        m=TrainingMetrics(4,'cpu',.5)
+        low=list(state());low[0][:,2]=.2;up=state()
+        for step in range(2):
+            tr=transition(step=step);tr['terminated']=torch.zeros(4,dtype=torch.bool)
+            tr['command'][:,0]=1
+            m.observe(tr,low if step==0 else up,up)
+        r=m.flush()
+        self.assertEqual(r['Recovery/success_rate'],1.)
+        self.assertEqual(r['Recovery/successes'],4)
+        self.assertEqual(r['Recovery/mean_success_seconds'],1.)
+        self.assertEqual(r['Tracking/vx_mae_moving'],1.)
+        tr=transition(step=0,done=True);tr['terminated']=torch.zeros(4,dtype=torch.bool)
+        m.observe(tr,low,low);r=m.flush()
+        self.assertEqual(r['Recovery/success_rate'],0.)
+        self.assertEqual(r['Recovery/failures'],4)
+        self.assertNotIn('Recovery/mean_success_seconds',r)
+        self.assertEqual(r['Survival/mean_episode_seconds'],.5)
