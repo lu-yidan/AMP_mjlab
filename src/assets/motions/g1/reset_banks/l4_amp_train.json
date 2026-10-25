@@ -1,0 +1,32 @@
+{
+  "natural": {
+    "input": 3046,
+    "rejected": 151,
+    "source_sha256": "e9f94540520d7927dee01150a0f0bae39ad2aad5ae008b1c7c71f521650e44b9"
+  },
+  "procedural": {
+    "input": 4096,
+    "rejected": 0,
+    "source_sha256": "e289bed8d1c93e87fbdcf969fc5fc741f2d8500a0908ed145d2a4e02e7fe116d"
+  },
+  "groups": {
+    "natural/late/intermediate": 235,
+    "natural/late/left_side_down": 3,
+    "natural/late/prone": 32,
+    "natural/late/right_side_down": 3,
+    "natural/low/left_side_down": 158,
+    "natural/low/prone": 72,
+    "natural/low/right_side_down": 158,
+    "natural/low/supine": 854,
+    "natural/middle/intermediate": 868,
+    "natural/middle/left_side_down": 36,
+    "natural/middle/prone": 396,
+    "natural/middle/right_side_down": 36,
+    "natural/middle/supine": 44,
+    "procedural/low/left_side_down": 1024,
+    "procedural/low/prone": 1024,
+    "procedural/low/right_side_down": 1024,
+    "procedural/low/supine": 1024
+  },
+  "sha256": "5750cffc90955c270cf1daf8d6bed849cca47b472e50b55d44b15893410407b8"
+}

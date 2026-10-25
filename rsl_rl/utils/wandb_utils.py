@@ -52,7 +52,7 @@ class WandbSummaryWriter(SummaryWriter):
         wandb.init(project=project, entity=entity, name=run_name)
 
         # Add log directory to wandb
-        wandb.config.update({"log_dir": log_dir})
+        wandb.config.update({"log_dir": log_dir}, allow_val_change=True)
 
         self.name_map = {
             "Train/mean_reward/time": "Train/mean_reward_time",
@@ -60,13 +60,13 @@ class WandbSummaryWriter(SummaryWriter):
         }
 
     def store_config(self, env_cfg, runner_cfg, alg_cfg, policy_cfg):
-        wandb.config.update({"runner_cfg": runner_cfg})
-        wandb.config.update({"policy_cfg": policy_cfg})
-        wandb.config.update({"alg_cfg": alg_cfg})
+        wandb.config.update({"runner_cfg": runner_cfg}, allow_val_change=True)
+        wandb.config.update({"policy_cfg": policy_cfg}, allow_val_change=True)
+        wandb.config.update({"alg_cfg": alg_cfg}, allow_val_change=True)
         try:
-            wandb.config.update({"env_cfg": env_cfg.to_dict()})
+            wandb.config.update({"env_cfg": env_cfg.to_dict()}, allow_val_change=True)
         except Exception:
-            wandb.config.update({"env_cfg": asdict(env_cfg)})
+            wandb.config.update({"env_cfg": asdict(env_cfg)}, allow_val_change=True)
 
     def add_scalar(self, tag, scalar_value, global_step=None, walltime=None, new_style=False):
         super().add_scalar(

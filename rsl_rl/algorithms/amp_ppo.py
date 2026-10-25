@@ -209,7 +209,8 @@ class AMPPPO:
             )
 
         # record the transition
-        self.amp_storage.insert(self.amp_transition.observations, amp_obs)
+        if getattr(self, "multi_amp", None) is None:
+            self.amp_storage.insert(self.amp_transition.observations, amp_obs)
         self.storage.add_transitions(self.transition)
         self.transition.clear()
         self.amp_transition.clear()
@@ -249,14 +250,19 @@ class AMPPPO:
         else:
             generator = self.storage.mini_batch_generator(self.num_mini_batches, self.num_learning_epochs)
 
-        amp_policy_generator = self.amp_storage.feed_forward_generator(
-            self.num_learning_epochs * self.num_mini_batches,
-            self.storage.num_envs * self.storage.num_transitions_per_env // self.num_mini_batches,
-        )
-        amp_expert_generator = self.amp_data.feed_forward_generator(
-            self.num_learning_epochs * self.num_mini_batches,
-            self.storage.num_envs * self.storage.num_transitions_per_env // self.num_mini_batches,
-        )
+        if getattr(self, "multi_amp", None) is not None:
+            from itertools import repeat
+            amp_policy_generator = repeat(None)
+            amp_expert_generator = repeat(None)
+        else:
+            amp_policy_generator = self.amp_storage.feed_forward_generator(
+                self.num_learning_epochs * self.num_mini_batches,
+                self.storage.num_envs * self.storage.num_transitions_per_env // self.num_mini_batches,
+            )
+            amp_expert_generator = self.amp_data.feed_forward_generator(
+                self.num_learning_epochs * self.num_mini_batches,
+                self.storage.num_envs * self.storage.num_transitions_per_env // self.num_mini_batches,
+            )
 
         # iterate over batches
         for sample, sample_amp_policy, sample_amp_expert in zip(generator, amp_policy_generator, amp_expert_generator):
@@ -432,22 +438,26 @@ class AMPPPO:
                 mseloss = torch.nn.MSELoss()
                 rnd_loss = mseloss(predicted_embedding, target_embedding)
 
-            # Discriminator loss.
-            policy_state, policy_next_state = sample_amp_policy
-            expert_state, expert_next_state = sample_amp_expert
-            if self.amp_normalizer is not None:
-                with torch.no_grad():
-                    policy_state = self.amp_normalizer.normalize_torch(policy_state, self.device)
-                    policy_next_state = self.amp_normalizer.normalize_torch(policy_next_state, self.device)
-                    expert_state = self.amp_normalizer.normalize_torch(expert_state, self.device)
-                    expert_next_state = self.amp_normalizer.normalize_torch(expert_next_state, self.device)
-            policy_d = self.discriminator(torch.cat([policy_state, policy_next_state], dim=-1))
-            expert_d = self.discriminator(torch.cat([expert_state, expert_next_state], dim=-1))
-            expert_loss = torch.nn.MSELoss()(expert_d, torch.ones(expert_d.size(), device=self.device))
-            policy_loss = torch.nn.MSELoss()(policy_d, -1 * torch.ones(policy_d.size(), device=self.device))
-            amp_loss = 0.5 * (expert_loss + policy_loss)
-            grad_pen_loss = self.discriminator.compute_grad_pen(*sample_amp_expert, lambda_=10)
-            loss += self.amploss_coef * amp_loss + self.amploss_coef * grad_pen_loss
+            if getattr(self, "multi_amp", None) is not None:
+                amp_loss = grad_pen_loss = torch.zeros((), device=self.device)
+                policy_d = expert_d = amp_loss.reshape(1)
+            else:
+                # Discriminator loss.
+                policy_state, policy_next_state = sample_amp_policy
+                expert_state, expert_next_state = sample_amp_expert
+                if self.amp_normalizer is not None:
+                    with torch.no_grad():
+                        policy_state = self.amp_normalizer.normalize_torch(policy_state, self.device)
+                        policy_next_state = self.amp_normalizer.normalize_torch(policy_next_state, self.device)
+                        expert_state = self.amp_normalizer.normalize_torch(expert_state, self.device)
+                        expert_next_state = self.amp_normalizer.normalize_torch(expert_next_state, self.device)
+                policy_d = self.discriminator(torch.cat([policy_state, policy_next_state], dim=-1))
+                expert_d = self.discriminator(torch.cat([expert_state, expert_next_state], dim=-1))
+                expert_loss = torch.nn.MSELoss()(expert_d, torch.ones(expert_d.size(), device=self.device))
+                policy_loss = torch.nn.MSELoss()(policy_d, -1 * torch.ones(policy_d.size(), device=self.device))
+                amp_loss = 0.5 * (expert_loss + policy_loss)
+                grad_pen_loss = self.discriminator.compute_grad_pen(*sample_amp_expert, lambda_=10)
+                loss += self.amploss_coef * amp_loss + self.amploss_coef * grad_pen_loss
 
             # Compute the gradients
             # -- For PPO
@@ -494,7 +504,7 @@ class AMPPPO:
             if self.rnd_optimizer:
                 self.rnd_optimizer.step()
 
-            if self.amp_normalizer is not None:
+            if self.amp_normalizer is not None and getattr(self, "multi_amp", None) is None:
                 self.amp_normalizer.update(policy_state.cpu().numpy())
                 self.amp_normalizer.update(expert_state.cpu().numpy())
 

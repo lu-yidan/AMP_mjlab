@@ -1,4 +1,5 @@
 import os
+import copy
 import inspect
 
 import torch
@@ -19,15 +20,15 @@ class _OnnxPolicyWrapper(torch.nn.Module):
   and C++ deployment does not need to implement normalization separately.
   """
 
-  def __init__(self, actor_critic, obs_normalizer=None):
+  def __init__(self, actor, obs_normalizer=None):
     super().__init__()
-    self.actor_critic = actor_critic
+    self.actor = actor
     self.obs_normalizer = obs_normalizer
 
   def forward(self, obs):
     if self.obs_normalizer is not None:
       obs = self.obs_normalizer(obs)
-    return self.actor_critic.act_inference(obs)
+    return self.actor(obs)
 
 
 def _onnx_export_kwargs_single_file() -> dict:
@@ -71,17 +72,16 @@ class AMPOnPolicyRunner(AmpOnPolicyRunner):
     The exported model includes the obs normalizer (if empirical_normalization
     is enabled) so that the ONNX model expects raw observations directly.
     """
-    policy = self.alg.policy
+    policy = copy.deepcopy(self.alg.policy.actor).cpu()
     # Include normalizer in the ONNX model if empirical normalization is used
     obs_normalizer = None
     if self.empirical_normalization:
-      obs_normalizer = self.obs_normalizer
-      obs_normalizer.to("cpu")
+      obs_normalizer = copy.deepcopy(self.obs_normalizer).cpu()
       obs_normalizer.eval()
     wrapper = _OnnxPolicyWrapper(policy, obs_normalizer)
     wrapper.to("cpu")
     wrapper.eval()
-    num_obs = policy.actor[0].in_features
+    num_obs = policy[0].in_features
     dummy_input = torch.zeros(1, num_obs)
     os.makedirs(path, exist_ok=True)
     torch.onnx.export(
@@ -96,10 +96,8 @@ class AMPOnPolicyRunner(AmpOnPolicyRunner):
       **_onnx_export_kwargs_single_file(),
     )
     _inline_external_onnx_data(os.path.join(path, filename))
-    # move policy back to training device
-    policy.to(self.device)
-    if obs_normalizer is not None:
-      obs_normalizer.to(self.device)
+    # Exported copies are discarded; online model devices and training modes
+    # (especially observation-normalizer updates) are never modified.
 
   def save(self, path: str, infos=None):
     super().save(path, infos)

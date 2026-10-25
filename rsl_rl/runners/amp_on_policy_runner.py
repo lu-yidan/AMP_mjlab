@@ -215,6 +215,16 @@ class AmpOnPolicyRunner:
             multi_gpu_cfg=self.multi_gpu_cfg,
         )
 
+        self.alg.multi_amp = None
+        if train_cfg.get("multi_amp"):
+            if self.multi_gpu_cfg is not None:
+                raise ValueError("MultiAMP currently supports one GPU per run")
+            from rsl_rl.modules.multi_amp import MultiAMP
+            self.alg.multi_amp = MultiAMP(
+                amp_data, train_cfg["multi_amp"], train_cfg["amp_discr_hidden_dims"],
+                train_cfg["amp_reward_coef"], train_cfg["amp_task_reward_lerp"], self.device,
+            )
+
         # store training configuration
         self.num_steps_per_env = self.cfg["num_steps_per_env"]
         self.save_interval = self.cfg["save_interval"]
@@ -319,6 +329,7 @@ class AmpOnPolicyRunner:
             # Rollout
             with torch.inference_mode():
                 for _ in range(self.num_steps_per_env):
+                    routing = self._multi_amp_routing() if self.alg.multi_amp is not None else None
                     # Sample actions
                     actions = self.alg.act(obs, privileged_obs, amp_obs)
                     # Step the environment
@@ -349,9 +360,14 @@ class AmpOnPolicyRunner:
                     if len(reset_env_ids) > 0:
                         next_amp_obs_with_term[reset_env_ids] = amp_obs[reset_env_ids]
 
-                    rewards = self.alg.discriminator.predict_amp_reward(
-                        amp_obs, next_amp_obs_with_term, rewards, normalizer=self.alg.amp_normalizer
-                    )[0]
+                    if self.alg.multi_amp is not None:
+                        rewards = self.alg.multi_amp.reward_and_store(
+                            amp_obs, next_amp_obs, rewards, *routing, dones,
+                        )
+                    else:
+                        rewards = self.alg.discriminator.predict_amp_reward(
+                            amp_obs, next_amp_obs_with_term, rewards, normalizer=self.alg.amp_normalizer
+                        )[0]
                     amp_obs = torch.clone(next_amp_obs)
                     self.alg.process_env_step(rewards, dones, infos, next_amp_obs_with_term)
 
@@ -397,6 +413,9 @@ class AmpOnPolicyRunner:
 
             # update policy
             loss_dict = self.alg.update()
+            if self.alg.multi_amp is not None:
+                loss_dict.update(self.alg.multi_amp.update(
+                    self.alg.num_learning_epochs * self.alg.num_mini_batches))
 
             stop = time.time()
             learn_time = stop - start
@@ -531,6 +550,30 @@ class AmpOnPolicyRunner:
         )
         print(log_string)
 
+    def _multi_amp_routing(self):
+        from mjlab.utils.lab_api.math import quat_apply
+        from rsl_rl.modules.multi_amp import recovery_gate
+        env = self.env.unwrapped
+        robot = env.scene["robot"]
+        cfg = self.alg.multi_amp.cfg
+        if cfg.get("condition_mode") == "matched_velocity":
+            command = env.command_manager.get_term("twist")
+            return (command.recovering.to(self.device).clone(),
+                    command.command.to(self.device).clone())
+        body_id = list(robot.body_names).index(cfg["head_body"])
+        q = robot.data.body_link_quat_w[:, body_id]
+        offset = torch.tensor(cfg["head_offset"], device=q.device).expand(q.shape[0], -1)
+        head = robot.data.body_link_pos_w[:, body_id] + quat_apply(q, offset)
+        height = head[:, 2] - env.scene.env_origins[:, 2]
+        # This task is registered only on flat ground: origin z is ground height.
+        recovery = recovery_gate(
+            robot.data.projected_gravity_b[:, 2], height,
+            cfg["gravity_threshold"], cfg["head_height_threshold"] if cfg["use_head_height"] else None,
+        )
+        speed = env.command_manager.get_command("twist")[:, :2].norm(dim=-1)
+        condition = (speed / cfg["speed_max"]).clamp(0, 1)
+        return recovery.to(self.device).clone(), condition.to(self.device).clone()
+
     def save(self, path: str, infos=None):
         # -- Save model
         saved_dict = {
@@ -541,6 +584,8 @@ class AmpOnPolicyRunner:
             "iter": self.current_learning_iteration,
             "infos": infos,
         }
+        if self.alg.multi_amp is not None:
+            saved_dict["multi_amp"] = self.alg.multi_amp.checkpoint()
         # -- Save RND model if used
         if self.alg.rnd:
             saved_dict["rnd_state_dict"] = self.alg.rnd.state_dict()
@@ -559,6 +604,11 @@ class AmpOnPolicyRunner:
 
     def load(self, path: str, load_optimizer: bool = True):
         loaded_dict = torch.load(path, weights_only=False)
+
+        if ("multi_amp" in loaded_dict) != (self.alg.multi_amp is not None):
+            raise ValueError("Checkpoint and task disagree on single/multi discriminator mode")
+        if self.alg.multi_amp is not None:
+            self.alg.multi_amp.restore(loaded_dict["multi_amp"], load_optimizer)
 
         # -- Load model (support both native and mjlab v5 checkpoint formats)
         if "model_state_dict" in loaded_dict:

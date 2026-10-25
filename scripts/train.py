@@ -135,8 +135,13 @@ def run_train(task_id: str, cfg: TrainConfig, log_dir: Path) -> None:
     dump_yaml(log_dir / "params" / "env.yaml", env_cfg)
     dump_yaml(log_dir / "params" / "agent.yaml", agent_cfg)
 
+  remaining_iterations = cfg.agent.max_iterations
+  if resume_path is not None and getattr(runner.alg, "multi_amp", None) is not None:
+    # AMP checkpoints store the last completed iteration, not the next one.
+    runner.current_learning_iteration += 1
+    remaining_iterations = max(0, cfg.agent.max_iterations - runner.current_learning_iteration)
   runner.learn(
-    num_learning_iterations=cfg.agent.max_iterations, init_at_random_ep_len=True
+    num_learning_iterations=remaining_iterations, init_at_random_ep_len=True
   )
 
   env.close()

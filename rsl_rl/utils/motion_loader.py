@@ -56,6 +56,7 @@ class AMPLoader:
         
         # 存储所有motion的数据列表
         self.motion_names = motion_names
+        self._command_velocity_list = []
         self._body_pos_b_list = []
         self._body_quat_b_list = []
         self._body_ori_b_list = []
@@ -77,6 +78,13 @@ class AMPLoader:
             _body_lin_vel_w = torch.tensor(data["body_lin_vel_w"], dtype=torch.float32, device=device)
             _body_ang_vel_w = torch.tensor(data["body_ang_vel_w"], dtype=torch.float32, device=device)
             
+            # Signed torso-yaw-frame xy and world-z yaw rate, matching task commands.
+            anchor_q = _body_quat_w[:, self._anchor_indexes]
+            velocity = math_utils.quat_apply_inverse(
+                math_utils.yaw_quat(anchor_q), _body_lin_vel_w[:, self._anchor_indexes])
+            self._command_velocity_list.append(torch.cat((velocity[:, :2],
+                _body_ang_vel_w[:, self._anchor_indexes, 2:3]), -1))
+
             time_step_total = _dof_pos.shape[0]
             
             # 为当前motion初始化存储

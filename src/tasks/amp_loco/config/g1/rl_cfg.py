@@ -29,6 +29,7 @@ class RslRlAmpRunnerCfg(RslRlOnPolicyRunnerCfg):
   min_normalized_std: List[float] = field(default_factory=lambda: [0.05] * 29)
   amp_body_names: tuple = ()
   amp_anchor_name: str = ""
+  multi_amp: dict = field(default_factory=dict)
 
 
 def g1_amp_ppo_runner_cfg() -> RslRlAmpRunnerCfg:
@@ -93,3 +94,20 @@ def g1_amp_ppo_runner_cfg() -> RslRlAmpRunnerCfg:
     ),
     amp_anchor_name="torso_link",
   )
+
+def g1_multi_amp_ppo_runner_cfg() -> RslRlAmpRunnerCfg:
+  cfg = g1_amp_ppo_runner_cfg()
+  cfg.experiment_name = "g1_multi_amp"
+  cfg.save_interval = 1000
+  cfg.multi_amp = {
+    "gravity_threshold": 0.6,
+    "head_height_threshold": 0.9,
+    "use_head_height": True,
+    "speed_max": 3.0,
+    "head_body": "torso_link",
+    "head_offset": [0.0, 0.0, 0.43],
+    "replay_size": 100000,
+    "batch_size": 1024,
+    "learning_rate": 1e-4,
+  }
+  return cfg
