@@ -20,7 +20,8 @@ def main():
         observation='q-default_q (29), qd*0.1 (29), pelvis angular velocity body-frame *0.25 (3), projected gravity (3), previous normalized action (29)',
         joint_names=ck['joint_names'],default_q=ck['default_q'].tolist(),dt=ck['dt'],
         action='motor order normalized offsets, use this repository G1_ACTION_SCALE and default_q; NOT legacy AMP 0.25 interface',
-        source_checkpoint=a.checkpoint),indent=2))
+        recovery='Same actor; always pass the raw requested velocity even when fallen. No external mode gate.',
+        reset_metadata=ck.get('reset_metadata',{}),source_checkpoint=a.checkpoint),indent=2))
 
 
 if __name__=='__main__':main()

@@ -1,13 +1,19 @@
 """Nominal mjlab adapter. Capture physical next state BEFORE manual reset."""
 import torch
-from .mdp import flatten_state, unflatten_state, observation, reward, termination
+from .mdp import flatten_state, unflatten_state, reward, termination, is_recovery
+from .reset_bank import ResetBank, DEFAULT_BANK
 
 
 class VelocitySim:
-    def __init__(self, num_envs=4096, device='cuda:0', seed=42, max_speed=3., render=False):
+    def __init__(self, num_envs=4096, device='cuda:0', seed=42, max_speed=3., render=False, reset_mode='stratified',
+                 bank_path=DEFAULT_BANK, episode_seconds=20., gamma=.99):
         from mjlab.envs import ManagerBasedRlEnv
         from mjlab.managers.event_manager import EventTermCfg
         from src.tasks.amp_loco.config.g1.env_cfgs import g1_amp_flat_env_cfg
+        if reset_mode not in ('stratified','standing'):raise ValueError(reset_mode)
+        if episode_seconds<=0:raise ValueError('episode_seconds must be positive')
+        self.reset_mode=reset_mode;self.bank_path=bank_path;self.bank=None;self.gamma=gamma
+        self.reset_groups=torch.zeros(num_envs,dtype=torch.long,device=device)
         cfg = g1_amp_flat_env_cfg(play=True)
         cfg.seed = seed
         cfg.scene.num_envs = num_envs
@@ -15,10 +21,17 @@ class VelocitySim:
         cfg.terminations = {}; cfg.curriculum = {}; cfg.rewards = {}; cfg.metrics = {}
         cfg.observations = {}; cfg.commands = {}; cfg.events = {}
         cfg.scene.sensors = ()
-        cfg.events['nominal_reset'] = EventTermCfg(func=self._reset_pose, mode='reset')
+        # EventManager deep-copies term configs. A bound method would copy this
+        # adapter and detach reset bookkeeping/configuration from the live object.
+        def reset_pose(env, env_ids):
+            self._reset_pose(env, env_ids)
+        cfg.events['nominal_reset'] = EventTermCfg(func=reset_pose, mode='reset')
         self.env = ManagerBasedRlEnv(cfg=cfg, device=device, render_mode='rgb_array' if render else None)
         self.device=device; self.n=num_envs; self.max_speed=max_speed
         self.robot=self.env.scene['robot']
+        self.max_episode_steps=round(episode_seconds/self.env.step_dt)
+        self.recovered=torch.zeros(num_envs,dtype=torch.bool,device=device)
+        self.stable_steps=torch.zeros(num_envs,dtype=torch.long,device=device)
         self.default_q=self.robot.data.default_joint_pos[0].clone()
         self.command=torch.zeros(num_envs,3,device=device)
         self.a_prev=torch.zeros(num_envs,29,device=device)
@@ -28,14 +41,20 @@ class VelocitySim:
         self.env.reset()
         self.resample(torch.arange(num_envs,device=device))
 
-    @staticmethod
-    def _reset_pose(env, env_ids):
+    def _reset_pose(self, env, env_ids):
         r=env.scene['robot']
         ids=torch.arange(env.num_envs,device=env.device) if env_ids is None else env_ids
         root=r.data.default_root_state[ids].clone(); root[:,:3]+=env.scene.env_origins[ids]
+        q=r.data.default_joint_pos[ids].clone()
+        self.reset_groups[ids]=0
+        if self.reset_mode=='stratified':
+            if self.bank is None:self.bank=ResetBank(self.bank_path,r.joint_names,env.device)
+            groups,indices=self.bank.sample(len(ids));self.reset_groups[ids]=groups
+            low=indices>=0;sample=self.bank.qpos[indices[low]]
+            root[low,:7]=sample[:,:7];root[low,:3]+=env.scene.env_origins[ids[low]]
+            q[low]=sample[:,7:]
         r.write_root_link_pose_to_sim(root[:,:7],env_ids=ids)
         r.write_root_link_velocity_to_sim(torch.zeros_like(root[:,7:13]),env_ids=ids)
-        q=r.data.default_joint_pos[ids].clone()
         r.write_joint_state_to_sim(q,torch.zeros_like(q),env_ids=ids)
 
     def state(self):
@@ -66,19 +85,39 @@ class VelocitySim:
         if not torch.isfinite(s1).all():
             raise FloatingPointError('Non-finite simulator state; refusing to contaminate replay')
         self.ep_step+=1; self.age-=1
-        done=terminated|(self.ep_step>=1000)
+        done=terminated|(self.ep_step>=self.max_episode_steps)
+        recovering=is_recovery(S1)
+        self.stable_steps=torch.where(~recovering,self.stable_steps+1,0)
+        self.recovered|=self.stable_steps>=round(1/self.env.step_dt)
         transition=dict(s=s,s1=s1,a=action.clone(),a_prev=prev,xi=self.xi.clone(),
-            r=reward(S1,command,action,prev,self.default_q,self.env.step_dt),
-            command=command,ep_step=ep,done=done)
+            r=reward(S1,command,action,prev,self.default_q,self.env.step_dt,previous_state=unflatten_state(s),gamma=self.gamma),
+            command=command,ep_step=ep,done=done,recovery=is_recovery(unflatten_state(s)),
+            terminated=terminated, reset_group=self.reset_groups.clone(), recovered=self.recovered.clone())
         self.a_prev.copy_(action)
         ids=done.nonzero().flatten()
         if auto_reset and len(ids):
             self.env.reset(env_ids=ids)
             self.ep_step[ids]=0; self.a_prev[ids]=0
+            self.stable_steps[ids]=0;self.recovered[ids]=False
             if resample:self.resample(ids)
         if resample:
             self.resample((self.age<=0).nonzero().flatten())
         return transition
+
+    @torch.no_grad()
+    def reset_to_bank(self, bank, indices):
+        """Reset every environment to explicitly selected held-out bank rows."""
+        if len(indices)!=self.n:raise ValueError('One bank row per environment required')
+        mode=self.reset_mode;self.reset_mode='standing'
+        try:self.env.reset()
+        finally:self.reset_mode=mode
+        ids=torch.arange(self.n,device=self.device)
+        q=bank.qpos[indices].clone();q[:,:3]+=self.env.scene.env_origins
+        self.robot.write_root_link_pose_to_sim(q[:,:7],env_ids=ids)
+        self.robot.write_root_link_velocity_to_sim(torch.zeros(self.n,6,device=self.device),env_ids=ids)
+        self.robot.write_joint_state_to_sim(q[:,7:],torch.zeros_like(q[:,7:]),env_ids=ids)
+        self.env.scene.write_data_to_sim();self.env.sim.forward();self.env.sim.sense()
+        self.ep_step.zero_();self.a_prev.zero_();self.stable_steps.zero_();self.recovered.zero_()
 
     def close(self):
         self.env.close()

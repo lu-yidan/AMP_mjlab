@@ -62,3 +62,54 @@ class SuperMimicTest(unittest.TestCase):
             self.assertEqual(u.iteration,2)
             for k,v in t.pi.state_dict().items():torch.testing.assert_close(v,u.pi.state_dict()[k])
             with self.assertRaises(ValueError):u.load(path,names[::-1])
+            u.reset_metadata={'sha256':'wrong-bank'}
+            with self.assertRaisesRegex(ValueError,'bank mismatch'):u.load(path,names)
+            u.reset_metadata={}
+            ck=torch.load(path,weights_only=False);ck['format']='supermimic_velocity_v1';torch.save(ck,path)
+            with self.assertRaisesRegex(ValueError,'Incompatible'):u.load(path,names)
+
+    def test_fallen_states_survive_and_progress_is_rewarded(self):
+        from src.supermimic.mdp import termination,locomotion_readiness,is_recovery
+        S=list(state());S[0][:,2]=.2
+        S[1][:]=torch.diag(torch.tensor([1.,-1.,-1.]))
+        self.assertTrue(is_recovery(S).all());self.assertFalse(termination(S).any())
+        self.assertTrue((locomotion_readiness(S)==0).all())
+        up=[x.clone() for x in S];up[0][:,2]=.4;up[1][:]=torch.eye(3)
+        z=torch.zeros(4,29);cmd=torch.ones(4,3)
+        stay=reward(S,cmd,z,z,z[0],previous_state=S)
+        rise=reward(up,cmd,z,z,z[0],previous_state=S)
+        self.assertTrue((rise>stay).all())
+        up[0][:,2]=-1;self.assertTrue(termination(up).all())
+
+    def test_balanced_replay_with_missing_class_fallback(self):
+        b=ReplayBuffer(4,4,'cpu')
+        for i in range(4):
+            tr=transition(step=i);tr['s'][0,2]=.2;b.add(tr)
+        w=b.sample_windows(100,2,.5)
+        self.assertEqual(int(w['recovery'][:,0].sum()),50)
+        s,h=b.sample_starts(100,3,.5)
+        self.assertEqual(int(s['recovery'].sum()),50)
+        b=ReplayBuffer(4,4,'cpu');b.add(transition())
+        s,_=b.sample_starts(100,3,.5)
+        self.assertFalse(s['recovery'].any())
+
+    def test_reset_bank_mapping_and_distribution(self):
+        import numpy as np
+        from src.supermimic.reset_bank import ResetBank,DEFAULT_BANK
+        with np.load(DEFAULT_BANK) as data:
+            names=data['joint_names'].tolist();q=torch.tensor(data['qpos'],dtype=torch.float32)
+        bank=ResetBank(DEFAULT_BANK,names[::-1],'cpu')
+        torch.testing.assert_close(bank.qpos[:,7:],q[:,7:].flip(-1))
+        torch.manual_seed(42);groups,ids=bank.sample(20000)
+        self.assertLess(abs(float((groups==0).float().mean())-.3),.02)
+        self.assertLess(abs(float((groups>=3).float().mean())-.4),.02)
+        self.assertTrue((ids[groups==0]==-1).all())
+        self.assertEqual(len(groups.unique()),11)
+
+    def test_upside_down_world_model_has_finite_gradients(self):
+        S=list(state());S[0][:,2]=.2;S[1][:]=torch.diag(torch.tensor([1.,-1.,-1.]))
+        wm=WorldModel((16,));a=torch.zeros(4,29,requires_grad=True)
+        with torch.no_grad():wm.net[-1].weight.normal_(0,.01)
+        nxt=wm.step(S,a,torch.empty(4,0))
+        reward(nxt,torch.ones(4,3),a,a.detach(),torch.zeros(29),previous_state=S).sum().backward()
+        self.assertTrue(torch.isfinite(a.grad).all())
