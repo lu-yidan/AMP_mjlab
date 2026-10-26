@@ -531,3 +531,10 @@ v2 验证：18 项单元测试通过；另有 opt-in CUDA 仿真回归测试
 初态从留出库各方向自然低位样本按根高度取中位数，未按策略结果挑选，行号 665/122/88/44。
 本地成片目录 `logs/supermimic/eval_grouped_steps3_49000/videos_follow/`，大视频不进入 Git。
 画面叠加实际速度、目标速度、根高度及直立判据；单段展示不替代 888 姿态的完整评测。
+
+2026-10-26 增加分组＋课程 `sim_steps=6` 中间对照，GPU 4，从零训练 4096 环境、100k 轮，
+其余学习/奖励/初态/课程参数沿用 steps=3；保留已有四组。
+W&B https://wandb.ai/tabletennis/lyd-supermimic/runs/aa56c532 ，输出
+`/root/workplace/lyd-supermimic-grouped-c32c73c/logs/sm_grouped_4096x6_100k_v5_seed42_20261026`。
+启动清单 `/root/workplace/supermimic_grouped_steps6_20261026.json`，包含源码 SHA256 与运行参数。
+`sim_steps` 不改变 0.02 秒动作控制周期，只改变每轮真实采样量；该实验不能单独保证动作更平滑。
