@@ -6,7 +6,7 @@ from .reset_bank import ResetBank, DEFAULT_BANK
 
 class VelocitySim:
     def __init__(self, num_envs=4096, device='cuda:0', seed=42, max_speed=5., render=False, reset_mode='stratified',
-                 bank_path=DEFAULT_BANK, episode_seconds=20., gamma=.99, locomotion_grace=.3, recovery_grace=5.):
+                 bank_path=DEFAULT_BANK, episode_seconds=20., gamma=.99, locomotion_grace=.3, recovery_grace=5., viewer_cfg=None):
         from mjlab.envs import ManagerBasedRlEnv
         from mjlab.managers.event_manager import EventTermCfg
         from src.tasks.amp_loco.config.g1.env_cfgs import g1_amp_flat_env_cfg
@@ -21,6 +21,7 @@ class VelocitySim:
         self.attempt_active=self.recovery_env.clone()
         self.reset_groups=torch.zeros(num_envs,dtype=torch.long,device=device)
         cfg = g1_amp_flat_env_cfg(play=True)
+        if viewer_cfg is not None:cfg.viewer=viewer_cfg
         cfg.seed = seed
         cfg.scene.num_envs = num_envs
         # No auto-reset: terminal physical states must reach the world model.

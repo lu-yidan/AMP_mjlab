@@ -523,3 +523,11 @@ v2 验证：18 项单元测试通过；另有 opt-in CUDA 仿真回归测试
 0–3m/s 末段直立比例均 100%，4m/s 为 94.65%，5m/s 为 36.70%；5m/s 仍不可靠。
 每命令 8 个相同默认初态、确定性动作，重复不构成独立泛化试验。
 原 AMP 的 100k 验证结果属于不同训练预算/配置，不能据此次结果宣称算法效率更高。
+
+49k 评测配套视频使用 `python -m src.supermimic.record --checkpoint PATH --bank PATH --output DIR`，
+远端以 `MUJOCO_GL=egl PYOPENGL_PLATFORM=egl` 渲染，25fps、实时速度播放，无自动 reset。
+`walk_run.mp4` 对照 0.5/1/2/3m/s，`fast_run.mp4` 对照 4/5m/s，均先站立 2 秒再给命令；
+`recovery_stand.mp4` 与 `recovery_walk.mp4` 分别是四方向零速/持续 1m/s 起身。
+初态从留出库各方向自然低位样本按根高度取中位数，未按策略结果挑选，行号 665/122/88/44。
+本地成片目录 `logs/supermimic/eval_grouped_steps3_49000/videos_follow/`，大视频不进入 Git。
+画面叠加实际速度、目标速度、根高度及直立判据；单段展示不替代 888 姿态的完整评测。
