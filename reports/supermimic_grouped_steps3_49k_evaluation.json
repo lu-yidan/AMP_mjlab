@@ -1,0 +1,124 @@
+{
+  "recovery_zero": {
+    "all": {
+      "cases": 888,
+      "successes": 888,
+      "mean_seconds": 1.94601351613397,
+      "max_seconds": 4.199999809265137,
+      "final_upright_fraction": 0.9911711707560195,
+      "fully_upright_final_second": 867,
+      "catastrophic": 0,
+      "post_recovery_vx_mae": 0.014210523841357245
+    },
+    "natural": {
+      "cases": 376,
+      "successes": 376,
+      "mean_seconds": 2.016968088581207,
+      "max_seconds": 4.199999809265137,
+      "final_upright_fraction": 0.991117020930223,
+      "fully_upright_final_second": 367,
+      "catastrophic": 0,
+      "post_recovery_vx_mae": 0.015263365383168305
+    },
+    "procedural": {
+      "cases": 512,
+      "successes": 512,
+      "mean_seconds": 1.8939062519930303,
+      "max_seconds": 3.940000057220459,
+      "final_upright_fraction": 0.9912109370343387,
+      "fully_upright_final_second": 500,
+      "catastrophic": 0,
+      "post_recovery_vx_mae": 0.013437343334089746
+    }
+  },
+  "recovery_moving": {
+    "all": {
+      "cases": 888,
+      "successes": 888,
+      "mean_seconds": 1.9570720723351918,
+      "max_seconds": 4.480000019073486,
+      "final_upright_fraction": 1.0,
+      "fully_upright_final_second": 888,
+      "catastrophic": 0,
+      "post_recovery_vx_mae": 0.1656319583925578
+    },
+    "natural": {
+      "cases": 376,
+      "successes": 376,
+      "mean_seconds": 2.049787232216368,
+      "max_seconds": 4.480000019073486,
+      "final_upright_fraction": 1.0,
+      "fully_upright_final_second": 376,
+      "catastrophic": 0,
+      "post_recovery_vx_mae": 0.16552468500238784
+    },
+    "procedural": {
+      "cases": 512,
+      "successes": 512,
+      "mean_seconds": 1.8889843767974526,
+      "max_seconds": 4.059999942779541,
+      "final_upright_fraction": 1.0,
+      "fully_upright_final_second": 512,
+      "catastrophic": 0,
+      "post_recovery_vx_mae": 0.16571073728846386
+    }
+  },
+  "locomotion": {
+    "0.0": {
+      "actual_vx": -0.0002218845474999398,
+      "vx_mae": 0.0038167943712323904,
+      "upright_fraction": 1.0,
+      "ever_failed_fraction": 0.0
+    },
+    "0.5": {
+      "actual_vx": 0.5013054609298706,
+      "vx_mae": 0.01688382588326931,
+      "upright_fraction": 1.0,
+      "ever_failed_fraction": 0.0
+    },
+    "1.0": {
+      "actual_vx": 0.8440994024276733,
+      "vx_mae": 0.15590055286884308,
+      "upright_fraction": 1.0,
+      "ever_failed_fraction": 0.0
+    },
+    "2.0": {
+      "actual_vx": 2.455018997192383,
+      "vx_mae": 0.4550185203552246,
+      "upright_fraction": 1.0,
+      "ever_failed_fraction": 0.0
+    },
+    "3.0": {
+      "actual_vx": 2.9627697467803955,
+      "vx_mae": 0.058032430708408356,
+      "upright_fraction": 1.0,
+      "ever_failed_fraction": 0.0
+    },
+    "4.0": {
+      "actual_vx": 4.083993911743164,
+      "vx_mae": 0.09925997257232666,
+      "upright_fraction": 0.9465000033378601,
+      "ever_failed_fraction": 0.0
+    },
+    "5.0": {
+      "actual_vx": 3.70719051361084,
+      "vx_mae": 1.3594353199005127,
+      "upright_fraction": 0.367000013589859,
+      "ever_failed_fraction": 0.0
+    }
+  },
+  "manifest": {
+    "checkpoint": "/root/workplace/lyd-supermimic-grouped-c32c73c/logs/sm_grouped_4096_100k_v5_seed42_20261026/model_49000.pt",
+    "checkpoint_sha256": "d11e507146c9f1bb66b7c12ff0698cf3d55dc4447ca30072c3b821d87dd43e15",
+    "bank": "/root/autodl-tmp/bj-backup-20261021/rootfs/root/workplace/lyd-multi-discriminator-amp/records/eval60k/validation.npz",
+    "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+    "low_cases": 888,
+    "train_pose_overlap_rounded_6decimals": 0
+  },
+  "iteration": 49000,
+  "wandb": "https://wandb.ai/tabletennis/lyd-supermimic/runs/c6af7843",
+  "protocol": {
+    "recovery": "888 held-out low poses; 20s; success root_z>=0.65m and Rzz>=0.9 continuously for 1s; commands 0 or 1m/s active from start; no resets; nominal flat dynamics; reported recovery time includes 1s hold",
+    "locomotion": "2s standing then 10s target command; statistics over last 5s; 8 identical deterministic starts per speed, not independent trials; upright criterion root_z>0.65 and Rzz>0.9"
+  }
+}
