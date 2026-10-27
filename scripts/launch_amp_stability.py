@@ -25,7 +25,8 @@ def main():
     for gpu,(label,task) in zip(a.gpus,TASKS):
         if a.only and label not in a.only:continue
         run_id=uuid.uuid4().hex[:8]
-        name='stability-'+label.lower()+'-scratch-4096x24-100k-seed42'
+        code='AMP-'+label[0]
+        name=code+'-stability-'+label.lower()+'-scratch-4096x24-100k-seed42'
         cmd=[sys.executable,'-u','scripts/train.py',task,'--env.scene.num-envs','4096',
              '--agent.num-steps-per-env','24','--agent.max-iterations','100000',
              '--agent.save-interval','1000','--agent.logger','wandb','--agent.wandb-project','lyd-multi-amp',
@@ -35,7 +36,7 @@ def main():
         log=out/(label+'.log')
         with log.open('w') as f:
             proc=subprocess.Popen(cmd,cwd=root,env=env,stdout=f,stderr=subprocess.STDOUT,start_new_session=True)
-        records['runs'].append(dict(label=label,task=task,gpu=gpu,pid=proc.pid,run_id=run_id,
+        records['runs'].append(dict(code=code,label=label,task=task,gpu=gpu,pid=proc.pid,run_id=run_id,
               wandb='https://wandb.ai/tabletennis/lyd-multi-amp/runs/'+run_id,command=cmd,log=str(log)))
         manifest.write_text(json.dumps(records,indent=2))
     print(manifest.read_text())

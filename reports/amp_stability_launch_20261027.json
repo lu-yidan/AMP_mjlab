@@ -38,7 +38,8 @@
       ],
       "log": "/root/workplace/lyd-amp-recovery-stability/records/stability-20261027/A-single.log",
       "source_commit": "e48bd6192668aa971dbcc795a752a60c244d259f",
-      "root": "/root/workplace/lyd-amp-recovery-stability"
+      "root": "/root/workplace/lyd-amp-recovery-stability",
+      "code": "AMP-A"
     },
     {
       "label": "B-stable",
@@ -75,7 +76,8 @@
       ],
       "log": "/root/workplace/lyd-amp-recovery-stability/records/stability-20261027/B-stable.log",
       "source_commit": "e48bd6192668aa971dbcc795a752a60c244d259f",
-      "root": "/root/workplace/lyd-amp-recovery-stability"
+      "root": "/root/workplace/lyd-amp-recovery-stability",
+      "code": "AMP-B"
     },
     {
       "label": "C-phase-smp",
@@ -112,7 +114,8 @@
       ],
       "log": "/root/workplace/lyd-amp-recovery-stability/records/stability-20261027/C-phase-smp.log",
       "source_commit": "e48bd6192668aa971dbcc795a752a60c244d259f",
-      "root": "/root/workplace/lyd-amp-recovery-stability"
+      "root": "/root/workplace/lyd-amp-recovery-stability",
+      "code": "AMP-C"
     },
     {
       "label": "D-smooth-smp",
@@ -149,7 +152,8 @@
       ],
       "log": "/root/workplace/lyd-amp-recovery-stability-smooth-v2/records/stability-20261027/D-smooth-smp.log",
       "source_commit": "ca9bd9deb7115ea84525e20ff94df7edf9021064",
-      "root": "/root/workplace/lyd-amp-recovery-stability-smooth-v2"
+      "root": "/root/workplace/lyd-amp-recovery-stability-smooth-v2",
+      "code": "AMP-D"
     }
   ],
   "aborted_runs": [
@@ -221,5 +225,6 @@
       "checkpoint": 96000
     }
   ],
-  "runtime_pythonpath": "/root/autodl-tmp/bj-backup-20261021/rootfs/root/workplace/lyd-multi-discriminator-amp/runtime:.:/root/autodl-tmp/bj-backup-20261021/rootfs/root/autodl-tmp/cra-throughput-20261014/.venv/lib/python3.12/site-packages"
+  "runtime_pythonpath": "/root/autodl-tmp/bj-backup-20261021/rootfs/root/workplace/lyd-multi-discriminator-amp/runtime:.:/root/autodl-tmp/bj-backup-20261021/rootfs/root/autodl-tmp/cra-throughput-20261014/.venv/lib/python3.12/site-packages",
+  "code_policy": "Stable identifiers AMP-A through AMP-D for this batch; future experiments use new letters, never reuse a code for a different configuration."
 }
