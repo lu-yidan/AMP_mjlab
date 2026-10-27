@@ -393,3 +393,14 @@ SuperMimic三个活跃训练已按要求停止，最近周期存档分别为原�
 AMP-C=稳定更新＋SMP恢复专家＋阶段采样；AMP-D=C＋空间/时间平滑。
 W&B名称已加对应代号前缀；启动清单含`code`字段。后续新配置继续分配新字母，
 不复用已有代号；checkpoint或评测名称应包含代号和训练轮数，避免同名混淆。
+
+2026-10-27首次视频对照：AMP-A 14k、AMP-B 17k、AMP-C 16k、AMP-D 17k。
+`scripts/record_amp_stability.py` 用相同6个标称初态，确定性actor，不自动reset或施加推扰。
+4个恢复初态取验证池每方向第一个程序低位姿态，零命令录10秒；走跑与原地转向各25秒，
+每5秒切换命令（走跑0/.5/1/2/3m/s，转向0/+1/-1/+1/-1rad/s）。
+与既有评测一致，命令切换经过一个0.02s控制步进入观测历史。
+`scripts/compose_amp_stability.py` 校验初态hash一致后合成四宫格，左上A、右上B、左下C、右下D。
+6个场景原片在服务器`/root/workplace/amp-stability-videos-20261027/latest-a14-b17-c16-d17/`；
+本地合集在`logs/amp_stability/videos/latest-a14-b17-c16-d17/`。
+权重hash、验证池hash、初态hash及帧数在`reports/amp_stability_videos_20261027.json`。
+这是最新存档的固定场景展示，不是相同训练预算或完整恢复成功率评测。

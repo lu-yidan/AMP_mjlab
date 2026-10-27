@@ -1,0 +1,99 @@
+{
+  "layout": {
+    "top_left": "AMP-A",
+    "top_right": "AMP-B",
+    "bottom_left": "AMP-C",
+    "bottom_right": "AMP-D"
+  },
+  "recordings": [
+    {
+      "name": "AMP-A 14k",
+      "task": "Unitree-G1-AMP-Stratified-Tracking-Flat",
+      "checkpoint": "/root/workplace/lyd-amp-recovery-stability/logs/rsl_rl/g1_amp_stratified_tracking/2026-10-27_14-04-33_stability-a-single-scratch-4096x24-100k-seed42/model_14000.pt",
+      "checkpoint_sha256": "8866206d767c4a6b1fe18824d585ba2a1ed74d496cbe2e6cd72fafad81b1317d",
+      "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+      "bank_rows": [
+        756,
+        757,
+        758,
+        759
+      ],
+      "initial_state_hash": "311df42750571bed42949efb2196d3009086154c4677b290b1435c26bd18e426",
+      "protocol": "Nominal physics, deterministic policy, no resets/pushes; first procedural low pose per direction; recovery 10s at zero command; walk/run 0/.5/1/2/3 m/s and yaw 0/1/-1/1/-1 rad/s each 5s; Command changes enter observations after one 0.02s control step, matching the existing evaluation protocol.",
+      "fps": 25
+    },
+    {
+      "name": "AMP-B 17k",
+      "task": "Unitree-G1-MultiAMP-Stable-Tracking-Flat",
+      "checkpoint": "/root/workplace/lyd-amp-recovery-stability/logs/rsl_rl/g1_multi_amp_stable/2026-10-27_14-04-33_stability-b-stable-scratch-4096x24-100k-seed42/model_17000.pt",
+      "checkpoint_sha256": "f5abd0d6d4ab18ce4ad0907303f7d5e35cbba05f233d3d5b6bbba8ead90e7051",
+      "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+      "bank_rows": [
+        756,
+        757,
+        758,
+        759
+      ],
+      "initial_state_hash": "311df42750571bed42949efb2196d3009086154c4677b290b1435c26bd18e426",
+      "protocol": "Nominal physics, deterministic policy, no resets/pushes; first procedural low pose per direction; recovery 10s at zero command; walk/run 0/.5/1/2/3 m/s and yaw 0/1/-1/1/-1 rad/s each 5s; Command changes enter observations after one 0.02s control step, matching the existing evaluation protocol.",
+      "fps": 25
+    },
+    {
+      "name": "AMP-C 16k",
+      "task": "Unitree-G1-MultiAMP-Phase-Tracking-Flat",
+      "checkpoint": "/root/workplace/lyd-amp-recovery-stability/logs/rsl_rl/g1_multi_amp_phase/2026-10-27_14-04-33_stability-c-phase-smp-scratch-4096x24-100k-seed42/model_16000.pt",
+      "checkpoint_sha256": "c9bef4dbf2529b18b75c4fe46b1a9db76acca79379cc7eb302b89565bee790af",
+      "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+      "bank_rows": [
+        756,
+        757,
+        758,
+        759
+      ],
+      "initial_state_hash": "311df42750571bed42949efb2196d3009086154c4677b290b1435c26bd18e426",
+      "protocol": "Nominal physics, deterministic policy, no resets/pushes; first procedural low pose per direction; recovery 10s at zero command; walk/run 0/.5/1/2/3 m/s and yaw 0/1/-1/1/-1 rad/s each 5s; Command changes enter observations after one 0.02s control step, matching the existing evaluation protocol.",
+      "fps": 25
+    },
+    {
+      "name": "AMP-D 17k",
+      "task": "Unitree-G1-MultiAMP-Smooth-Tracking-Flat",
+      "checkpoint": "/root/workplace/lyd-amp-recovery-stability-smooth-v2/logs/rsl_rl/g1_multi_amp_smooth/2026-10-27_14-08-05_stability-d-smooth-smp-scratch-4096x24-100k-seed42/model_17000.pt",
+      "checkpoint_sha256": "e0eb6df3c9ba0d81824d7bc0253700b5d20eeb757cdcdd0c93223fcf4ecfc598",
+      "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+      "bank_rows": [
+        756,
+        757,
+        758,
+        759
+      ],
+      "initial_state_hash": "311df42750571bed42949efb2196d3009086154c4677b290b1435c26bd18e426",
+      "protocol": "Nominal physics, deterministic policy, no resets/pushes; first procedural low pose per direction; recovery 10s at zero command; walk/run 0/.5/1/2/3 m/s and yaw 0/1/-1/1/-1 rad/s each 5s; Command changes enter observations after one 0.02s control step, matching the existing evaluation protocol.",
+      "fps": 25
+    }
+  ],
+  "local_video_directory": "/home/luyd/workspace/AMP_mjlab/logs/amp_stability/videos/latest-a14-b17-c16-d17",
+  "scripts": {
+    "scripts/record_amp_stability.py": "6796907f9b32217a1793bef3e36286be4e7740c79785ae4b3cc39497680de539",
+    "scripts/compose_amp_stability.py": "25c89bbc43a968519a596bd5ba6af14604c16703aa986aa98ba4534349e3cac6"
+  },
+  "verified_videos": {
+    "walk_run.mp4": {
+      "seconds": 25,
+      "frames": 625
+    },
+    "turn.mp4": {
+      "seconds": 25,
+      "frames": 625
+    },
+    "recovery_all.mp4": {
+      "seconds": 40,
+      "frames": 1000,
+      "order": [
+        "supine",
+        "prone",
+        "left_side_down",
+        "right_side_down"
+      ]
+    }
+  }
+}
