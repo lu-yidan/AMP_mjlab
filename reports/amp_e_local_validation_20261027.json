@@ -1,0 +1,38 @@
+{
+  "obs_max_abs": {
+    "actor": 1.9073486328125e-06,
+    "critic": 3.5762786865234375e-06
+  },
+  "amp_max_abs": 2.1249055862426758e-05,
+  "reward_max_abs": {
+    "track_anchor_linear_velocity": 6.51925802230835e-09,
+    "track_anchor_angular_velocity": 1.862645149230957e-09,
+    "track_root_height": 1.862645149230957e-09,
+    "body_ang_vel_xy_l2": 5.587935447692871e-09,
+    "is_terminated": 0,
+    "joint_acc_l2": 0,
+    "joint_pos_limits": 3.725290298461914e-09,
+    "action_rate_l2": 1.4551915228366852e-11,
+    "foot_slip": 2.3283064365386963e-10,
+    "self_collisions": 0,
+    "vertical_motion_l2": 1.1641532182693481e-10
+  },
+  "termination_mismatch": 0.0,
+  "post_step_state_reward_max_abs": {
+    "track_anchor_linear_velocity": 0.0011812732554972172,
+    "track_anchor_angular_velocity": 0.005134266801178455,
+    "track_root_height": 0.029176432639360428,
+    "body_ang_vel_xy_l2": 0.008519378490746021,
+    "is_terminated": 4.0,
+    "joint_acc_l2": 0,
+    "joint_pos_limits": 3.725290298461914e-09,
+    "action_rate_l2": 1.4551915228366852e-11,
+    "foot_slip": 2.3283064365386963e-10,
+    "self_collisions": 0,
+    "vertical_motion_l2": 0.0001843844074755907
+  },
+  "post_step_state_termination_mismatch": 0.0013427734375,
+  "gradient_finite_nonzero": true,
+  "gradient_fd_max_abs": 1.2009659258183092e-06,
+  "passed": true
+}

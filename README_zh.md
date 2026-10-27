@@ -404,3 +404,18 @@ W&B名称已加对应代号前缀；启动清单含`code`字段。后续新配�
 本地合集在`logs/amp_stability/videos/latest-a14-b17-c16-d17/`。
 权重hash、验证池hash、初态hash及帧数在`reports/amp_stability_videos_20261027.json`。
 这是最新存档的固定场景展示，不是相同训练预算或完整恢复成功率评测。
+
+### AMP-E：C 的 MBRL SuperMimic 对照
+
+分支 `lyd-amp-c-supermimic`。使用 `MBRL_supermimic` 的独立库版本
+`eb7a82bedad9e9e25a93cff3318d24e4a9f88cb2`，不恢复之前已停止的 SuperMimic 任务。
+保持 AMP-C 的真实环境、分层 reset、SMP 恢复数据、双判别器与奖励比例，
+以世界模型＋BPTT 替换 PPO。计划 4096×24、100k 轮、每1000轮保存，
+32步想象展开。判别器只用真实采样训练，想象中冻结参数、保留状态梯度。
+
+接入包含恢复滞回、250步延迟终止、命令平滑与4帧观测历史。
+接触代价及子步加速度由世界模型辅助头预测；命令专家条件在短想象展开内固定，
+这些近似与 mjlab 子步位姿时序偏差均在 [详细说明](docs/AMP_E_SUPERMIMIC.md) 记录。
+数值验收区分“实际奖励时刻的公式一致性”和“步末状态的时序误差”。
+比较时需同时看真实恢复成功率、速度跟随、真实采样量和墙钟时间，不能仅看想象奖励。
+入口：`scripts/train_amp_supermimic.py`；带验收门禁的启动器：`scripts/launch_amp_supermimic.py`。
