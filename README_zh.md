@@ -373,3 +373,18 @@ D额外对混合权重施加0.2秒速率限制（控制dt=0.02，每步权重最
 按新初态初始化，不继承上一回合权重；该短时状态不用于跨episode续训。
 最初D启动后约10轮在代码复核中被停止；修正后的D从零启动，独立run，不续训旧权重。
 A/B/C仍使用e48bd61快照；新增时间渐变只影响D。各run来源以启动清单为准。
+
+正式启动清单：`reports/amp_stability_launch_20261027.json`。
+全部从零开始、W&B项目`tabletennis/lyd-multi-amp`，group为`amp-recovery-stability-20261027`。
+
+| GPU | 实验 | W&B run |
+|---|---|---|
+| 0 | A 分层单判别器 Tracking | https://wandb.ai/tabletennis/lyd-multi-amp/runs/42b53ed8 |
+| 1 | B 双判别器稳定更新 | https://wandb.ai/tabletennis/lyd-multi-amp/runs/372370e0 |
+| 2 | C 稳定更新＋SMP恢复专家＋阶段采样 | https://wandb.ai/tabletennis/lyd-multi-amp/runs/1ed80983 |
+| 3 | D 在C上增加空间及0.2s时间平滑 | https://wandb.ai/tabletennis/lyd-multi-amp/runs/f011bd5c |
+
+旧D `a3a09677` 已停止并被替换，不计入正式对照。16项单元测试通过；四组均通过4096×24×2轮
+GPU短训练、checkpoint及ONNX导出；短训练专家预载2048，正式恢复默认200000。
+SuperMimic三个活跃训练已按要求停止，最近周期存档分别为原版24步84k、分组24步73k、分组6步96k；
+两组3步已完成100k。未删除模型或停止其他项目进程。
