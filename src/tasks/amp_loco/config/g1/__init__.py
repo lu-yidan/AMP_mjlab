@@ -134,6 +134,8 @@ for variant, phase_experts, smooth in (
     match_tolerance=[.3, .2, .3], stability_version=1,
     phase_experts=phase_experts, smooth_transition=smooth, max_reuse=2., max_age=50)
   cfg.max_iterations = 100000
+  if smooth:
+    cfg.multi_amp.update(blend_seconds=.2, control_dt=.02)
   if phase_experts:
     cfg.multi_amp['expert_bank'] = str(Path(__file__).resolve().parents[5] / 'logs/amp_stability/smp_recovery_train.npz')
   cfg.experiment_name = 'g1_multi_amp_' + variant.lower()

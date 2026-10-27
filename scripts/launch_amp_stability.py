@@ -11,7 +11,7 @@ TASKS = [
 
 
 def main():
-    p=argparse.ArgumentParser();p.add_argument('--source-commit',required=True);p.add_argument('--output',required=True);p.add_argument('--gpus',type=int,nargs=4,default=[0,1,2,3]);a=p.parse_args()
+    p=argparse.ArgumentParser();p.add_argument('--source-commit',required=True);p.add_argument('--output',required=True);p.add_argument('--gpus',type=int,nargs=4,default=[0,1,2,3]);p.add_argument('--only',nargs='+',choices=[t[0] for t in TASKS]);a=p.parse_args()
     out=Path(a.output).resolve();out.mkdir(parents=True,exist_ok=True)
     manifest=out/'launch.json'
     if manifest.exists():raise RuntimeError('Existing launch manifest; refusing duplicate launch')
@@ -23,6 +23,7 @@ def main():
     records=dict(source_commit=a.source_commit,branch='lyd-amp-recovery-stability',root=str(root),expert_bank_sha256=sha,python=sys.executable,runs=[])
     manifest.write_text(json.dumps(records,indent=2))
     for gpu,(label,task) in zip(a.gpus,TASKS):
+        if a.only and label not in a.only:continue
         run_id=uuid.uuid4().hex[:8]
         name='stability-'+label.lower()+'-scratch-4096x24-100k-seed42'
         cmd=[sys.executable,'-u','scripts/train.py',task,'--env.scene.num-envs','4096',

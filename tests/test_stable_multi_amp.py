@@ -60,10 +60,23 @@ class StableTests(unittest.TestCase):
             for p in n.parameters(): p.data.zero_()
             n.amp_linear.bias.data.fill_(1.)
         low=m.reward_and_store(a,a,torch.ones(1),torch.tensor([True]),c,torch.tensor([False]),geometry=torch.tensor([[.5,0,0,-1.]]))
+        m.previous_weights = None
         high=m.reward_and_store(a,a,torch.ones(1),torch.tensor([True]),c,torch.tensor([False]),geometry=torch.tensor([[1.2,0,0,-1.]]))
         torch.testing.assert_close(low, high)
         self.assertEqual(m.replay['rec'].num_samples,1)
         self.assertEqual(m.replay['loco'].num_samples,1)
+
+    def test_temporal_blend_and_reset_isolation(self):
+        m = model(True, True)
+        a=torch.zeros(1,4);c=torch.tensor([[1.,0,0.]])
+        def step(height, recovering=True, done=False):
+            m.reward_and_store(a,a,torch.ones(1),torch.tensor([recovering]),c,torch.tensor([done]),
+                              geometry=torch.tensor([[height,0,0,-1.]]))
+            return float(m.previous_weights[0])
+        self.assertEqual(step(.5),1.)
+        self.assertAlmostEqual(step(1.2,False),.9,places=6)
+        self.assertAlmostEqual(step(1.2,False,True),.8,places=6)
+        self.assertEqual(step(.5),1.)  # new episode initializes from its own geometry
 
     def test_expired_replay_and_wrap(self):
         b=FreshReplay(4,2,'cpu');a=torch.randn(7,2)

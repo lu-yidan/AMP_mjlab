@@ -88,6 +88,8 @@ class StableMultiAMP(MultiAMP):
         self.new_samples = dict(rec=0, loco=0)
         self.rollout_stats = {}
         self.expert_report = []
+        self.previous_weights = None
+        self.reset_weights = None
         if cfg.get('phase_experts'):
             aa, bb, gg = [], [], []
             for i, name in enumerate(loader.motion_names):
@@ -146,7 +148,15 @@ class StableMultiAMP(MultiAMP):
             upright_ready = ((-geometry[:, 3] - .4) / .5).clamp(0, 1)
             ready = height_ready * upright_ready
             ready = ready.square() * (3 - 2 * ready)  # smoothstep, bounded at both ends
-            rec_weight = torch.where(recovery, 1 - ready, 0.)
+            target = torch.where(recovery, 1 - ready, 0.)
+            if self.previous_weights is None or len(self.previous_weights) != len(target):
+                rec_weight = target
+            else:
+                limit = self.cfg.get('control_dt', .02) / self.cfg.get('blend_seconds', .2)
+                rec_weight = self.previous_weights + (target - self.previous_weights).clamp(-limit, limit)
+                rec_weight = torch.where(self.reset_weights, target, rec_weight)
+            self.previous_weights = rec_weight.clone()
+            self.reset_weights = dones.bool().clone()
         self._sum('blend_fraction', ((rec_weight > 0) & (rec_weight < 1)).float())
         self._sum('task_reward', task_reward)
         for kind, weights in (('rec', rec_weight), ('loco', 1 - rec_weight)):
