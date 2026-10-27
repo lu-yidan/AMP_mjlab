@@ -124,3 +124,20 @@ for guided in (False, True):
     env_cfg=dual_tracking_env_cfg(guidance=guided),
     play_env_cfg=dual_tracking_env_cfg(play=True, guidance=guided),
     rl_cfg=cfg, runner_cls=AMPOnPolicyRunner)
+
+# 2026-10-27: cumulative stability ablations; no extra recovery guidance.
+for variant, phase_experts, smooth in (
+    ('Stable', False, False), ('Phase', True, False), ('Smooth', True, True)):
+  cfg = g1_multi_amp_ppo_runner_cfg()
+  cfg.multi_amp.update(
+    condition_mode='matched_velocity', condition_scale=[3., 1., 1.5],
+    match_tolerance=[.3, .2, .3], stability_version=1,
+    phase_experts=phase_experts, smooth_transition=smooth, max_reuse=2., max_age=50)
+  cfg.max_iterations = 100000
+  if phase_experts:
+    cfg.multi_amp['expert_bank'] = str(Path(__file__).resolve().parents[5] / 'logs/amp_stability/smp_recovery_train.npz')
+  cfg.experiment_name = 'g1_multi_amp_' + variant.lower()
+  register_mjlab_task(
+    task_id='Unitree-G1-MultiAMP-' + variant + '-Tracking-Flat',
+    env_cfg=dual_tracking_env_cfg(), play_env_cfg=dual_tracking_env_cfg(play=True),
+    rl_cfg=cfg, runner_cls=AMPOnPolicyRunner)

@@ -33,6 +33,7 @@ class AMPLoader:
         self._body_indexes = [all_names_list.index(n) for n in body_names]
         self._anchor_indexes = all_names_list.index(anchor_name)
         self._num_bodies = len(self._body_indexes)
+        self.body_names = list(body_names)
 
         # 检查是文件还是文件夹
         if os.path.isfile(motion_file):
@@ -57,6 +58,7 @@ class AMPLoader:
         # 存储所有motion的数据列表
         self.motion_names = motion_names
         self._command_velocity_list = []
+        self._recovery_geometry_list = []
         self._body_pos_b_list = []
         self._body_quat_b_list = []
         self._body_ori_b_list = []
@@ -80,6 +82,13 @@ class AMPLoader:
             
             # Signed torso-yaw-frame xy and world-z yaw rate, matching task commands.
             anchor_q = _body_quat_w[:, self._anchor_indexes]
+            offset = torch.zeros_like(_body_pos_w[:, self._anchor_indexes])
+            offset[:, 2] = .43
+            head = _body_pos_w[:, self._anchor_indexes, 2] + math_utils.quat_apply(anchor_q, offset)[:, 2]
+            gravity = torch.zeros_like(offset)
+            gravity[:, 2] = -1.
+            gravity = math_utils.quat_apply_inverse(anchor_q, gravity)
+            self._recovery_geometry_list.append(torch.cat((head[:, None], gravity), -1))
             velocity = math_utils.quat_apply_inverse(
                 math_utils.yaw_quat(anchor_q), _body_lin_vel_w[:, self._anchor_indexes])
             self._command_velocity_list.append(torch.cat((velocity[:, :2],

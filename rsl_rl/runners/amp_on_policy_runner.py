@@ -220,6 +220,9 @@ class AmpOnPolicyRunner:
             if self.multi_gpu_cfg is not None:
                 raise ValueError("MultiAMP currently supports one GPU per run")
             from rsl_rl.modules.multi_amp import MultiAMP
+            if train_cfg["multi_amp"].get("stability_version"):
+                from rsl_rl.modules.stable_multi_amp import StableMultiAMP
+                MultiAMP = StableMultiAMP
             self.alg.multi_amp = MultiAMP(
                 amp_data, train_cfg["multi_amp"], train_cfg["amp_discr_hidden_dims"],
                 train_cfg["amp_reward_coef"], train_cfg["amp_task_reward_lerp"], self.device,
@@ -362,7 +365,8 @@ class AmpOnPolicyRunner:
 
                     if self.alg.multi_amp is not None:
                         rewards = self.alg.multi_amp.reward_and_store(
-                            amp_obs, next_amp_obs, rewards, *routing, dones,
+                            amp_obs, next_amp_obs, rewards, routing[0], routing[1], dones,
+                            **({"geometry": routing[2]} if len(routing) > 2 else {}),
                         )
                     else:
                         rewards = self.alg.discriminator.predict_amp_reward(
@@ -558,8 +562,16 @@ class AmpOnPolicyRunner:
         cfg = self.alg.multi_amp.cfg
         if cfg.get("condition_mode") == "matched_velocity":
             command = env.command_manager.get_term("twist")
-            return (command.recovering.to(self.device).clone(),
-                    command.command.to(self.device).clone())
+            routing = (command.recovering.to(self.device).clone(), command.command.to(self.device).clone())
+            if cfg.get("stability_version"):
+                from mjlab.utils.lab_api.math import quat_apply_inverse
+                q = robot.data.body_link_quat_w[:, command.body]
+                gravity = torch.zeros((len(q), 3), device=q.device)
+                gravity[:, 2] = -1.
+                gravity = quat_apply_inverse(q, gravity)
+                geometry = torch.cat((command.physical_state()[2][:, None], gravity), -1)
+                return (*routing, geometry.to(self.device).clone())
+            return routing
         body_id = list(robot.body_names).index(cfg["head_body"])
         q = robot.data.body_link_quat_w[:, body_id]
         offset = torch.tensor(cfg["head_offset"], device=q.device).expand(q.shape[0], -1)

@@ -1,0 +1,713 @@
+{
+  "format": "amp_recovery_features_v1",
+  "train_bank_sha256": "5750cffc90955c270cf1daf8d6bed849cca47b472e50b55d44b15893410407b8",
+  "validation_bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+  "validation_source_overlap": 0,
+  "transitions": 16336,
+  "phase_direction_counts": [
+    [
+      2130,
+      3466,
+      1792,
+      1792,
+      746
+    ],
+    [
+      10,
+      1938,
+      283,
+      283,
+      362
+    ],
+    [
+      0,
+      1698,
+      36,
+      36,
+      382
+    ],
+    [
+      0,
+      244,
+      0,
+      0,
+      1138
+    ]
+  ],
+  "sha256": "525d90307cf738b2051aad840abf5bb36ebe8460ad4cf7c0f1a3635b8d8a2823",
+  "clips": [
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_000",
+      "sha256": "f5ad814239c41bfac11256e25f334d0f0e60f14d868bd5ebcb06fbf848726cd1",
+      "frames": 325,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 189
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_000__mirror",
+      "sha256": "cd28385c0b33de7c0eeeb7701d17282afd3d56a79a1ae6540f6756660aeadc27",
+      "frames": 325,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 189
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_001",
+      "sha256": "eb7d0cb944f971fbccd99816bf1ca2406005aa4ed176e26dbce79e7b8abf4b43",
+      "frames": 272,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 156
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_001__mirror",
+      "sha256": "a8a25c352e65a1b50440e67a5493ad939ae1297349d470c72b9a23d4f71482e4",
+      "frames": 272,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 156
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_002",
+      "sha256": "31e953954ea64bb1a54b67a1c5788a31be4eff7f2b324fab8583b7a601ac5a0d",
+      "frames": 267,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 161
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_002__mirror",
+      "sha256": "e188980153cbf5b8c30951cb1d5aaa8db55604e2a17b5fe99dcab4e8bfae78cb",
+      "frames": 267,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 161
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_005",
+      "sha256": "9cb8dc50482698b473738cc7523d97059704644d1a2bea7df072b776539b814d",
+      "frames": 144,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 63
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_005__mirror",
+      "sha256": "d388e194eca9c9f9a440749139e027c7b39a749b8b16606bfd4f380177c6470a",
+      "frames": 144,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 63
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_007",
+      "sha256": "73640965b53453d93bc10a150f2ce25acf385dfdc85588dc5b5a31eace645588",
+      "frames": 284,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 171
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_007__mirror",
+      "sha256": "d7c7c199842de5188bf49b4942f03096903f326b8b63b7d7df9472c197fe77a5",
+      "frames": 284,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 171
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_008",
+      "sha256": "20431eb82c8a9c25ba0374240572660ee72fcdead144991f6701b67d012570de",
+      "frames": 289,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 177
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_008__mirror",
+      "sha256": "e288869d4770fbaa87b63c517228d3cd2bc8d06fa2d40333f739205b21e9d333",
+      "frames": 289,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 177
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_009",
+      "sha256": "bd595c98880ecbc4e956dac062fbfc26fd272633995a2709d469a8ca6bc86900",
+      "frames": 365,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 127
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_009__mirror",
+      "sha256": "8c70dd75cc98257bf73ca9c08175011915a2547df4738bea99a2038056be8fb3",
+      "frames": 365,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 127
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_011",
+      "sha256": "30a9eab95912910f1d06b2e5ad0fe79a6cad93f6c1bdb7add9bd7f5e0a9cabe7",
+      "frames": 334,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 219
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_011__mirror",
+      "sha256": "5e420ac4ac6a1d54695b51d192a96524022fba049b3c55946630e3288e8cde7e",
+      "frames": 334,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 219
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_014",
+      "sha256": "36f38652bd1b61bb028a5322826ef76c5d6fc582839194916e988156b5ee400c",
+      "frames": 260,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 159
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_014__mirror",
+      "sha256": "9cc6b856fb71728855448b1e7e4133a2a424ac5f68f45226fac453a186ac5ec2",
+      "frames": 260,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 159
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_015",
+      "sha256": "1ce54e555e2493b1ea728cb3dbb841021831c29bffba8651742521cb5abe7281",
+      "frames": 354,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 233
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_015__mirror",
+      "sha256": "f72b47f0fcc01a4dfea6793268e7638e53a640c492099fae900634ad3bc1e9ca",
+      "frames": 354,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 233
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_018",
+      "sha256": "f4f9b69bd62883d77820a37322856e24b21ddabb0017a7cd7220198e5d53ddb2",
+      "frames": 212,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 115
+    },
+    {
+      "clip": "fallAndGetUp1_subject1__recovery_018__mirror",
+      "sha256": "eb162864986a83b16bfb54e5b461a625ccbcafa289a0c10425bb2e45f9c92359",
+      "frames": 212,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 115
+    },
+    {
+      "clip": "fallAndGetUp1_subject4__recovery_000",
+      "sha256": "78b074b40e464ced13aac2f72324641e68ed08999a9a2630ea8c6bb366c66007",
+      "frames": 550,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 374
+    },
+    {
+      "clip": "fallAndGetUp1_subject4__recovery_000__mirror",
+      "sha256": "6a2795d8df73068ce1461005a48e997e4a9ce4b9778f70f96b0532c18b5a240d",
+      "frames": 550,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 374
+    },
+    {
+      "clip": "fallAndGetUp1_subject4__recovery_003",
+      "sha256": "10c37e31206204b37c7634478abfd1b54b06b4d4f04dc0825d4230b1731ba7f1",
+      "frames": 400,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 235
+    },
+    {
+      "clip": "fallAndGetUp1_subject4__recovery_003__mirror",
+      "sha256": "50b0c6ebdc3a985b66da74951b7a87f5995667d7e6d8e1d10a482b6da83554c8",
+      "frames": 400,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 235
+    },
+    {
+      "clip": "fallAndGetUp1_subject4__recovery_006",
+      "sha256": "8e63a33c0d55ee3a96e7f7ed22075fec559a078df53a7826dbf317cdaf7d0097",
+      "frames": 369,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 202
+    },
+    {
+      "clip": "fallAndGetUp1_subject4__recovery_006__mirror",
+      "sha256": "855d197768d1ec8d739398e928e7663cb1c9979937025bb4144b4fd5548bc52a",
+      "frames": 369,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 202
+    },
+    {
+      "clip": "fallAndGetUp1_subject4__recovery_007",
+      "sha256": "ea9c1633d31f75a3116f1e1b25a8801d2b4bc4a29774ad7fceabaa617e760bd9",
+      "frames": 482,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 296
+    },
+    {
+      "clip": "fallAndGetUp1_subject4__recovery_007__mirror",
+      "sha256": "24772062042d6bde00edf2ff22a0fc5f67c93e938c9f1427b0340301ce312a8d",
+      "frames": 482,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 296
+    },
+    {
+      "clip": "fallAndGetUp1_subject4__recovery_008",
+      "sha256": "a79c6d0237bda5a188f6241bcfe2153c08b390c90101f9daad82ebd8ee9cf7be",
+      "frames": 599,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 546
+    },
+    {
+      "clip": "fallAndGetUp1_subject4__recovery_008__mirror",
+      "sha256": "30f370d327c08159e234edc051bed99ac9e8d3e9e4c8242941ff7af469ae0acf",
+      "frames": 599,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 546
+    },
+    {
+      "clip": "fallAndGetUp1_subject4__recovery_010",
+      "sha256": "1c86cc65a3611514029a7a1984b68aa3435886c2aedaafdfa2261b590433025c",
+      "frames": 250,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 81
+    },
+    {
+      "clip": "fallAndGetUp1_subject4__recovery_010__mirror",
+      "sha256": "d5718294c3fe219b900e68836ca6752a8915bd443d412ac804e39e1a0be81fa5",
+      "frames": 250,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 81
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_000",
+      "sha256": "7e3edef98f5a9fb9113d79c82f6f57ee3d67a18878394d112ac0898881e2973a",
+      "frames": 159,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 0
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_000__mirror",
+      "sha256": "6389b5330ae2647d3988eebdd405a748e417f57972b781b511dbddf9933bca04",
+      "frames": 159,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 0
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_001",
+      "sha256": "ecfac44da59ada46b3734c793008b3e3d5ce088b1b8057bb951104ad2fab4a46",
+      "frames": 165,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 125
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_001__mirror",
+      "sha256": "6b5059a5ce7aab3e48aa7a08c01c212c509ce793afe683f340d2537c55ce4de8",
+      "frames": 165,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 125
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_003",
+      "sha256": "1fa2c678aac50b62e77f033cd3d660b2f971b1decdcd1b880944e3f65734ac94",
+      "frames": 274,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 164
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_003__mirror",
+      "sha256": "95a5760b6b7f3ac2417f8c3cb50cf958832b302fee42efdeda894722202c922e",
+      "frames": 274,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 164
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_004",
+      "sha256": "f480daeb6bc41786f08ef9b69edf3af358311cef1e6aa35d6d294df909894b98",
+      "frames": 300,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 146
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_004__mirror",
+      "sha256": "83b8f30e896d9864c4b0bc8fd40f3aada88b451647a2ac290658dc2f8349e823",
+      "frames": 300,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 146
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_006",
+      "sha256": "6135c2e515f4c72da70e0b8d3f567d0b52df6c25f165f3179063bcda93574a6b",
+      "frames": 242,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 182
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_006__mirror",
+      "sha256": "5c23ce9122737e17a6883220ca5858fbc0c01c0fb369c9e681697ab065a2fc83",
+      "frames": 242,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 182
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_007",
+      "sha256": "a955b0eb1363a19776e6dc6100ddf9ce12f040ec100c7e81d32054589b7ebf2e",
+      "frames": 244,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 120
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_007__mirror",
+      "sha256": "2adcfa71979fe7c8a2edfbc0c25041a3122efe75692737c26b33fa2d95e21387",
+      "frames": 244,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 120
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_008",
+      "sha256": "416cb8b657e529aeee92e8dbae4d4424930a95d7c23adcaf043a3572bf82c04a",
+      "frames": 355,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 221
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_008__mirror",
+      "sha256": "053c280d2902bf92040a2ca9e5b9ab614f6531053a36df00a5e9d8b7b2b1b520",
+      "frames": 355,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 221
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_010",
+      "sha256": "88040f729a51c3f44ed0bf3e6547584166706f351d2b301faa4cef6c8c9d2c78",
+      "frames": 274,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 183
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_010__mirror",
+      "sha256": "f0ce89919b96fdf818186192dc4fff0a4b3b45be83886cb2f9eda7e6fe9d25f5",
+      "frames": 274,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 183
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_012",
+      "sha256": "0b02e81874ba4b9ccf6a5e16d0a8267a7620c7e555589b03ee8dc42e9c6288cc",
+      "frames": 275,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 153
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_012__mirror",
+      "sha256": "0829e870147808443632f027390782796e1333d5b64bcdd11c33b3608833a6f8",
+      "frames": 275,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 153
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_013",
+      "sha256": "e5fa9d97e73871c6930f65b754fe9230ab542f2c1b806c711d9e9b805af4f6ec",
+      "frames": 302,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 126
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_013__mirror",
+      "sha256": "b4e948e9714783e763d06dc885fab09b0e891952d83236be00a90c49f4ee8f0c",
+      "frames": 302,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 126
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_015",
+      "sha256": "8f846ad0bb144008c202a8eb965c0f99facba5dae371737b6ffb7a4b180130e2",
+      "frames": 227,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 115
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_015__mirror",
+      "sha256": "493b215048208d7a37dcdb4e7d987be736c582e8bfbe72edf89ce7740f9ade79",
+      "frames": 227,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 115
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_017",
+      "sha256": "b59919748c0bb5fae1850d3c154664c380f42422df41db13b3714469e1ccf1f9",
+      "frames": 250,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 94
+    },
+    {
+      "clip": "fallAndGetUp1_subject5__recovery_017__mirror",
+      "sha256": "820c1b1cc4c5f203237896123ecf122e2c3e8cd805fbd67e3720c1aeb236d253",
+      "frames": 250,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 94
+    },
+    {
+      "clip": "fallAndGetUp2_subject2__recovery_002",
+      "sha256": "3970f6e96764e6711cac40d57abf3d022fb7b1dae223d6b6cf103c742d6d4f43",
+      "frames": 490,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 298
+    },
+    {
+      "clip": "fallAndGetUp2_subject2__recovery_002__mirror",
+      "sha256": "ac0aaf3b0347ed1ff5cf4730e90c35e727cfdd31ce9ee1550c7d5ba65a8c3e2f",
+      "frames": 490,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 298
+    },
+    {
+      "clip": "fallAndGetUp2_subject2__recovery_003",
+      "sha256": "d48cfdd6160e6b4295028a4cf30f60884b722f85c87c517e77216c7bd15a6421",
+      "frames": 320,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 149
+    },
+    {
+      "clip": "fallAndGetUp2_subject2__recovery_003__mirror",
+      "sha256": "6ba7f8108a22f5aa8cfa41a69085eeee62301f8584e02fb7d3c3080187ac2732",
+      "frames": 320,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 149
+    },
+    {
+      "clip": "fallAndGetUp2_subject2__recovery_005",
+      "sha256": "85040251ac872e3239b7463d29269bc2f150036d64da943b2c631f3af48cb5c8",
+      "frames": 324,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 195
+    },
+    {
+      "clip": "fallAndGetUp2_subject2__recovery_005__mirror",
+      "sha256": "355e18887c388bdb48aee126a41589d8095c5b4fe6262a0703e37837d90d215a",
+      "frames": 324,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 195
+    },
+    {
+      "clip": "fallAndGetUp2_subject2__recovery_006",
+      "sha256": "b622ba86b520868f3b815ec3c3b7eea3a5187f7a955e7bcb804523788d708408",
+      "frames": 599,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 463
+    },
+    {
+      "clip": "fallAndGetUp2_subject2__recovery_006__mirror",
+      "sha256": "4c37612d890662c5890623431f4d646d76a8c1497ff8694a57cd72ad97a46102",
+      "frames": 599,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 463
+    },
+    {
+      "clip": "fallAndGetUp2_subject2__recovery_008",
+      "sha256": "b9d75e7ec2ee3ebf2a7e4091b62000e94ce925885975b2965f14b4948c96f371",
+      "frames": 199,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 90
+    },
+    {
+      "clip": "fallAndGetUp2_subject2__recovery_008__mirror",
+      "sha256": "d6f2bdbf3144ee5159a92b08e58a1a7f09c5c6751e56ab824f9289627f0dbc3e",
+      "frames": 199,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 90
+    },
+    {
+      "clip": "fallAndGetUp2_subject2__recovery_009",
+      "sha256": "8034ccd5e678252ee3c95a07e1450063781ec8ea31bc31c5878156fd1fe7d458",
+      "frames": 152,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 104
+    },
+    {
+      "clip": "fallAndGetUp2_subject2__recovery_009__mirror",
+      "sha256": "0f51e7e78aab2bbab6a408ccedbf3ba8fa2312290806ba8ffa90ef8a0ab28949",
+      "frames": 152,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 104
+    },
+    {
+      "clip": "fallAndGetUp2_subject2__recovery_012",
+      "sha256": "ff2da13d1bbdd069d095b7ac6308ea75143e0274869dafcae8989123ac0fd749",
+      "frames": 274,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 173
+    },
+    {
+      "clip": "fallAndGetUp2_subject2__recovery_012__mirror",
+      "sha256": "a594271673f1eae831d09ee6759b0c0073cdd77892b835e7a026a410236ec365",
+      "frames": 274,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 173
+    },
+    {
+      "clip": "fallAndGetUp2_subject2__recovery_013",
+      "sha256": "314a4f410aed4fce1ac26cb905f3f5dce0757ae1da85aa6a06d571b44121d260",
+      "frames": 275,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 93
+    },
+    {
+      "clip": "fallAndGetUp2_subject2__recovery_013__mirror",
+      "sha256": "8fcaf59ab734d7438c2f9da091faab6c895d353e708880246b12eaa0cd378ff9",
+      "frames": 275,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 93
+    },
+    {
+      "clip": "fallAndGetUp2_subject3__recovery_003",
+      "sha256": "5ec619acdeb12e053c47b3565dc6a9da439ee8faa81208b7ffc5a6729299e34f",
+      "frames": 385,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 78
+    },
+    {
+      "clip": "fallAndGetUp2_subject3__recovery_003__mirror",
+      "sha256": "738491293f21f9ecce4f3d6cd7e991ec286a4a392fb1c6ec99b81d81eea2c7a5",
+      "frames": 385,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 78
+    },
+    {
+      "clip": "fallAndGetUp2_subject3__recovery_004",
+      "sha256": "4861ff361da24372f084ba89b5044346ebf3209fdbcdda56360b90c111241fe7",
+      "frames": 365,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 64
+    },
+    {
+      "clip": "fallAndGetUp2_subject3__recovery_004__mirror",
+      "sha256": "796a846ff0dda717be47b1a18ac8ea17291d233359aa6ab2a071066f7f53081a",
+      "frames": 365,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 64
+    },
+    {
+      "clip": "fallAndGetUp2_subject3__recovery_005",
+      "sha256": "20a49a385217b3feb5af1da3f2fff17468c855969ad72f03aca307ac8b0921b4",
+      "frames": 345,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 152
+    },
+    {
+      "clip": "fallAndGetUp2_subject3__recovery_005__mirror",
+      "sha256": "b114a783bada54f4f27600fdf1999465aa6dc8e10bd278a4781c9ec2a32dfcc7",
+      "frames": 345,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 152
+    },
+    {
+      "clip": "fallAndGetUp2_subject3__recovery_007",
+      "sha256": "9fbd2aae2b7cf8d88b3e6dc83102143afebdb8abafb0a9a7f1938f9e35c58865",
+      "frames": 302,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 104
+    },
+    {
+      "clip": "fallAndGetUp2_subject3__recovery_007__mirror",
+      "sha256": "a6a92f4be5612b4245030b8205c2d806717166819f9f802bf793a23fb2d81de2",
+      "frames": 302,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 104
+    },
+    {
+      "clip": "fallAndGetUp2_subject3__recovery_009",
+      "sha256": "63d412853a8e5c407a5d1e9e2b100372cea566b45ad91d9712373e5aa682ba8a",
+      "frames": 547,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 328
+    },
+    {
+      "clip": "fallAndGetUp2_subject3__recovery_009__mirror",
+      "sha256": "b988e72dced0c597f9d2b9957b57693ede7c376ff2d47f0a8e8156040afc4e34",
+      "frames": 547,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 328
+    },
+    {
+      "clip": "fallAndGetUp2_subject3__recovery_010",
+      "sha256": "f65891b9819f40eb92bfebb18f3c74449f54cff1330c010426f514ab4586e8a5",
+      "frames": 500,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 239
+    },
+    {
+      "clip": "fallAndGetUp2_subject3__recovery_010__mirror",
+      "sha256": "6ac5cb093432bf1e8ae872b665cbf8cbe3126e896657f5e1a358fdaa03df64bd",
+      "frames": 500,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 239
+    },
+    {
+      "clip": "fallAndGetUp3_subject1__recovery_001",
+      "sha256": "fa5627cd832090a4b8916e79a6415e531411a4eb4ca018ebb9fdee47d37dbee1",
+      "frames": 115,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 49
+    },
+    {
+      "clip": "fallAndGetUp3_subject1__recovery_001__mirror",
+      "sha256": "3c6eb51c27dcdb7874a8ca9822b569f06a671f08a91d12b16d13e7decf217fca",
+      "frames": 115,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 49
+    },
+    {
+      "clip": "fallAndGetUp3_subject1__recovery_008",
+      "sha256": "a5b832792f7ae4c08f38775a9152f2b94a4beb6f36ecf16cf7ffcf6916f95067",
+      "frames": 274,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 135
+    },
+    {
+      "clip": "fallAndGetUp3_subject1__recovery_008__mirror",
+      "sha256": "09ad55f625c0dff270305adcff084a4c1fd088e52dac11f6d96114e82c2acb18",
+      "frames": 274,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 135
+    },
+    {
+      "clip": "fallAndGetUp3_subject1__recovery_009",
+      "sha256": "98f1521aac1e6d0b7b1903b2c3d4a7ed79afc87c679c1a4317f65d9bd4fdef28",
+      "frames": 257,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 114
+    },
+    {
+      "clip": "fallAndGetUp3_subject1__recovery_009__mirror",
+      "sha256": "0ba54dcd1a281b8dddc63d4554837c532ee043e99bdab6cf5b2e7b8ffbf74031",
+      "frames": 257,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 114
+    },
+    {
+      "clip": "fallAndGetUp3_subject1__recovery_010",
+      "sha256": "e04cd53a1c60bb0e04f04d3dfd755b5bb2f906e74000d737869c7264950e50f3",
+      "frames": 275,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 115
+    },
+    {
+      "clip": "fallAndGetUp3_subject1__recovery_010__mirror",
+      "sha256": "93759b21886512df16ca68294bb2fc73e72407464d6e429ee6ced5a78e20f6f3",
+      "frames": 275,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 115
+    },
+    {
+      "clip": "fallAndGetUp3_subject1__recovery_011",
+      "sha256": "4c9093833439b500c0654d44821667fbc12f4b34ac0dda84b79cca3960cd5b6b",
+      "frames": 244,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 92
+    },
+    {
+      "clip": "fallAndGetUp3_subject1__recovery_011__mirror",
+      "sha256": "6e0745146042c8d1645ace94fa62603f36754036454ed843f7b23ac291d64bb1",
+      "frames": 244,
+      "max_limit_violation": 0.0,
+      "retained_transitions": 92
+    }
+  ],
+  "note": "CSV xyzw converted to wxyz; current AMP model FK; world body-origin velocities from Jacobians and differentiated qpos; 50Hz; phases by head height .6/.9/1.15; direction by dominant torso gravity xy, 4=upright. No collision or dynamic feasibility claim."
+}
