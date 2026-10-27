@@ -419,3 +419,10 @@ W&B名称已加对应代号前缀；启动清单含`code`字段。后续新配�
 数值验收区分“实际奖励时刻的公式一致性”和“步末状态的时序误差”。
 比较时需同时看真实恢复成功率、速度跟随、真实采样量和墙钟时间，不能仅看想象奖励。
 入口：`scripts/train_amp_supermimic.py`；带验收门禁的启动器：`scripts/launch_amp_supermimic.py`。
+
+AMP-E 已于2026-10-27在GPU4启动：W&B run `079f010b`，
+https://wandb.ai/tabletennis/lyd-multi-amp/runs/079f010b 。
+训练源码提交 `a3219c8`，启动与参数记录在 `reports/amp_e_launch_20261027.json`。
+19项测试通过；256环境数值验收通过；4096×24、32步想象的3轮完整尺寸短训练通过，
+检查点206个张量均有限。首次编译后短测约2.1秒/轮，不能视为长期吞吐保证。
+正式训练前300轮只预热世界模型，然后开始更新actor/critic。
