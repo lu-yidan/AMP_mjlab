@@ -1,4 +1,4 @@
-"""Six fixed nominal scenarios, identical across AMP-A/B/C/D; no resets."""
+"""Six fixed nominal scenarios, identical across AMP-A/B/C/D/E; no resets."""
 import argparse, hashlib, json
 from dataclasses import asdict
 from pathlib import Path
@@ -15,6 +15,7 @@ from mjlab.utils.lab_api.math import quat_apply_inverse, yaw_quat
 from rsl_rl.runners.amp_on_policy_runner import _unpack_obs, _unpack_step
 
 p=argparse.ArgumentParser()
+p.add_argument('--backend',choices=['amp','supermimic'],default='amp')
 for key in ('task','checkpoint','name','bank','output'):p.add_argument('--'+key,required=True)
 a=p.parse_args();bank=np.load(a.bank);out=Path(a.output);out.mkdir(parents=True,exist_ok=True)
 directions=['supine','prone','left_side_down','right_side_down']
@@ -37,10 +38,24 @@ cfg.viewer.width=640;cfg.viewer.height=384;cfg.viewer.max_extra_envs=0;cfg.viewe
 agent=load_rl_cfg(a.task);agent.amp_num_preload_transitions=2048
 # Expert preloading is only for constructing the checkpoint-compatible runner; no learning.
 env=ManagerBasedRlEnv(cfg=cfg,device='cuda:0',render_mode='rgb_array');w=RslRlVecEnvWrapper(env,clip_actions=agent.clip_actions)
-runner=load_runner_cls(a.task)(w,asdict(agent),log_dir=None,device='cuda:0');runner.load(a.checkpoint,load_optimizer=False)
-policy=runner.get_inference_policy(device='cuda:0');obs,_=_unpack_obs(w.get_observations());r=env.scene['robot'];body=list(r.body_names).index('torso_link')
+obs,obs_extras=_unpack_obs(w.get_observations())
+if a.backend=='supermimic':
+ import sys
+ sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'third_party/mbrl_supermimic'))
+ from supermimic.modules.actor_critic import ActorCritic
+ checkpoint=torch.load(a.checkpoint,map_location='cuda:0',weights_only=False)
+ model=ActorCritic({'policy':obs,'critic':obs_extras['observations']['critic']},29).to('cuda:0')
+ model.load_state_dict(checkpoint['policy'],strict=True);model.eval()
+ clip=checkpoint['cfg'].get('action_clip')
+ def policy(observations):
+  action=model.act_inference({'policy':observations})
+  return action if clip is None else action.clamp(-clip,clip)
+else:
+ runner=load_runner_cls(a.task)(w,asdict(agent),log_dir=None,device='cuda:0');runner.load(a.checkpoint,load_optimizer=False)
+ policy=runner.get_inference_policy(device='cuda:0')
+r=env.scene['robot'];body=list(r.body_names).index('torso_link')
 initial=torch.cat((r.data.root_link_pos_w-env.scene.env_origins,r.data.root_link_quat_w,r.data.joint_pos),-1).cpu().numpy()
-report=dict(name=a.name,task=a.task,checkpoint=a.checkpoint,checkpoint_sha256=hashlib.sha256(Path(a.checkpoint).read_bytes()).hexdigest(),bank_sha256=hashlib.sha256(Path(a.bank).read_bytes()).hexdigest(),bank_rows=rows,initial_state_hash=hashlib.sha256(initial.tobytes()).hexdigest(),protocol='Nominal physics, deterministic policy, no resets/pushes; first procedural low pose per direction; recovery 10s at zero command; walk/run 0/.5/1/2/3 m/s and yaw 0/1/-1/1/-1 rad/s each 5s; Command changes enter observations after one 0.02s control step, matching the existing evaluation protocol.',fps=25)
+report=dict(backend=a.backend,name=a.name,task=a.task,checkpoint=a.checkpoint,checkpoint_sha256=hashlib.sha256(Path(a.checkpoint).read_bytes()).hexdigest(),bank_sha256=hashlib.sha256(Path(a.bank).read_bytes()).hexdigest(),bank_rows=rows,initial_state_hash=hashlib.sha256(initial.tobytes()).hexdigest(),protocol='Nominal physics, deterministic policy, no resets/pushes; first procedural low pose per direction; recovery 10s at zero command; walk/run 0/.5/1/2/3 m/s and yaw 0/1/-1/1/-1 rad/s each 5s; Command changes enter observations after one 0.02s control step, matching the existing evaluation protocol.',fps=25)
 font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',18)
 writers={label:imageio.get_writer(out/(label+'.mp4'),fps=25,codec='libx264',quality=7,macro_block_size=1,ffmpeg_params=['-threads','1','-movflags','+faststart'])for label in labels}
 traces=[]

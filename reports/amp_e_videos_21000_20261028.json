@@ -1,0 +1,44 @@
+{
+  "backend": "supermimic",
+  "name": "AMP-E 21k SuperMimic",
+  "task": "Unitree-G1-MultiAMP-Phase-Tracking-Flat",
+  "checkpoint": "logs/amp_stability/videos/AMP-E-21000/model_21000.pt",
+  "checkpoint_sha256": "73d7c4e42baae260e7c92c1aacb2d852f9734154081c6215f0484d3ab0bd1e67",
+  "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+  "bank_rows": [
+    756,
+    757,
+    758,
+    759
+  ],
+  "initial_state_hash": "311df42750571bed42949efb2196d3009086154c4677b290b1435c26bd18e426",
+  "protocol": "Nominal physics, deterministic policy, no resets/pushes; first procedural low pose per direction; recovery 10s at zero command; walk/run 0/.5/1/2/3 m/s and yaw 0/1/-1/1/-1 rad/s each 5s; Command changes enter observations after one 0.02s control step, matching the existing evaluation protocol.",
+  "fps": 25,
+  "code": "AMP-E",
+  "iteration": 21000,
+  "wandb_run": "079f010b",
+  "matches_previous_ABCD_initial_states": true,
+  "videos": {
+    "recovery_grid": {
+      "path": "/home/luyd/workspace/AMP_mjlab/logs/amp_stability/videos/AMP-E-21000/recovery_grid.mp4",
+      "width": 1280,
+      "height": 928,
+      "duration": "10.000000",
+      "nb_frames": "250"
+    },
+    "walk_run": {
+      "path": "/home/luyd/workspace/AMP_mjlab/logs/amp_stability/videos/AMP-E-21000/walk_run.mp4",
+      "width": 640,
+      "height": 464,
+      "duration": "25.000000",
+      "nb_frames": "625"
+    },
+    "turn": {
+      "path": "/home/luyd/workspace/AMP_mjlab/logs/amp_stability/videos/AMP-E-21000/turn.mp4",
+      "width": 640,
+      "height": 464,
+      "duration": "25.000000",
+      "nb_frames": "625"
+    }
+  }
+}
