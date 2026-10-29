@@ -1,0 +1,815 @@
+{
+  "date": "2026-10-29",
+  "name": "AMP-A 98k versus previous stratified single Tracking 100k",
+  "manifest": {
+    "task": "Unitree-G1-AMP-Stratified-Tracking-Flat",
+    "wandb": "https://wandb.ai/tabletennis/lyd-multi-amp/runs/42b53ed8",
+    "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_amp_a_98000/model_98000.pt",
+    "checkpoint_audit": {
+      "checkpoint_sha256": "79b09d4fb93bed5865ab32d110b6cb98b064b2f65d1979b99261fc9c279f3856",
+      "stored_iteration": 98000,
+      "nonfinite_tensors": []
+    },
+    "evaluation_commit": "1e86b448a9fb483d1b8305362a28c9c194f2355c",
+    "python": "3.13.8",
+    "torch": "2.8.0+cu128",
+    "mujoco": "3.5.0",
+    "script_sha256": {
+      "scripts/evaluate_amp_common.py": "65f2bff058c3751adf6e099783108853d3ef5791818a5fcb0e5dcad8e3f5475e",
+      "scripts/evaluate_amp_commands_latest.py": "df709a38bbb7ae660df97b892fa9b5d3e78dea0a4bea4036b730ca0b2e32e1ad"
+    },
+    "finite_traces": {
+      "commands": {
+        "actual": true,
+        "upright": true,
+        "guidance_gate": true,
+        "route": true
+      },
+      "recovery": {
+        "height": true,
+        "gravity_z": true
+      }
+    }
+  },
+  "recovery": {
+    "name": "amp_a_98000",
+    "checkpoint": "logs/eval_amp_a_98000/model_98000.pt",
+    "initial_state_hash": "beb879b875c97bfa08c359f32a04f6f12d575f5e13b1da0e75e0822fd4b2da3b",
+    "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+    "protocol": "20s, no resets, deterministic policy, nominal dynamics; hroot>.65 and gz<-.9 for 1s; zero command for recovery; 128 standing trials commands 0/.5/1/2m/s every 5s",
+    "groups": {
+      "natural/low": {
+        "n": 376,
+        "success_1s_percent": 0.0,
+        "mean_success_time_s": null,
+        "last5s_upright_percent": 0.0,
+        "ever_continuous_failure_5s_percent": 99.99999237060547,
+        "route_switches_mean": 0.005319148767739534,
+        "recovery_route_percent": 99.9986801147461
+      },
+      "natural/supine": {
+        "n": 314,
+        "success_1s_percent": 0.0,
+        "mean_success_time_s": null,
+        "last5s_upright_percent": 0.0,
+        "ever_continuous_failure_5s_percent": 100.0,
+        "route_switches_mean": 0.006369426846504211,
+        "recovery_route_percent": 99.9984130859375
+      },
+      "natural/prone": {
+        "n": 36,
+        "success_1s_percent": 0.0,
+        "mean_success_time_s": null,
+        "last5s_upright_percent": 0.0,
+        "ever_continuous_failure_5s_percent": 100.0,
+        "route_switches_mean": 0.0,
+        "recovery_route_percent": 100.0
+      },
+      "natural/left_side_down": {
+        "n": 13,
+        "success_1s_percent": 0.0,
+        "mean_success_time_s": null,
+        "last5s_upright_percent": 0.0,
+        "ever_continuous_failure_5s_percent": 100.0,
+        "route_switches_mean": 0.0,
+        "recovery_route_percent": 100.00001525878906
+      },
+      "natural/right_side_down": {
+        "n": 13,
+        "success_1s_percent": 0.0,
+        "mean_success_time_s": null,
+        "last5s_upright_percent": 0.0,
+        "ever_continuous_failure_5s_percent": 100.0,
+        "route_switches_mean": 0.0,
+        "recovery_route_percent": 100.00001525878906
+      },
+      "natural/middle": {
+        "n": 328,
+        "success_1s_percent": 0.0,
+        "mean_success_time_s": null,
+        "last5s_upright_percent": 0.0,
+        "ever_continuous_failure_5s_percent": 99.99999237060547,
+        "route_switches_mean": 0.05487804859876633,
+        "recovery_route_percent": 99.97286987304688
+      },
+      "natural/late": {
+        "n": 52,
+        "success_1s_percent": 3.846153974533081,
+        "mean_success_time_s": 1.440000057220459,
+        "last5s_upright_percent": 3.8461544513702393,
+        "ever_continuous_failure_5s_percent": 96.15384674072266,
+        "route_switches_mean": 0.48076924681663513,
+        "recovery_route_percent": 95.98078155517578
+      },
+      "procedural/low": {
+        "n": 512,
+        "success_1s_percent": 0.0,
+        "mean_success_time_s": null,
+        "last5s_upright_percent": 0.0,
+        "ever_continuous_failure_5s_percent": 100.0,
+        "route_switches_mean": 0.08203125,
+        "recovery_route_percent": 99.96328735351562
+      },
+      "procedural/supine": {
+        "n": 128,
+        "success_1s_percent": 0.0,
+        "mean_success_time_s": null,
+        "last5s_upright_percent": 0.0,
+        "ever_continuous_failure_5s_percent": 100.0,
+        "route_switches_mean": 0.0,
+        "recovery_route_percent": 100.0
+      },
+      "procedural/prone": {
+        "n": 128,
+        "success_1s_percent": 0.0,
+        "mean_success_time_s": null,
+        "last5s_upright_percent": 0.0,
+        "ever_continuous_failure_5s_percent": 100.0,
+        "route_switches_mean": 0.0,
+        "recovery_route_percent": 100.0
+      },
+      "procedural/left_side_down": {
+        "n": 128,
+        "success_1s_percent": 0.0,
+        "mean_success_time_s": null,
+        "last5s_upright_percent": 0.0,
+        "ever_continuous_failure_5s_percent": 100.0,
+        "route_switches_mean": 0.0,
+        "recovery_route_percent": 100.0
+      },
+      "procedural/right_side_down": {
+        "n": 128,
+        "success_1s_percent": 0.0,
+        "mean_success_time_s": null,
+        "last5s_upright_percent": 0.0,
+        "ever_continuous_failure_5s_percent": 100.0,
+        "route_switches_mean": 0.328125,
+        "recovery_route_percent": 99.8531265258789
+      }
+    },
+    "locomotion": {
+      "n": 128,
+      "success_1s_percent": 100.0,
+      "mean_success_time_s": 1.0,
+      "last5s_upright_percent": 100.0,
+      "ever_continuous_failure_5s_percent": 0.0,
+      "route_switches_mean": 0.0,
+      "recovery_route_percent": 0.0,
+      "vx_mae_by_5s": [
+        0.02703462727367878,
+        0.10989454388618469,
+        0.18328842520713806,
+        0.2667101323604584
+      ]
+    }
+  },
+  "commands": {
+    "name": "amp_a_98000",
+    "checkpoint": "logs/eval_amp_a_98000/model_98000.pt",
+    "protocol": "8 matched initial joint perturbations per command, 2s standing then 10s command; no resets/push/DR/smoothing; torso yaw-frame xy velocity and world torso yaw rate; final5s means",
+    "cases": {
+      "stand": {
+        "command": [
+          0,
+          0,
+          0
+        ],
+        "mean_actual": [
+          0.00956537015736103,
+          0.0411025807261467,
+          -0.02762744575738907
+        ],
+        "mae": [
+          0.018449467861340964,
+          0.056585943594207495,
+          0.09255317120230756
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.03438320755958557,
+        "recovery_route_percent": 0.0
+      },
+      "forward05": {
+        "command": [
+          0.5,
+          0,
+          0
+        ],
+        "mean_actual": [
+          0.4170107841491699,
+          0.014237084425985813,
+          0.014155097305774689
+        ],
+        "mae": [
+          0.08298930811882019,
+          0.046783069278899345,
+          0.19078906128348536
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.008598476648330688,
+        "recovery_route_percent": 0.0
+      },
+      "forward1": {
+        "command": [
+          1,
+          0,
+          0
+        ],
+        "mean_actual": [
+          0.9045022130012512,
+          0.05164138972759247,
+          -0.07133669406175613
+        ],
+        "mae": [
+          0.09615721198916435,
+          0.061544553872197864,
+          0.2409168319342716
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 8.125305157591356e-07,
+        "recovery_route_percent": 0.0
+      },
+      "forward2": {
+        "command": [
+          2,
+          0,
+          0
+        ],
+        "mean_actual": [
+          1.950523853302002,
+          0.023118337616324425,
+          0.14805494248867035
+        ],
+        "mae": [
+          0.07441350585222244,
+          0.0593705966565758,
+          0.38485163350128276
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0,
+        "recovery_route_percent": 0.0
+      },
+      "forward3": {
+        "command": [
+          3,
+          0,
+          0
+        ],
+        "mean_actual": [
+          2.9609477519989014,
+          0.008858496323227882,
+          0.10765620321035385
+        ],
+        "mae": [
+          0.08544203758239746,
+          0.08178708849661052,
+          0.6810254397760945
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 3.2246829505311325e-05,
+        "recovery_route_percent": 0.0
+      },
+      "backward05": {
+        "command": [
+          -0.5,
+          0,
+          0
+        ],
+        "mean_actual": [
+          -0.42919883131980896,
+          -0.008295457810163498,
+          -0.06839852780103683
+        ],
+        "mae": [
+          0.07321919304132461,
+          0.041368192936293784,
+          0.08748663578346895
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.008487215265631676,
+        "recovery_route_percent": 0.0
+      },
+      "backward1": {
+        "command": [
+          -1,
+          0,
+          0
+        ],
+        "mean_actual": [
+          -0.8381271958351135,
+          0.03354949131608009,
+          -0.16110391914844513
+        ],
+        "mae": [
+          0.16191079545021056,
+          0.059306292802095414,
+          0.1962585772552702
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0020717307925224304,
+        "recovery_route_percent": 0.0
+      },
+      "left05": {
+        "command": [
+          0,
+          0.5,
+          0
+        ],
+        "mean_actual": [
+          -0.009775984100997448,
+          0.48861441016197205,
+          -0.07418640702962875
+        ],
+        "mae": [
+          0.03573019813746214,
+          0.03865931995213032,
+          0.1743289616721122
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.03360306844115257,
+        "recovery_route_percent": 0.0
+      },
+      "right05": {
+        "command": [
+          0,
+          -0.5,
+          0
+        ],
+        "mean_actual": [
+          0.03939274325966835,
+          -0.4168858230113983,
+          0.05359794571995735
+        ],
+        "mae": [
+          0.042006658818689174,
+          0.09106124408543109,
+          0.12264221279899448
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.03151846304535866,
+        "recovery_route_percent": 0.0
+      },
+      "yaw_left": {
+        "command": [
+          0,
+          0,
+          1
+        ],
+        "mean_actual": [
+          -0.020245831459760666,
+          0.025938808917999268,
+          0.1510472446680069
+        ],
+        "mae": [
+          0.03985284248596872,
+          0.05337135848891921,
+          0.8489527106284513
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.030568048357963562,
+        "recovery_route_percent": 0.0
+      },
+      "yaw_right": {
+        "command": [
+          0,
+          0,
+          -1
+        ],
+        "mean_actual": [
+          -0.0066093443892896175,
+          0.02806963585317135,
+          -0.2606724798679352
+        ],
+        "mae": [
+          0.0401582357804291,
+          0.054436052582459524,
+          0.7393275400577113
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.015963729470968246,
+        "recovery_route_percent": 0.0
+      },
+      "forward_turn": {
+        "command": [
+          1,
+          0,
+          1
+        ],
+        "mean_actual": [
+          0.8895599246025085,
+          0.012581827118992805,
+          0.219646617770195
+        ],
+        "mae": [
+          0.11045288857817649,
+          0.045046605996787545,
+          0.7803533519470075
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.00010809254308696836,
+        "recovery_route_percent": 0.0
+      }
+    }
+  },
+  "reference": {
+    "manifest": {
+      "code_commit": "94ecee0",
+      "task": "Unitree-G1-AMP-Stratified-Tracking-Flat",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval100k_single/model_99999.pt",
+      "checkpoint_sha256": "7c488614326fae9762a79131400f4ebd8e33195540d5705faf59991a7f00d462",
+      "training_iterations_completed": 100000,
+      "stored_iteration": 99999,
+      "wandb": "https://wandb.ai/tabletennis/lyd-multi-amp/runs/4uvuh77l",
+      "evaluation_python": "3.13.8",
+      "packages": {
+        "torch": "2.8.0+cu128",
+        "mujoco": "3.5.0",
+        "mujoco-warp": "3.5.0.2",
+        "warp-lang": "1.13.0.dev20260225",
+        "tyro": "1.0.8"
+      },
+      "note": "Original mjlab runtime copied from training server; local GPU evaluation. Training used Python 3.12 and torch 2.10.0; local Python and torch differ."
+    },
+    "recovery": {
+      "name": "single_100k",
+      "checkpoint": "logs/eval100k_single/model_99999.pt",
+      "initial_state_hash": "beb879b875c97bfa08c359f32a04f6f12d575f5e13b1da0e75e0822fd4b2da3b",
+      "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+      "protocol": "20s, no resets, deterministic policy, nominal dynamics; hroot>.65 and gz<-.9 for 1s; zero command for recovery; 128 standing trials commands 0/.5/1/2m/s every 5s",
+      "groups": {
+        "natural/low": {
+          "n": 376,
+          "success_1s_percent": 99.99999237060547,
+          "mean_success_time_s": 1.8455851078033447,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 0.9999999403953552,
+          "recovery_route_percent": 3.1978721618652344
+        },
+        "natural/supine": {
+          "n": 314,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.831592321395874,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 3.1085989475250244
+        },
+        "natural/prone": {
+          "n": 36,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.826111078262329,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 3.3388891220092773
+        },
+        "natural/left_side_down": {
+          "n": 13,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.7061539888381958,
+          "last5s_upright_percent": 100.00001525878906,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 2.4153847694396973
+        },
+        "natural/right_side_down": {
+          "n": 13,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 2.3769233226776123,
+          "last5s_upright_percent": 100.00001525878906,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 5.746154308319092
+        },
+        "natural/middle": {
+          "n": 328,
+          "success_1s_percent": 99.99999237060547,
+          "mean_success_time_s": 1.7916463613510132,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.012195110321045,
+          "recovery_route_percent": 3.0588414669036865
+        },
+        "natural/late": {
+          "n": 52,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.348461627960205,
+          "last5s_upright_percent": 100.00001525878906,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 0.5,
+          "recovery_route_percent": 1.0615384578704834
+        },
+        "procedural/low": {
+          "n": 512,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.8810937404632568,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 3.3810548782348633
+        },
+        "procedural/supine": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.8393750190734863,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 3.140625
+        },
+        "procedural/prone": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.8798437118530273,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 3.5765626430511475
+        },
+        "procedural/left_side_down": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.7870311737060547,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 2.70703125
+        },
+        "procedural/right_side_down": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 2.018125057220459,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 4.099999904632568
+        }
+      },
+      "locomotion": {
+        "n": 128,
+        "success_1s_percent": 100.0,
+        "mean_success_time_s": 1.0,
+        "last5s_upright_percent": 100.0,
+        "ever_continuous_failure_5s_percent": 0.0,
+        "route_switches_mean": 0.0,
+        "recovery_route_percent": 0.0,
+        "vx_mae_by_5s": [
+          0.01245582289993763,
+          0.052573539316654205,
+          0.06567893922328949,
+          0.11931375414133072
+        ]
+      }
+    },
+    "commands": {
+      "name": "single_100k",
+      "checkpoint": "logs/eval100k_single/model_99999.pt",
+      "protocol": "8 matched initial joint perturbations per command, 2s standing then 10s command; no resets/push/DR/smoothing; torso yaw-frame xy velocity and world torso yaw rate; final5s means",
+      "cases": {
+        "stand": {
+          "command": [
+            0,
+            0,
+            0
+          ],
+          "mean_actual": [
+            -0.0027592522092163563,
+            0.003908927086740732,
+            -0.025701399892568588
+          ],
+          "mae": [
+            0.003586323200782317,
+            0.004054090255662232,
+            0.05952772603630729
+          ],
+          "upright_percent": 100.0,
+          "guidance_gate_mean": 0.0,
+          "recovery_route_percent": 0.0
+        },
+        "forward05": {
+          "command": [
+            0.5,
+            0,
+            0
+          ],
+          "mean_actual": [
+            0.5199612975120544,
+            0.016785377636551857,
+            -0.010510573163628578
+          ],
+          "mae": [
+            0.030154356494545936,
+            0.06245143901920528,
+            0.08386887975599165
+          ],
+          "upright_percent": 100.0,
+          "guidance_gate_mean": 0.0,
+          "recovery_route_percent": 0.0
+        },
+        "forward1": {
+          "command": [
+            1,
+            0,
+            0
+          ],
+          "mean_actual": [
+            1.028554916381836,
+            -0.03522631525993347,
+            0.009022311307489872
+          ],
+          "mae": [
+            0.04356530958414078,
+            0.06703724638368294,
+            0.07463132590618898
+          ],
+          "upright_percent": 100.0,
+          "guidance_gate_mean": 0.0,
+          "recovery_route_percent": 0.0
+        },
+        "forward2": {
+          "command": [
+            2,
+            0,
+            0
+          ],
+          "mean_actual": [
+            1.9707679748535156,
+            -0.0314851775765419,
+            -0.005202857777476311
+          ],
+          "mae": [
+            0.05714206600189209,
+            0.0790876389526893,
+            0.11661362636284321
+          ],
+          "upright_percent": 100.0,
+          "guidance_gate_mean": 0.0,
+          "recovery_route_percent": 0.0
+        },
+        "forward3": {
+          "command": [
+            3,
+            0,
+            0
+          ],
+          "mean_actual": [
+            2.888638734817505,
+            -0.05330749601125717,
+            -0.02888496033847332
+          ],
+          "mae": [
+            0.11689334642887116,
+            0.06442938317947847,
+            0.1525319502920247
+          ],
+          "upright_percent": 100.0,
+          "guidance_gate_mean": 0.0,
+          "recovery_route_percent": 0.0
+        },
+        "backward05": {
+          "command": [
+            -0.5,
+            0,
+            0
+          ],
+          "mean_actual": [
+            -0.47275662422180176,
+            -0.033806122839450836,
+            -0.007189004682004452
+          ],
+          "mae": [
+            0.03356603279709816,
+            0.061423163336818104,
+            0.05610601007484365
+          ],
+          "upright_percent": 100.0,
+          "guidance_gate_mean": 0.0,
+          "recovery_route_percent": 0.0
+        },
+        "backward1": {
+          "command": [
+            -1,
+            0,
+            0
+          ],
+          "mean_actual": [
+            -1.0133358240127563,
+            -0.03066962957382202,
+            -0.0016022184863686562
+          ],
+          "mae": [
+            0.042577014535665515,
+            0.08570549150073202,
+            0.11321046777207812
+          ],
+          "upright_percent": 100.0,
+          "guidance_gate_mean": 0.0,
+          "recovery_route_percent": 0.0
+        },
+        "left05": {
+          "command": [
+            0,
+            0.5,
+            0
+          ],
+          "mean_actual": [
+            0.007016570307314396,
+            0.4392080307006836,
+            0.03073744848370552
+          ],
+          "mae": [
+            0.015623671362682216,
+            0.09043934378027917,
+            0.11323585540956992
+          ],
+          "upright_percent": 100.0,
+          "guidance_gate_mean": 0.0,
+          "recovery_route_percent": 0.0
+        },
+        "right05": {
+          "command": [
+            0,
+            -0.5,
+            0
+          ],
+          "mean_actual": [
+            0.008002816699445248,
+            -0.412242591381073,
+            -0.035408489406108856
+          ],
+          "mae": [
+            0.012355438122001943,
+            0.10994881740212441,
+            0.07286687869348771
+          ],
+          "upright_percent": 100.0,
+          "guidance_gate_mean": 0.0,
+          "recovery_route_percent": 0.0
+        },
+        "yaw_left": {
+          "command": [
+            0,
+            0,
+            1
+          ],
+          "mean_actual": [
+            0.014533867128193378,
+            -0.04541574791073799,
+            0.8272713422775269
+          ],
+          "mae": [
+            0.04450413099890284,
+            0.0573103782528633,
+            0.2000370320379734
+          ],
+          "upright_percent": 100.0,
+          "guidance_gate_mean": 0.0,
+          "recovery_route_percent": 0.0
+        },
+        "yaw_right": {
+          "command": [
+            0,
+            0,
+            -1
+          ],
+          "mean_actual": [
+            0.019838348031044006,
+            0.001547258347272873,
+            -0.9155617952346802
+          ],
+          "mae": [
+            0.044235117768752386,
+            0.051594094371888784,
+            0.12559379763901235
+          ],
+          "upright_percent": 100.0,
+          "guidance_gate_mean": 0.0,
+          "recovery_route_percent": 0.0
+        },
+        "forward_turn": {
+          "command": [
+            1,
+            0,
+            1
+          ],
+          "mean_actual": [
+            0.9710472226142883,
+            -0.05054831877350807,
+            0.9936842322349548
+          ],
+          "mae": [
+            0.06630753991007805,
+            0.06849644277701736,
+            0.06786050647497177
+          ],
+          "upright_percent": 100.0,
+          "guidance_gate_mean": 0.0,
+          "recovery_route_percent": 0.0
+        }
+      }
+    }
+  },
+  "matched_initial_state_hash": true,
+  "matched_bank_sha256": true,
+  "interpretation": "AMP-A 98k retains nominal forward/lateral locomotion but fails all 888 low-pose recovery tests and tracks yaw poorly. Its 3 m/s forward component is accurate but has large unintended yaw MAE. Training logs show skipped non-finite PPO batches; this evaluation does not establish the root cause or imply that stratified single-discriminator methods generally fail."
+}
