@@ -1,0 +1,106 @@
+{
+  "checkpoints": [
+    {
+      "backend": "amp",
+      "name": "AMP-B 100k",
+      "task": "Unitree-G1-MultiAMP-Stable-Tracking-Flat",
+      "checkpoint": "logs/amp_stability/videos/BCE-latest-20261029/B-100k/model.pt",
+      "checkpoint_sha256": "33d647472b5f473df65661ec6eda01eac3677463c1789e262130496304aa2ff0",
+      "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+      "bank_rows": [
+        756,
+        757,
+        758,
+        759
+      ],
+      "initial_state_hash": "311df42750571bed42949efb2196d3009086154c4677b290b1435c26bd18e426",
+      "protocol": "Nominal physics, deterministic policy, no resets/pushes; first procedural low pose per direction; recovery 10s at zero command; walk/run 0/.5/1/2/3 m/s and yaw 0/1/-1/1/-1 rad/s each 5s; Command changes enter observations after one 0.02s control step, matching the existing evaluation protocol.",
+      "fps": 25
+    },
+    {
+      "backend": "amp",
+      "name": "AMP-C 71k",
+      "task": "Unitree-G1-MultiAMP-Phase-Tracking-Flat",
+      "checkpoint": "logs/amp_stability/videos/BCE-latest-20261029/C-71k/model.pt",
+      "checkpoint_sha256": "615a062bfb93646f9761d4966902cf54ba1d48d21d0f51f7a4caded3cb64fd25",
+      "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+      "bank_rows": [
+        756,
+        757,
+        758,
+        759
+      ],
+      "initial_state_hash": "311df42750571bed42949efb2196d3009086154c4677b290b1435c26bd18e426",
+      "protocol": "Nominal physics, deterministic policy, no resets/pushes; first procedural low pose per direction; recovery 10s at zero command; walk/run 0/.5/1/2/3 m/s and yaw 0/1/-1/1/-1 rad/s each 5s; Command changes enter observations after one 0.02s control step, matching the existing evaluation protocol.",
+      "fps": 25
+    },
+    {
+      "backend": "supermimic",
+      "name": "AMP-E 63k",
+      "task": "Unitree-G1-MultiAMP-Phase-Tracking-Flat",
+      "checkpoint": "logs/amp_stability/videos/BCE-latest-20261029/E-63k/model.pt",
+      "checkpoint_sha256": "6c749b76c51f14e28e71c0bb2ea2995a0dc6161c3506944ad7b852689bd57904",
+      "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+      "bank_rows": [
+        756,
+        757,
+        758,
+        759
+      ],
+      "initial_state_hash": "311df42750571bed42949efb2196d3009086154c4677b290b1435c26bd18e426",
+      "protocol": "Nominal physics, deterministic policy, no resets/pushes; first procedural low pose per direction; recovery 10s at zero command; walk/run 0/.5/1/2/3 m/s and yaw 0/1/-1/1/-1 rad/s each 5s; Command changes enter observations after one 0.02s control step, matching the existing evaluation protocol.",
+      "fps": 25
+    }
+  ],
+  "layout": "Left B 100k, center C 71k, right E 63k",
+  "recovery_order": [
+    "supine",
+    "prone",
+    "left_side_down",
+    "right_side_down"
+  ],
+  "files": {
+    "recovery": {
+      "path": "/home/luyd/workspace/AMP_mjlab/logs/amp_stability/videos/BCE-latest-20261029/recovery_BCE.mp4",
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 1920,
+            "height": 464,
+            "duration": "40.000000",
+            "nb_frames": "1000"
+          }
+        ]
+      }
+    },
+    "walk_run": {
+      "path": "/home/luyd/workspace/AMP_mjlab/logs/amp_stability/videos/BCE-latest-20261029/walk_run_BCE.mp4",
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 1920,
+            "height": 464,
+            "duration": "25.000000",
+            "nb_frames": "625"
+          }
+        ]
+      }
+    },
+    "turn": {
+      "path": "/home/luyd/workspace/AMP_mjlab/logs/amp_stability/videos/BCE-latest-20261029/turn_BCE.mp4",
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 1920,
+            "height": 464,
+            "duration": "25.000000",
+            "nb_frames": "625"
+          }
+        ]
+      }
+    }
+  }
+}

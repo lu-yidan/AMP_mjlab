@@ -51,7 +51,20 @@ if a.backend=='supermimic':
   action=model.act_inference({'policy':observations})
   return action if clip is None else action.clamp(-clip,clip)
 else:
- runner=load_runner_cls(a.task)(w,asdict(agent),log_dir=None,device='cuda:0');runner.load(a.checkpoint,load_optimizer=False)
+ runner=load_runner_cls(a.task)(w,asdict(agent),log_dir=None,device='cuda:0')
+ # Inference may move an expert bank between hosts. Preserve all semantic
+ # configuration checks, allowing only this unused-at-inference path to move.
+ checkpoint=torch.load(a.checkpoint,map_location='cpu',weights_only=False)
+ if runner.alg.multi_amp is not None and 'multi_amp' in checkpoint:
+  saved_cfg=checkpoint['multi_amp']['config']
+  comparable=dict(saved_cfg)
+  if 'expert_bank' in comparable:
+   comparable['expert_bank']=runner.alg.multi_amp.cfg.get('expert_bank')
+  if comparable != runner.alg.multi_amp.cfg:
+   raise ValueError('MultiAMP semantic configuration differs from checkpoint')
+  runner.alg.multi_amp.cfg=dict(saved_cfg)
+ del checkpoint
+ runner.load(a.checkpoint,load_optimizer=False)
  policy=runner.get_inference_policy(device='cuda:0')
 r=env.scene['robot'];body=list(r.body_names).index('torso_link')
 initial=torch.cat((r.data.root_link_pos_w-env.scene.env_origins,r.data.root_link_quat_w,r.data.joint_pos),-1).cpu().numpy()
