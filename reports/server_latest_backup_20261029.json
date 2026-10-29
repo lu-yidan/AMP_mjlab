@@ -1,0 +1,76 @@
+{
+  "backup_time": "2026-10-29 14:30:47+0800",
+  "server": "root@10.177.36.91:28036",
+  "scope": "Latest checkpoint per formal AMP/SuperMimic run only; historical transfer canceled at user request. No training processes were stopped.",
+  "local_directory": "/home/luyd/workspace/AMP_mjlab/logs/server_backup_20261029",
+  "sha256_verified": true,
+  "checkpoints": [
+    {
+      "path": "root/workplace/lyd-amp-c-supermimic/logs/amp_e_100k/079f010b/model_64000.pt",
+      "size": 143095407,
+      "sha256": "eddec60d0025dee5bb69eaae3989c43364d0f3555938ebdb1db1b375028e2db0",
+      "local_path": "/home/luyd/workspace/AMP_mjlab/logs/server_backup_20261029/latest/root/workplace/lyd-amp-c-supermimic/logs/amp_e_100k/079f010b/model_64000.pt"
+    },
+    {
+      "path": "root/workplace/lyd-amp-recovery-stability/logs/rsl_rl/g1_amp_stratified_tracking/2026-10-27_14-04-33_stability-a-single-scratch-4096x24-100k-seed42/model_99999.pt",
+      "size": 24402479,
+      "sha256": "4790b9e74451ba32db08cfe411522cb95ee9c61bf759ec0def6696ce45602d5d",
+      "local_path": "/home/luyd/workspace/AMP_mjlab/logs/server_backup_20261029/latest/root/workplace/lyd-amp-recovery-stability/logs/rsl_rl/g1_amp_stratified_tracking/2026-10-27_14-04-33_stability-a-single-scratch-4096x24-100k-seed42/model_99999.pt"
+    },
+    {
+      "path": "root/workplace/lyd-amp-recovery-stability/logs/rsl_rl/g1_multi_amp_phase/2026-10-27_14-04-33_stability-c-phase-smp-scratch-4096x24-100k-seed42/model_71000.pt",
+      "size": 41365453,
+      "sha256": "615a062bfb93646f9761d4966902cf54ba1d48d21d0f51f7a4caded3cb64fd25",
+      "local_path": "/home/luyd/workspace/AMP_mjlab/logs/server_backup_20261029/latest/root/workplace/lyd-amp-recovery-stability/logs/rsl_rl/g1_multi_amp_phase/2026-10-27_14-04-33_stability-c-phase-smp-scratch-4096x24-100k-seed42/model_71000.pt"
+    },
+    {
+      "path": "root/workplace/lyd-amp-recovery-stability/logs/rsl_rl/g1_multi_amp_stable/2026-10-27_14-04-33_stability-b-stable-scratch-4096x24-100k-seed42/model_99999.pt",
+      "size": 41365261,
+      "sha256": "33d647472b5f473df65661ec6eda01eac3677463c1789e262130496304aa2ff0",
+      "local_path": "/home/luyd/workspace/AMP_mjlab/logs/server_backup_20261029/latest/root/workplace/lyd-amp-recovery-stability/logs/rsl_rl/g1_multi_amp_stable/2026-10-27_14-04-33_stability-b-stable-scratch-4096x24-100k-seed42/model_99999.pt"
+    },
+    {
+      "path": "root/workplace/lyd-amp-recovery-stability-smooth-v2/logs/rsl_rl/g1_multi_amp_smooth/2026-10-27_14-08-05_stability-d-smooth-smp-scratch-4096x24-100k-seed42/model_99999.pt",
+      "size": 41365517,
+      "sha256": "a87d1ba2b407de521fc7bc1c4f80fdadbda833851b84fa3f6fe8a14a99cb54cc",
+      "local_path": "/home/luyd/workspace/AMP_mjlab/logs/server_backup_20261029/latest/root/workplace/lyd-amp-recovery-stability-smooth-v2/logs/rsl_rl/g1_multi_amp_smooth/2026-10-27_14-08-05_stability-d-smooth-smp-scratch-4096x24-100k-seed42/model_99999.pt"
+    },
+    {
+      "path": "root/workplace/lyd-supermimic-grouped-c32c73c/logs/sm_grouped_4096_100k_v5_seed42_20261026/model_100000.pt",
+      "size": 195894509,
+      "sha256": "6805b150ddd437a6457108eb2f356dbfc2d328c701a08718fbf01daab4653390",
+      "local_path": "/home/luyd/workspace/AMP_mjlab/logs/server_backup_20261029/latest/root/workplace/lyd-supermimic-grouped-c32c73c/logs/sm_grouped_4096_100k_v5_seed42_20261026/model_100000.pt"
+    },
+    {
+      "path": "root/workplace/lyd-supermimic-grouped-c32c73c/logs/sm_grouped_4096x24_100k_v5_seed42_20261026/model_73000.pt",
+      "size": 195893879,
+      "sha256": "df9accaa4d7c03c815bd3dea4759e2e71b30202079632a96437ccd3a54476eed",
+      "local_path": "/home/luyd/workspace/AMP_mjlab/logs/server_backup_20261029/latest/root/workplace/lyd-supermimic-grouped-c32c73c/logs/sm_grouped_4096x24_100k_v5_seed42_20261026/model_73000.pt"
+    },
+    {
+      "path": "root/workplace/lyd-supermimic-grouped-c32c73c/logs/sm_grouped_4096x6_100k_v5_seed42_20261026/model_96000.pt",
+      "size": 195893879,
+      "sha256": "a37c0bc2b6360d652c4158c7b8309d69a58e8ab6b96f6ec5750eb3e8ccd962bb",
+      "local_path": "/home/luyd/workspace/AMP_mjlab/logs/server_backup_20261029/latest/root/workplace/lyd-supermimic-grouped-c32c73c/logs/sm_grouped_4096x6_100k_v5_seed42_20261026/model_96000.pt"
+    },
+    {
+      "path": "root/workplace/lyd-supermimic-original-dc21d99/logs/sm_original_4096_100k_v5_seed42_20261026/model_100000.pt",
+      "size": 195894189,
+      "sha256": "b8724f8a578d479050b1c9eba5a5e17f6662c78dc5204d51c7cc830b58b6d79f",
+      "local_path": "/home/luyd/workspace/AMP_mjlab/logs/server_backup_20261029/latest/root/workplace/lyd-supermimic-original-dc21d99/logs/sm_original_4096_100k_v5_seed42_20261026/model_100000.pt"
+    },
+    {
+      "path": "root/workplace/lyd-supermimic-original-dc21d99/logs/sm_original_4096x24_100k_v5_seed42_20261026/model_84000.pt",
+      "size": 195893559,
+      "sha256": "2b53d78e7ed27529f45f3241256b59bab04678eaf9d1081dd7fb5047180b4fd3",
+      "local_path": "/home/luyd/workspace/AMP_mjlab/logs/server_backup_20261029/latest/root/workplace/lyd-supermimic-original-dc21d99/logs/sm_original_4096x24_100k_v5_seed42_20261026/model_84000.pt"
+    }
+  ],
+  "metadata_directory": "/home/luyd/workspace/AMP_mjlab/logs/server_backup_20261029/metadata",
+  "git_branches": {
+    "lyd-amp-c-supermimic": "ba75390a9d15687b9333aa2b5a327d57bca679b8",
+    "lyd-amp-recovery-stability": "c861f3a83597e8875a7b90bd5ecd461b0595c42d",
+    "lyd-multi-discriminator-amp": "40a8a0c68ac15a08a9254faaba69c82dc77f888c",
+    "lyd-supermimic-stand-walk-run": "8135f0670281d1e9479430b83cfa26632a539b12"
+  }
+}
