@@ -45,7 +45,7 @@ def main():
                 '--agent.logger','tensorboard' if a.preflight else 'wandb',
                 '--agent.wandb-project','lyd-multi-amp','--agent.run-name',
                 ('preflight-' if a.preflight else '')+f'AMP-{label}-controlled-scratch-4096x24',
-                '--agent.seed',str(seed),'--agent.resume','False','--gpu-ids',f'[{gpu}]','--enable-nan-guard']
+                '--agent.seed',str(seed),'--agent.resume','False','--gpu-ids',f'[{gpu}]','--enable-nan-guard','True']
             env=os.environ.copy();env.update(MUJOCO_GL='egl',OMP_NUM_THREADS='4',MKL_NUM_THREADS='4',
                 WANDB_BASE_URL='https://api.wandb.ai',WANDB_USERNAME='tabletennis',WANDB_RUN_ID=run_id,
                 WANDB_RUN_GROUP='amp-c-controlled-20261030',WANDB_MODE='online')

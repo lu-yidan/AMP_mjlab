@@ -1,0 +1,501 @@
+{
+  "unit_tests": 15,
+  "env_configs_identical": true,
+  "runner_only_differences": [
+    "experiment_name",
+    "multi_amp.shared_discriminator",
+    "multi_amp.balance_recovery"
+  ],
+  "environment_config_sha256": "96c5d87aff09af905fd2d6a37e3ee9297f2b9c430f80e687f1107e74bdd060c2",
+  "runner_configs": [
+    {
+      "seed": 42,
+      "num_steps_per_env": 24,
+      "max_iterations": 100000,
+      "obs_groups": {
+        "actor": [
+          "actor"
+        ],
+        "critic": [
+          "critic"
+        ]
+      },
+      "save_interval": 1000,
+      "experiment_name": "g1_controlled_f-shared",
+      "run_name": "",
+      "logger": "tensorboard",
+      "wandb_project": "mjlab",
+      "wandb_tags": [],
+      "resume": false,
+      "load_run": ".*",
+      "load_checkpoint": "model_.*.pt",
+      "clip_actions": null,
+      "upload_model": true,
+      "class_name": "OnPolicyRunner",
+      "actor": {
+        "hidden_dims": [
+          512,
+          256,
+          128
+        ],
+        "activation": "elu",
+        "obs_normalization": true,
+        "cnn_cfg": null,
+        "distribution_cfg": {
+          "class_name": "GaussianDistribution",
+          "init_std": 1.0,
+          "std_type": "scalar"
+        },
+        "class_name": "MLPModel"
+      },
+      "critic": {
+        "hidden_dims": [
+          512,
+          256,
+          128
+        ],
+        "activation": "elu",
+        "obs_normalization": true,
+        "cnn_cfg": null,
+        "distribution_cfg": null,
+        "class_name": "MLPModel"
+      },
+      "algorithm": {
+        "num_learning_epochs": 5,
+        "num_mini_batches": 4,
+        "learning_rate": 0.001,
+        "schedule": "adaptive",
+        "gamma": 0.99,
+        "lam": 0.95,
+        "entropy_coef": 0.005,
+        "desired_kl": 0.01,
+        "max_grad_norm": 1.0,
+        "value_loss_coef": 1.0,
+        "use_clipped_value_loss": true,
+        "clip_param": 0.2,
+        "normalize_advantage_per_mini_batch": false,
+        "optimizer": "adam",
+        "share_cnn_encoders": false,
+        "class_name": "AMPPPO"
+      },
+      "amp_reward_coef": 0.1,
+      "amp_motion_files": "/home/luyd/workspace/AMP_mjlab/src/assets/motions/g1/amp",
+      "amp_num_preload_transitions": 200000,
+      "amp_task_reward_lerp": 0.75,
+      "amp_discr_hidden_dims": [
+        1024,
+        512,
+        256
+      ],
+      "min_normalized_std": [
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05
+      ],
+      "amp_body_names": [
+        "pelvis",
+        "left_hip_roll_link",
+        "left_knee_link",
+        "left_ankle_roll_link",
+        "right_hip_roll_link",
+        "right_knee_link",
+        "right_ankle_roll_link",
+        "left_shoulder_roll_link",
+        "left_elbow_link",
+        "left_wrist_yaw_link",
+        "right_shoulder_roll_link",
+        "right_elbow_link",
+        "right_wrist_yaw_link"
+      ],
+      "amp_anchor_name": "torso_link",
+      "multi_amp": {
+        "gravity_threshold": 0.6,
+        "head_height_threshold": 0.9,
+        "use_head_height": true,
+        "speed_max": 3.0,
+        "head_body": "torso_link",
+        "head_offset": [
+          0.0,
+          0.0,
+          0.43
+        ],
+        "replay_size": 100000,
+        "batch_size": 1024,
+        "learning_rate": 0.0001,
+        "condition_mode": "matched_velocity",
+        "condition_scale": [
+          3.0,
+          1.0,
+          1.5
+        ],
+        "match_tolerance": [
+          0.3,
+          0.2,
+          0.3
+        ],
+        "stability_version": 1,
+        "phase_experts": true,
+        "smooth_transition": false,
+        "max_reuse": 2.0,
+        "max_age": 50,
+        "controlled_ablation": true,
+        "shared_discriminator": true,
+        "balance_recovery": true,
+        "fail_on_nonfinite": true,
+        "expert_bank": "/home/luyd/workspace/AMP_mjlab/logs/amp_stability/smp_recovery_train.npz"
+      }
+    },
+    {
+      "seed": 42,
+      "num_steps_per_env": 24,
+      "max_iterations": 100000,
+      "obs_groups": {
+        "actor": [
+          "actor"
+        ],
+        "critic": [
+          "critic"
+        ]
+      },
+      "save_interval": 1000,
+      "experiment_name": "g1_controlled_g-unbalanced",
+      "run_name": "",
+      "logger": "tensorboard",
+      "wandb_project": "mjlab",
+      "wandb_tags": [],
+      "resume": false,
+      "load_run": ".*",
+      "load_checkpoint": "model_.*.pt",
+      "clip_actions": null,
+      "upload_model": true,
+      "class_name": "OnPolicyRunner",
+      "actor": {
+        "hidden_dims": [
+          512,
+          256,
+          128
+        ],
+        "activation": "elu",
+        "obs_normalization": true,
+        "cnn_cfg": null,
+        "distribution_cfg": {
+          "class_name": "GaussianDistribution",
+          "init_std": 1.0,
+          "std_type": "scalar"
+        },
+        "class_name": "MLPModel"
+      },
+      "critic": {
+        "hidden_dims": [
+          512,
+          256,
+          128
+        ],
+        "activation": "elu",
+        "obs_normalization": true,
+        "cnn_cfg": null,
+        "distribution_cfg": null,
+        "class_name": "MLPModel"
+      },
+      "algorithm": {
+        "num_learning_epochs": 5,
+        "num_mini_batches": 4,
+        "learning_rate": 0.001,
+        "schedule": "adaptive",
+        "gamma": 0.99,
+        "lam": 0.95,
+        "entropy_coef": 0.005,
+        "desired_kl": 0.01,
+        "max_grad_norm": 1.0,
+        "value_loss_coef": 1.0,
+        "use_clipped_value_loss": true,
+        "clip_param": 0.2,
+        "normalize_advantage_per_mini_batch": false,
+        "optimizer": "adam",
+        "share_cnn_encoders": false,
+        "class_name": "AMPPPO"
+      },
+      "amp_reward_coef": 0.1,
+      "amp_motion_files": "/home/luyd/workspace/AMP_mjlab/src/assets/motions/g1/amp",
+      "amp_num_preload_transitions": 200000,
+      "amp_task_reward_lerp": 0.75,
+      "amp_discr_hidden_dims": [
+        1024,
+        512,
+        256
+      ],
+      "min_normalized_std": [
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05
+      ],
+      "amp_body_names": [
+        "pelvis",
+        "left_hip_roll_link",
+        "left_knee_link",
+        "left_ankle_roll_link",
+        "right_hip_roll_link",
+        "right_knee_link",
+        "right_ankle_roll_link",
+        "left_shoulder_roll_link",
+        "left_elbow_link",
+        "left_wrist_yaw_link",
+        "right_shoulder_roll_link",
+        "right_elbow_link",
+        "right_wrist_yaw_link"
+      ],
+      "amp_anchor_name": "torso_link",
+      "multi_amp": {
+        "gravity_threshold": 0.6,
+        "head_height_threshold": 0.9,
+        "use_head_height": true,
+        "speed_max": 3.0,
+        "head_body": "torso_link",
+        "head_offset": [
+          0.0,
+          0.0,
+          0.43
+        ],
+        "replay_size": 100000,
+        "batch_size": 1024,
+        "learning_rate": 0.0001,
+        "condition_mode": "matched_velocity",
+        "condition_scale": [
+          3.0,
+          1.0,
+          1.5
+        ],
+        "match_tolerance": [
+          0.3,
+          0.2,
+          0.3
+        ],
+        "stability_version": 1,
+        "phase_experts": true,
+        "smooth_transition": false,
+        "max_reuse": 2.0,
+        "max_age": 50,
+        "controlled_ablation": true,
+        "shared_discriminator": false,
+        "balance_recovery": false,
+        "fail_on_nonfinite": true,
+        "expert_bank": "/home/luyd/workspace/AMP_mjlab/logs/amp_stability/smp_recovery_train.npz"
+      }
+    },
+    {
+      "seed": 42,
+      "num_steps_per_env": 24,
+      "max_iterations": 100000,
+      "obs_groups": {
+        "actor": [
+          "actor"
+        ],
+        "critic": [
+          "critic"
+        ]
+      },
+      "save_interval": 1000,
+      "experiment_name": "g1_controlled_h-full",
+      "run_name": "",
+      "logger": "tensorboard",
+      "wandb_project": "mjlab",
+      "wandb_tags": [],
+      "resume": false,
+      "load_run": ".*",
+      "load_checkpoint": "model_.*.pt",
+      "clip_actions": null,
+      "upload_model": true,
+      "class_name": "OnPolicyRunner",
+      "actor": {
+        "hidden_dims": [
+          512,
+          256,
+          128
+        ],
+        "activation": "elu",
+        "obs_normalization": true,
+        "cnn_cfg": null,
+        "distribution_cfg": {
+          "class_name": "GaussianDistribution",
+          "init_std": 1.0,
+          "std_type": "scalar"
+        },
+        "class_name": "MLPModel"
+      },
+      "critic": {
+        "hidden_dims": [
+          512,
+          256,
+          128
+        ],
+        "activation": "elu",
+        "obs_normalization": true,
+        "cnn_cfg": null,
+        "distribution_cfg": null,
+        "class_name": "MLPModel"
+      },
+      "algorithm": {
+        "num_learning_epochs": 5,
+        "num_mini_batches": 4,
+        "learning_rate": 0.001,
+        "schedule": "adaptive",
+        "gamma": 0.99,
+        "lam": 0.95,
+        "entropy_coef": 0.005,
+        "desired_kl": 0.01,
+        "max_grad_norm": 1.0,
+        "value_loss_coef": 1.0,
+        "use_clipped_value_loss": true,
+        "clip_param": 0.2,
+        "normalize_advantage_per_mini_batch": false,
+        "optimizer": "adam",
+        "share_cnn_encoders": false,
+        "class_name": "AMPPPO"
+      },
+      "amp_reward_coef": 0.1,
+      "amp_motion_files": "/home/luyd/workspace/AMP_mjlab/src/assets/motions/g1/amp",
+      "amp_num_preload_transitions": 200000,
+      "amp_task_reward_lerp": 0.75,
+      "amp_discr_hidden_dims": [
+        1024,
+        512,
+        256
+      ],
+      "min_normalized_std": [
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05,
+        0.05
+      ],
+      "amp_body_names": [
+        "pelvis",
+        "left_hip_roll_link",
+        "left_knee_link",
+        "left_ankle_roll_link",
+        "right_hip_roll_link",
+        "right_knee_link",
+        "right_ankle_roll_link",
+        "left_shoulder_roll_link",
+        "left_elbow_link",
+        "left_wrist_yaw_link",
+        "right_shoulder_roll_link",
+        "right_elbow_link",
+        "right_wrist_yaw_link"
+      ],
+      "amp_anchor_name": "torso_link",
+      "multi_amp": {
+        "gravity_threshold": 0.6,
+        "head_height_threshold": 0.9,
+        "use_head_height": true,
+        "speed_max": 3.0,
+        "head_body": "torso_link",
+        "head_offset": [
+          0.0,
+          0.0,
+          0.43
+        ],
+        "replay_size": 100000,
+        "batch_size": 1024,
+        "learning_rate": 0.0001,
+        "condition_mode": "matched_velocity",
+        "condition_scale": [
+          3.0,
+          1.0,
+          1.5
+        ],
+        "match_tolerance": [
+          0.3,
+          0.2,
+          0.3
+        ],
+        "stability_version": 1,
+        "phase_experts": true,
+        "smooth_transition": false,
+        "max_reuse": 2.0,
+        "max_age": 50,
+        "controlled_ablation": true,
+        "shared_discriminator": false,
+        "balance_recovery": true,
+        "fail_on_nonfinite": true,
+        "expert_bank": "/home/luyd/workspace/AMP_mjlab/logs/amp_stability/smp_recovery_train.npz"
+      }
+    }
+  ]
+}
