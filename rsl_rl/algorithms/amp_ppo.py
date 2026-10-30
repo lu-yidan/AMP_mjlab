@@ -281,6 +281,12 @@ class AMPPPO:
                 rnd_state_batch,
             ) = sample
 
+            if getattr(self, 'fail_on_nonfinite', False):
+                from rsl_rl.modules.controlled_amp import require_finite
+                require_finite('PPO minibatch', obs_batch, critic_obs_batch, actions_batch,
+                    target_values_batch, advantages_batch, returns_batch,
+                    old_actions_log_prob_batch, old_mu_batch, old_sigma_batch)
+
             # number of augmentations per sample
             # we start with 1 and increase it if we use symmetry augmentation
             num_aug = 1
@@ -321,6 +327,8 @@ class AMPPPO:
             # -- critic
             value_batch = self.policy.evaluate(critic_obs_batch, masks=masks_batch, hidden_states=hid_states_batch[1])
             if not torch.isfinite(returns_batch).all() or not torch.isfinite(value_batch).all():
+                if getattr(self, 'fail_on_nonfinite', False):
+                    raise FloatingPointError('PPO non-finite value prediction or returns; refusing a skipped update')
                 skipped_non_finite_batches += 1
                 continue
             # -- entropy
@@ -386,11 +394,15 @@ class AMPPPO:
                 value_loss = (returns_batch - value_batch).pow(2).mean()
 
             if not torch.isfinite(value_loss):
+                if getattr(self, 'fail_on_nonfinite', False):
+                    raise FloatingPointError('PPO non-finite value loss; refusing a skipped update')
                 skipped_non_finite_batches += 1
                 continue
 
             loss = surrogate_loss + self.value_loss_coef * value_loss - self.entropy_coef * entropy_batch.mean()
             if not torch.isfinite(loss):
+                if getattr(self, 'fail_on_nonfinite', False):
+                    raise FloatingPointError('PPO non-finite surrogate/entropy combined loss; refusing a skipped update')
                 skipped_non_finite_batches += 1
                 continue
 
@@ -462,6 +474,8 @@ class AMPPPO:
             # Compute the gradients
             # -- For PPO
             self.optimizer.zero_grad()
+            if getattr(self, 'fail_on_nonfinite', False) and not torch.isfinite(loss):
+                raise FloatingPointError('PPO final loss non-finite')
             loss.backward()
             # -- For RND
             if self.rnd:
@@ -474,7 +488,8 @@ class AMPPPO:
 
             # Apply the gradients
             # -- For PPO
-            nn.utils.clip_grad_norm_(self.policy.parameters(), self.max_grad_norm)
+            nn.utils.clip_grad_norm_(self.policy.parameters(), self.max_grad_norm,
+                error_if_nonfinite=getattr(self, 'fail_on_nonfinite', False))
             self.optimizer.step()
 
             # Keep policy noise above configured floor to avoid invalid Normal std.

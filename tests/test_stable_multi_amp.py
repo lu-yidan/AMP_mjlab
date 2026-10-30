@@ -5,7 +5,7 @@ from tests.test_multi_amp import make_model
 from rsl_rl.modules.stable_multi_amp import StableMultiAMP, FreshReplay, recovery_segments
 
 
-def model(phase=False, smooth=False):
+def model(phase=False, smooth=False, cls=StableMultiAMP, **overrides):
     base = make_model(True)
     from types import SimpleNamespace
     loader = SimpleNamespace(observation_dim=4, motion_names=['fallAndGetUp1', 'walk_forward', 'jog_forward'], fps=torch.tensor([10.]))
@@ -15,7 +15,8 @@ def model(phase=False, smooth=False):
     h = torch.tensor([1.2, 1.1, .8, .5, .3, .4, .5, .65, .8, .95, 1., 1.1, 1.2, 1.2, 1.2, 1.2])
     loader._recovery_geometry_list = [torch.stack((h, h*0, h*0, h*0-1), -1)] * 3
     cfg = dict(base.cfg, stability_version=1, phase_experts=phase, smooth_transition=smooth, max_reuse=2., max_age=2)
-    return StableMultiAMP(loader, cfg, [8], .1, .75, 'cpu')
+    cfg.update(overrides)
+    return cls(loader, cfg, [8], .1, .75, 'cpu')
 
 
 class StableTests(unittest.TestCase):

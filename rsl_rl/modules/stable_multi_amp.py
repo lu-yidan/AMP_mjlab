@@ -214,7 +214,7 @@ class StableMultiAMP(MultiAMP):
             normalized = False
             for _ in range(updates):
                 ids = buffer.sample(batch, iteration, self.cfg['max_age'],
-                                    balanced=kind == 'rec' and self.cfg.get('phase_experts'))
+                                    balanced=kind == 'rec' and self.cfg.get('balance_recovery', self.cfg.get('phase_experts')))
                 if ids is None:
                     break
                 a, b, c = buffer.a[ids], buffer.b[ids], buffer.c[ids]
@@ -235,9 +235,12 @@ class StableMultiAMP(MultiAMP):
                 grad = torch.autograd.grad(ed.sum(), ex, create_graph=True)[0]
                 loss = .5 * ((pd + 1).square().mean() + (ed - 1).square().mean())
                 loss = loss + 10 * grad[:, :self.dim * 2].square().sum(-1).mean()
+                if self.cfg.get('fail_on_nonfinite') and not torch.isfinite(loss):
+                    raise FloatingPointError(f'{kind} discriminator loss non-finite')
                 self.optimizers[kind].zero_grad()
                 loss.backward()
-                torch.nn.utils.clip_grad_norm_(self.networks[kind].parameters(), 1.)
+                torch.nn.utils.clip_grad_norm_(self.networks[kind].parameters(), 1.,
+                    error_if_nonfinite=self.cfg.get('fail_on_nonfinite', False))
                 self.optimizers[kind].step()
                 losses.append(float(loss.detach())); scores.append(float(ed.detach().mean()))
                 ages.append(float((iteration - buffer.birth[ids]).float().mean()))

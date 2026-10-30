@@ -143,3 +143,22 @@ for variant, phase_experts, smooth in (
     task_id='Unitree-G1-MultiAMP-' + variant + '-Tracking-Flat',
     env_cfg=dual_tracking_env_cfg(), play_env_cfg=dual_tracking_env_cfg(play=True),
     rl_cfg=cfg, runner_cls=AMPOnPolicyRunner)
+
+
+# 2026-10-30: matched-data controls. Prior task definitions remain unchanged.
+for variant, shared, balanced in (
+    ('F-Shared', True, True), ('G-Unbalanced', False, False), ('H-Full', False, True)):
+  cfg = g1_multi_amp_ppo_runner_cfg()
+  cfg.multi_amp.update(
+    condition_mode='matched_velocity', condition_scale=[3., 1., 1.5],
+    match_tolerance=[.3, .2, .3], stability_version=1, phase_experts=True,
+    smooth_transition=False, max_reuse=2., max_age=50,
+    controlled_ablation=True, shared_discriminator=shared, balance_recovery=balanced,
+    fail_on_nonfinite=True,
+    expert_bank=str(Path(__file__).resolve().parents[5] / 'logs/amp_stability/smp_recovery_train.npz'))
+  cfg.max_iterations = 100000
+  cfg.experiment_name = 'g1_controlled_' + variant.lower()
+  register_mjlab_task(
+    task_id='Unitree-G1-AMP-Controlled-' + variant + '-Flat',
+    env_cfg=dual_tracking_env_cfg(), play_env_cfg=dual_tracking_env_cfg(play=True),
+    rl_cfg=cfg, runner_cls=AMPOnPolicyRunner)

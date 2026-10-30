@@ -223,6 +223,10 @@ class AmpOnPolicyRunner:
             if train_cfg["multi_amp"].get("stability_version"):
                 from rsl_rl.modules.stable_multi_amp import StableMultiAMP
                 MultiAMP = StableMultiAMP
+            if train_cfg['multi_amp'].get('controlled_ablation'):
+                from rsl_rl.modules.controlled_amp import ControlledAMP
+                MultiAMP = ControlledAMP
+            self.alg.fail_on_nonfinite = train_cfg['multi_amp'].get('fail_on_nonfinite', False)
             self.alg.multi_amp = MultiAMP(
                 amp_data, train_cfg["multi_amp"], train_cfg["amp_discr_hidden_dims"],
                 train_cfg["amp_reward_coef"], train_cfg["amp_task_reward_lerp"], self.device,
