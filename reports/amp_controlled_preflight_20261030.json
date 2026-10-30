@@ -1,0 +1,178 @@
+{
+  "launch": {
+    "source_commit": "c2526b7f3056117bbf8e622e13a24effcb8299f7",
+    "branch": "lyd-c-controlled-ablations",
+    "expert_sha256": "525d90307cf738b2051aad840abf5bb36ebe8460ad4cf7c0f1a3635b8d8a2823",
+    "reset_sha256": "5750cffc90955c270cf1daf8d6bed849cca47b472e50b55d44b15893410407b8",
+    "preflight": true,
+    "num_envs": 4096,
+    "steps_per_env": 24,
+    "iterations": 20,
+    "created_at": "2026-10-30 11:09:16+0800",
+    "runs": [
+      {
+        "arm": "F",
+        "seed": 42,
+        "gpu": 0,
+        "run_id": "35f3e641",
+        "command": [
+          "/root/autodl-tmp/bj-backup-20261021/rootfs/root/autodl-tmp/cra-throughput-20261014/python/bin/python3.12",
+          "-u",
+          "scripts/train.py",
+          "Unitree-G1-AMP-Controlled-F-Shared-Flat",
+          "--env.scene.num-envs",
+          "4096",
+          "--agent.num-steps-per-env",
+          "24",
+          "--agent.max-iterations",
+          "20",
+          "--agent.save-interval",
+          "1000",
+          "--agent.logger",
+          "tensorboard",
+          "--agent.wandb-project",
+          "lyd-multi-amp",
+          "--agent.run-name",
+          "preflight-AMP-F-seed42-controlled-scratch-4096x24",
+          "--agent.seed",
+          "42",
+          "--agent.resume",
+          "False",
+          "--gpu-ids",
+          "[0]",
+          "--enable-nan-guard",
+          "True"
+        ],
+        "log": "/root/workplace/lyd-c-controlled-ablations-c2526b7/records/preflight-v2-20261030/F-seed42.log",
+        "wandb": null,
+        "pid": 71774,
+        "status": "completed",
+        "exit_code": 0
+      },
+      {
+        "arm": "G",
+        "seed": 42,
+        "gpu": 1,
+        "run_id": "c3bc6218",
+        "command": [
+          "/root/autodl-tmp/bj-backup-20261021/rootfs/root/autodl-tmp/cra-throughput-20261014/python/bin/python3.12",
+          "-u",
+          "scripts/train.py",
+          "Unitree-G1-AMP-Controlled-G-Unbalanced-Flat",
+          "--env.scene.num-envs",
+          "4096",
+          "--agent.num-steps-per-env",
+          "24",
+          "--agent.max-iterations",
+          "20",
+          "--agent.save-interval",
+          "1000",
+          "--agent.logger",
+          "tensorboard",
+          "--agent.wandb-project",
+          "lyd-multi-amp",
+          "--agent.run-name",
+          "preflight-AMP-G-seed42-controlled-scratch-4096x24",
+          "--agent.seed",
+          "42",
+          "--agent.resume",
+          "False",
+          "--gpu-ids",
+          "[1]",
+          "--enable-nan-guard",
+          "True"
+        ],
+        "log": "/root/workplace/lyd-c-controlled-ablations-c2526b7/records/preflight-v2-20261030/G-seed42.log",
+        "wandb": null,
+        "pid": 71776,
+        "status": "completed",
+        "exit_code": 0
+      },
+      {
+        "arm": "H",
+        "seed": 42,
+        "gpu": 2,
+        "run_id": "a761eee8",
+        "command": [
+          "/root/autodl-tmp/bj-backup-20261021/rootfs/root/autodl-tmp/cra-throughput-20261014/python/bin/python3.12",
+          "-u",
+          "scripts/train.py",
+          "Unitree-G1-AMP-Controlled-H-Full-Flat",
+          "--env.scene.num-envs",
+          "4096",
+          "--agent.num-steps-per-env",
+          "24",
+          "--agent.max-iterations",
+          "20",
+          "--agent.save-interval",
+          "1000",
+          "--agent.logger",
+          "tensorboard",
+          "--agent.wandb-project",
+          "lyd-multi-amp",
+          "--agent.run-name",
+          "preflight-AMP-H-seed42-controlled-scratch-4096x24",
+          "--agent.seed",
+          "42",
+          "--agent.resume",
+          "False",
+          "--gpu-ids",
+          "[2]",
+          "--enable-nan-guard",
+          "True"
+        ],
+        "log": "/root/workplace/lyd-c-controlled-ablations-c2526b7/records/preflight-v2-20261030/H-seed42.log",
+        "wandb": null,
+        "pid": 71777,
+        "status": "completed",
+        "exit_code": 0
+      }
+    ],
+    "planned_runs": [
+      {
+        "arm": "F",
+        "seed": 42,
+        "gpu": 0
+      },
+      {
+        "arm": "G",
+        "seed": 42,
+        "gpu": 1
+      },
+      {
+        "arm": "H",
+        "seed": 42,
+        "gpu": 2
+      }
+    ]
+  },
+  "checks": [
+    {
+      "arm": "F",
+      "checkpoint": "logs/rsl_rl/g1_controlled_f-shared/2026-10-30_11-09-24_preflight-AMP-F-seed42-controlled-scratch-4096x24/model_19.pt",
+      "sha256": "63994c4621039bb36c5323d1c55ff972e1def14f9fd1de46c153bb21c4322992",
+      "finite_checkpoint": true,
+      "iterations": 20,
+      "skipped_batches": 0.0,
+      "last_iteration_seconds": "1.68"
+    },
+    {
+      "arm": "G",
+      "checkpoint": "logs/rsl_rl/g1_controlled_g-unbalanced/2026-10-30_11-09-24_preflight-AMP-G-seed42-controlled-scratch-4096x24/model_19.pt",
+      "sha256": "b3932ae537a56b2a122daffda678def863d5da4f455765b0633fa6be08a140b2",
+      "finite_checkpoint": true,
+      "iterations": 20,
+      "skipped_batches": 0.0,
+      "last_iteration_seconds": "1.62"
+    },
+    {
+      "arm": "H",
+      "checkpoint": "logs/rsl_rl/g1_controlled_h-full/2026-10-30_11-09-24_preflight-AMP-H-seed42-controlled-scratch-4096x24/model_19.pt",
+      "sha256": "e5df23bd8b1bfa2ad3ce473f8a41665aba57e0a80ec00423b6b11d3f17c02fbf",
+      "finite_checkpoint": true,
+      "iterations": 20,
+      "skipped_batches": 0.0,
+      "last_iteration_seconds": "1.65"
+    }
+  ]
+}

@@ -46,8 +46,13 @@ running moments, avoiding the legacy single AMP update path.
 Run `scripts/launch_amp_controlled.py --preflight --source-commit <sha> --output
 <new-directory>` for three 20-iteration 4096-environment smoke runs. Verify their
 checkpoints, zero skipped updates and finite metrics before launching without
-`--preflight`. Formal launch uses GPUs 0/1 for F, 2/3 for G, 4/5 for H. Seeds 42/43
-start concurrently; seed 44 queues behind seed 42 for each arm. GPU 6 remains free.
+`--preflight`. At the user's request, formal launch uses GPUs 0/1 for F, 2/3 for G, and 4 for H.
+F/G seeds 42/43 start concurrently; seed 44 queues behind seed 42. H runs seeds
+42, 44, 43 sequentially. GPUs 5 and 6 remain free. The first launch briefly started
+H43 on GPU5; it was terminated on request and is excluded from results. For that
+already-running launch, `queue_amp_controlled_run.py` defers a fresh H43 to GPU4
+after H44, records a new W&B ID and refuses to run if its dependency fails. Its
+`deferred-H43.json` supersedes the original H43 plan in `launch.json`.
 A failed worker does not start its queued seed. Launch manifests are exclusive and
 record source SHA, data hashes, planned runs, PIDs, commands, W&B URLs and exit codes.
 

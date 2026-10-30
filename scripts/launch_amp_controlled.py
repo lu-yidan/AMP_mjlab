@@ -1,4 +1,4 @@
-"""Launch F/G/H controls, three seeds each, six GPUs with three queued runs.
+"""Launch F/G/H controls, three seeds each, five GPUs with four queued runs.
 
 A failed run stops its worker queue. A durable manifest records every PID and exit.
 The launcher refuses to reuse an output directory containing a launch manifest.
@@ -30,7 +30,7 @@ def main():
         reset_sha256=hashlib.sha256(reset.read_bytes()).hexdigest(),preflight=a.preflight,
         num_envs=4096,steps_per_env=24,iterations=20 if a.preflight else 100000,
         created_at=time.strftime('%Y-%m-%d %H:%M:%S%z'),runs=[])
-    record['planned_runs'] = [dict(arm=arm, seed=seed, gpu=i if a.preflight else i*2+(seed==43))
+    record['planned_runs'] = [dict(arm=arm, seed=seed, gpu=i if a.preflight else (4 if arm=='H' else i*2+(seed==43)))
         for i,arm in enumerate(ARMS) for seed in ([42] if a.preflight else [42,43,44])]
     with path.open('x') as f:json.dump(record,f,indent=2)
     lock=threading.Lock()
@@ -60,8 +60,9 @@ def main():
                 item.update(exit_code=rc,status='completed' if rc==0 else 'failed');persist()
             if rc:raise RuntimeError(f'{label} failed with {rc}; worker queue stopped')
     jobs=([(i,[(arm,42)]) for i,arm in enumerate(ARMS)] if a.preflight else
-          [(i*2,[(arm,42),(arm,44)]) for i,arm in enumerate(ARMS)]+
-          [(i*2+1,[(arm,43)]) for i,arm in enumerate(ARMS)])
+          [(0,[('F',42),('F',44)]),(1,[('F',43)]),
+           (2,[('G',42),('G',44)]),(3,[('G',43)]),
+           (4,[('H',42),('H',44),('H',43)])])
     with ThreadPoolExecutor(max_workers=len(jobs)) as pool:
         futures=[pool.submit(worker,gpu,q) for gpu,q in jobs]
         for f in futures:f.result()
