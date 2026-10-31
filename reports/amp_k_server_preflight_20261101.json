@@ -1,0 +1,26 @@
+{
+  "source_commit": "4b7abd6",
+  "root": "/root/workplace/lyd-supermimic-terrain-4b7abd6",
+  "gpu": 0,
+  "pid": 302140,
+  "status": "preflight_started",
+  "command": [
+    "/root/autodl-tmp/bj-backup-20261021/rootfs/root/autodl-tmp/cra-throughput-20261014/python/bin/python3.12",
+    "-u",
+    "scripts/train_amp_supermimic.py",
+    "--terrain",
+    "--num-envs",
+    "4096",
+    "--iterations",
+    "3",
+    "--smoke",
+    "--output",
+    "/root/workplace/lyd-supermimic-terrain-4b7abd6/records/K-preflight4096"
+  ],
+  "formal_training_started": false,
+  "reserved_gpus": [
+    5,
+    6
+  ],
+  "previous_attempt": "4d2663d failed import: vendored env sources were gitignored; fixed in 4b7abd6"
+}

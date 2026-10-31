@@ -83,3 +83,9 @@ real-simulator evaluation. Both reports are retained.
 
 K opts into fail-fast checks for non-finite world-model, actor and critic
 updates, in addition to the controlled discriminator checks.
+
+Deployment preflight: the first archive exposed a pre-existing packaging bug:
+`.gitignore`'s `env/` rule excluded the vendored task protocol. Commit `4b7abd6`
+adds the source and an explicit ignore exception. Server source is isolated at
+`/root/workplace/lyd-supermimic-terrain-4b7abd6`. Full-size preflight uses GPU 0;
+old jobs remain SIGSTOP-paused (and still hold memory). GPUs 5/6 are not used.
