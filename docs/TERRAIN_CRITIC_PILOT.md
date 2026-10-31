@@ -57,3 +57,19 @@ existing server training and reserved GPUs are untouched. Before a long run, tes
 and a disturbance/recovery/resume-command evaluation. Actor is blind to terrain;
 privileged critic observations help training, but do not provide deployment-time
 terrain perception or anticipation.
+
+## Formal queue: 2026-11-01
+
+Deployed immutable source `c3572be` to server
+`/root/workplace/lyd-terrain-critic-c3572be`. Archive SHA256:
+`f81a4686bcc152b2741042d7c1ec5743857f849514ab87eb95904b2d1e391b67`.
+Scheduler PID at launch: `297594`; records under `records/terrain-20261101`.
+
+- I-Shared-TerrainCritic: seed 42, GPU 1, waits for F43 completion.
+- J-Dual-TerrainCritic: seed 42, GPU 0, waits for F42 and F44 completion.
+- Both: from scratch, 4096 environments, 24 rollout steps, 100000 iterations, checkpoint every 1000.
+- Each runs a 20-iteration full-size preflight first; any failed run or non-finite batch skip prevents formal launch.
+- Formal runs use W&B project `tabletennis/lyd-multi-amp`, group `amp-terrain-critic-20261101`. URLs are written to the remote manifest only at launch.
+- Queue does not use GPUs 5 or 6, and checks its assigned GPU has no compute processes before starting.
+
+Verified scheduler alive and both jobs queued. This is not evidence of formal training having started. Local launch snapshot: `reports/amp_terrain_launch_20261101.json`.

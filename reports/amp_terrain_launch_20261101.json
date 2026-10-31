@@ -1,0 +1,45 @@
+{
+  "source_commit": "c3572be",
+  "expert_sha256": "525d90307cf738b2051aad840abf5bb36ebe8460ad4cf7c0f1a3635b8d8a2823",
+  "dependency": "/root/workplace/lyd-c-controlled-ablations-c2526b7/records/formal-20261030/launch.json",
+  "reserved_gpus": [
+    5,
+    6
+  ],
+  "jobs": [
+    {
+      "label": "I-Shared-TerrainCritic",
+      "gpu": 1,
+      "dependencies": [
+        [
+          "F",
+          43
+        ]
+      ],
+      "status": "queued",
+      "seed": 42,
+      "iterations": 100000,
+      "num_envs": 4096,
+      "rollout_steps": 24
+    },
+    {
+      "label": "J-Dual-TerrainCritic",
+      "gpu": 0,
+      "dependencies": [
+        [
+          "F",
+          42
+        ],
+        [
+          "F",
+          44
+        ]
+      ],
+      "status": "queued",
+      "seed": 42,
+      "iterations": 100000,
+      "num_envs": 4096,
+      "rollout_steps": 24
+    }
+  ]
+}
