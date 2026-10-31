@@ -5,6 +5,7 @@ from dataclasses import asdict
 import numpy as np
 import torch
 import src.tasks
+from rsl_rl.utils.inference_checkpoint import load_inference_checkpoint
 from mjlab.envs import ManagerBasedRlEnv
 from mjlab.rl import RslRlVecEnvWrapper
 from mjlab.managers.event_manager import EventTermCfg
@@ -32,9 +33,9 @@ cfg.terminations={};cfg.curriculum={};cfg.events={'matched_reset':EventTermCfg(f
 cfg.episode_length_s=30
 cmdcfg=cfg.commands['twist'];cmdcfg.heading_command=False;cmdcfg.ranges.heading=None;cmdcfg.rel_standing_envs=0.;cmdcfg.rel_heading_envs=0.
 cmdcfg.ranges.lin_vel_x=(0.,0.);cmdcfg.ranges.lin_vel_y=(0.,0.);cmdcfg.ranges.ang_vel_z=(0.,0.)
-agent=load_rl_cfg(a.task)
+agent=load_rl_cfg(a.task);agent.amp_num_preload_transitions=2048
 env=ManagerBasedRlEnv(cfg=cfg,device='cuda:0');w=RslRlVecEnvWrapper(env,clip_actions=agent.clip_actions)
-runner=load_runner_cls(a.task)(w,asdict(agent),log_dir=None,device='cuda:0');runner.load(a.checkpoint,load_optimizer=False)
+runner=load_runner_cls(a.task)(w,asdict(agent),log_dir=None,device='cuda:0');load_inference_checkpoint(runner,a.checkpoint)
 policy=runner.get_inference_policy(device='cuda:0');obs,_=_unpack_obs(w.get_observations());r=env.scene['robot'];body=list(r.body_names).index('torso_link')
 init_hash=hashlib.sha256(torch.cat((r.data.root_link_pos_w-env.scene.env_origins,r.data.root_link_quat_w,r.data.joint_pos),-1).cpu().numpy().tobytes()).hexdigest()
 hold=torch.zeros(n,device=env.device);success=torch.zeros(n,dtype=torch.bool,device=env.device);first=torch.full((n,),float('nan'),device=env.device)

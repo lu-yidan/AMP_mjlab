@@ -5,6 +5,7 @@ from dataclasses import asdict
 import numpy as np
 import torch
 import src.tasks
+from rsl_rl.utils.inference_checkpoint import load_inference_checkpoint
 from mjlab.envs import ManagerBasedRlEnv
 from mjlab.rl import RslRlVecEnvWrapper
 from mjlab.managers.event_manager import EventTermCfg
@@ -23,8 +24,8 @@ def reset(env,env_ids):
 cfg=load_env_cfg('Unitree-G1-AMP-Flat',play=True);cfg.seed=12345;cfg.scene.num_envs=n;cfg.events={'reset':EventTermCfg(func=reset,mode='reset')};cfg.terminations={};cfg.curriculum={}
 c=cfg.commands['twist'];c.heading_command=False;c.ranges.heading=None;c.rel_standing_envs=0.;c.rel_heading_envs=0.;c.resampling_time_range=(1000.,1000.)
 c.ranges.lin_vel_x=(0.,0.);c.ranges.lin_vel_y=(0.,0.);c.ranges.ang_vel_z=(0.,0.)
-agent=load_rl_cfg(a.task);env=ManagerBasedRlEnv(cfg=cfg,device='cuda:0');w=RslRlVecEnvWrapper(env,clip_actions=agent.clip_actions)
-runner=load_runner_cls(a.task)(w,asdict(agent),log_dir=None,device='cuda:0');runner.load(a.checkpoint,load_optimizer=False);policy=runner.get_inference_policy(device='cuda:0');obs,_=_unpack_obs(w.get_observations())
+agent=load_rl_cfg(a.task);agent.amp_num_preload_transitions=2048;env=ManagerBasedRlEnv(cfg=cfg,device='cuda:0');w=RslRlVecEnvWrapper(env,clip_actions=agent.clip_actions)
+runner=load_runner_cls(a.task)(w,asdict(agent),log_dir=None,device='cuda:0');load_inference_checkpoint(runner,a.checkpoint);policy=runner.get_inference_policy(device='cuda:0');obs,_=_unpack_obs(w.get_observations())
 r=env.scene['robot'];body=list(r.body_names).index('torso_link');target=torch.tensor(list(cases.values()),device=env.device).repeat_interleave(8,dim=0)
 actual=[];upright=[];guidance=[];route=[]
 with torch.inference_mode():
