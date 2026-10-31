@@ -42,3 +42,7 @@ src/tasks/uni_track
 
 
 
+
+# Vendored SuperMimic task protocol is source code, not a virtual environment.
+!third_party/mbrl_supermimic/supermimic/env/
+!third_party/mbrl_supermimic/supermimic/env/*.py
