@@ -3,7 +3,8 @@ from dataclasses import fields
 from mjlab.tasks.registry import load_env_cfg, load_rl_cfg, register_mjlab_task
 from mjlab.envs import mdp
 from mjlab.managers.observation_manager import ObservationTermCfg
-from mjlab.sensor import RayCastSensorCfg, ObjRef, GridPatternCfg
+from mjlab.sensor import ObjRef, GridPatternCfg
+from src.tasks.amp_loco.mdp.terrain_sensor import FreshTerrainRayCastSensorCfg
 from mjlab.terrains import BoxFlatTerrainCfg, BoxPyramidStairsTerrainCfg, BoxInvertedPyramidStairsTerrainCfg, HfPyramidSlopedTerrainCfg
 from mjlab.terrains.terrain_generator import TerrainGeneratorCfg
 from src.tasks.amp_loco.mdp.terrain_tracking import TerrainTrackingCommandCfg, terrain_root_low, terrain_height_reward
@@ -12,7 +13,7 @@ from src.tasks.amp_loco.rl import AMPOnPolicyRunner
 
 def terrain_env(base_task, play=False):
     cfg = load_env_cfg(base_task, play=play)
-    cfg.scene.sensors = (*cfg.scene.sensors, RayCastSensorCfg(
+    cfg.scene.sensors = (*cfg.scene.sensors, FreshTerrainRayCastSensorCfg(
         name='terrain_scan', frame=ObjRef(type='body', name='pelvis', entity='robot'),
         pattern=GridPatternCfg(size=(1.6, 1.0), resolution=.1), ray_alignment='yaw',
         max_distance=30., include_geom_groups=(0,), debug_vis=False))

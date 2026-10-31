@@ -12,6 +12,7 @@ from supermimic.wrappers.mjlab import MjlabTrackingTask, _SiteSensor
 from supermimic.utils.kinematics import TreeKinematics
 from supermimic.utils.rotations import quat_to_mat
 from rsl_rl.modules.stable_multi_amp import StableMultiAMP
+from rsl_rl.modules.controlled_amp import ControlledAMP
 from rsl_rl.utils.motion_loader import AMPLoader
 
 
@@ -58,7 +59,8 @@ class AMPTask(MjlabTrackingTask):
         self.corrupt = env.cfg.observations['actor'].enable_corruption
         loader=AMPLoader(motion_file=agent.amp_motion_files, body_names=agent.amp_body_names,
             anchor_name=agent.amp_anchor_name, all_body_names=self.entity.body_names, device=self.device)
-        self.disc=StableMultiAMP(loader,agent.multi_amp,agent.amp_discr_hidden_dims,
+        disc_cls=ControlledAMP if agent.multi_amp.get("controlled_ablation") else StableMultiAMP
+        self.disc=disc_cls(loader,agent.multi_amp,agent.amp_discr_hidden_dims,
             agent.amp_reward_coef,agent.amp_task_reward_lerp,self.device)
         self.last_disc_metrics={}
         compute=env.reward_manager.compute

@@ -66,7 +66,8 @@ class SuperMimicRunner:
             pcfg = dict(self.cfg.get("policy", {}))
             policy = _resolve(pcfg.pop("class_name", "ActorCritic"))(obs, task.num_actions, **pcfg)
         policy = policy.to(device)
-        wm = WorldModel(task.layout, task.num_actions, task.xi_dim, task.aux_dim, **self.cfg.get("world_model", {})).to(device)
+        wm = (task.build_world_model(**self.cfg.get("world_model", {})) if hasattr(task, "build_world_model") else
+              WorldModel(task.layout, task.num_actions, task.xi_dim, task.aux_dim, **self.cfg.get("world_model", {}))).to(device)
         self.alg_cfg = SuperMimicCfg(**self.cfg.get("algorithm", {}))
         self.alg = SuperMimic(policy, wm, self.alg_cfg, task.step_dt, device)
         self.alg.init_storage(task.num_envs, task.state_dim, task.num_actions, task.xi_dim, task.aux_dim)

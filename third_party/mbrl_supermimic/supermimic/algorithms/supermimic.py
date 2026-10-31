@@ -39,6 +39,7 @@ from ..utils.distributed import allreduce_grads, allreduce_list, sync_norms, wor
 
 @dataclass
 class SuperMimicCfg:
+    fail_on_nonfinite: bool = False
     horizon: int = 32
     # where imagined rollouts start: "replay" (a stored state per env, as in the paper) or "live" (the envs
     # current states; also the fallback until the replay has data)
@@ -212,7 +213,9 @@ class SuperMimic:
             self.opt_wm.zero_grad(set_to_none=True)
             (loss_s + loss_aux).backward()
             allreduce_grads(params)
-            nn.utils.clip_grad_norm_(params, c.max_grad_norm)
+            wm_gn = nn.utils.clip_grad_norm_(params, c.max_grad_norm)
+            if c.fail_on_nonfinite and not bool(torch.isfinite(loss_s + loss_aux) & torch.isfinite(wm_gn)):
+                raise FloatingPointError("Non-finite world-model update")
             self.opt_wm.step()
         out = {"wm/loss": loss_s.detach() / c.wm_window, "wm/err_last": last}
         if wm.aux_dim:
@@ -346,6 +349,8 @@ class SuperMimic:
         t_bwd = time.time()
         allreduce_grads(self.actor_params)
         gn = nn.utils.clip_grad_norm_(self.actor_params, c.max_grad_norm)
+        if c.fail_on_nonfinite and not bool(torch.isfinite(loss) & torch.isfinite(gn)):
+            raise FloatingPointError("Non-finite imagined policy update")
         nn.utils.clip_grad_value_(self.actor_params, c.max_grad_value)
         if g_aux is not None:
             allreduce_list(g_aux)
@@ -419,7 +424,9 @@ class SuperMimic:
                 self.opt_v.zero_grad(set_to_none=True)
                 v_loss.backward()
                 allreduce_grads(self.critic_params)
-                nn.utils.clip_grad_norm_(self.critic_params, c.max_grad_norm)
+                v_gn = nn.utils.clip_grad_norm_(self.critic_params, c.max_grad_norm)
+                if c.fail_on_nonfinite and not bool(torch.isfinite(v_loss) & torch.isfinite(v_gn)):
+                    raise FloatingPointError("Non-finite critic update")
                 _step_if_finite(self.opt_v, torch.isfinite(v_loss))
         return v_loss.detach(), V0
 

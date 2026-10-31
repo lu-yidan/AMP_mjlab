@@ -1,0 +1,46 @@
+{
+  "obs_max_abs": {
+    "actor": 1.1920928955078125e-06,
+    "critic": 7.748603820800781e-06
+  },
+  "amp_max_abs": 4.9680471420288086e-05,
+  "reward_max_abs": {
+    "track_anchor_linear_velocity": 5.587935447692871e-09,
+    "track_anchor_angular_velocity": 9.313225746154785e-10,
+    "track_root_height": 1.862645149230957e-08,
+    "body_ang_vel_xy_l2": 4.190951585769653e-09,
+    "is_terminated": 0,
+    "joint_acc_l2": 0,
+    "joint_pos_limits": 1.862645149230957e-09,
+    "action_rate_l2": 1.4551915228366852e-11,
+    "foot_slip": 1.4551915228366852e-11,
+    "self_collisions": 0,
+    "vertical_motion_l2": 5.820766091346741e-11
+  },
+  "termination_mismatch": 0.0,
+  "post_step_state_reward_max_abs": {
+    "track_anchor_linear_velocity": 0.0008970317430794239,
+    "track_anchor_angular_velocity": 0.0041418615728616714,
+    "track_root_height": 0.03511061146855354,
+    "body_ang_vel_xy_l2": 0.00834666471928358,
+    "is_terminated": 0,
+    "joint_acc_l2": 0,
+    "joint_pos_limits": 1.862645149230957e-09,
+    "action_rate_l2": 1.4551915228366852e-11,
+    "foot_slip": 1.4551915228366852e-11,
+    "self_collisions": 0,
+    "vertical_motion_l2": 0.00013768370263278484
+  },
+  "post_step_state_termination_mismatch": 0.0,
+  "gradient_finite_nonzero": true,
+  "gradient_fd_max_abs": 9.705254342406988e-07,
+  "passed": false,
+  "terrain_audit": {
+    "points": 23078,
+    "mean_abs_m": 0.00016061658971011639,
+    "p99_abs_m": 0.0005235671997070312,
+    "max_abs_m": 0.03537547588348389,
+    "validity_mismatch": 0.06985294073820114,
+    "passed": false
+  }
+}

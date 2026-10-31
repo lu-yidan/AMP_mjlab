@@ -1,0 +1,48 @@
+{
+  "time": "2026-11-01T01:29:31.920928+08:00",
+  "reason": "User requested pause of existing training and queues",
+  "processes": [
+    {
+      "pid": 72214,
+      "cwd": "/root/workplace/lyd-c-controlled-ablations-c2526b7",
+      "command": "/root/autodl-tmp/bj-backup-20261021/rootfs/root/autodl-tmp/cra-throughput-20261014/python/bin/python3.12 -u scripts/launch_amp_controlled.py --source-commit c2526b7f3056117bbf8e622e13a24effcb8299f7 --output records/formal-20261030 ",
+      "action": "SIGSTOP"
+    },
+    {
+      "pid": 73617,
+      "cwd": "/root/workplace/lyd-c-controlled-ablations-c2526b7",
+      "command": "/root/autodl-tmp/bj-backup-20261021/rootfs/root/autodl-tmp/cra-throughput-20261014/python/bin/python3.12 -u records/formal-20261030/queue_amp_controlled_run.py --records records/formal-20261030 ",
+      "action": "SIGSTOP"
+    },
+    {
+      "pid": 297594,
+      "cwd": "/root/workplace/lyd-terrain-critic-c3572be",
+      "command": "/root/autodl-tmp/bj-backup-20261021/rootfs/root/autodl-tmp/cra-throughput-20261014/python/bin/python3.12 -u scripts/queue_terrain_training.py --dependency /root/workplace/lyd-c-controlled-ablations-c2526b7/records/formal-20261030/launch.json --output /root/workplace/lyd-terrain-critic-c3572be/records/terrain-20261101 --source-commit c3572be ",
+      "action": "SIGSTOP"
+    },
+    {
+      "pid": 72217,
+      "cwd": "/root/workplace/lyd-c-controlled-ablations-c2526b7",
+      "command": "/root/autodl-tmp/bj-backup-20261021/rootfs/root/autodl-tmp/cra-throughput-20261014/python/bin/python3.12 -u scripts/train.py Unitree-G1-AMP-Controlled-F-Shared-Flat --env.scene.num-envs 4096 --agent.num-steps-per-env 24 --agent.max-iterations 100000 --agent.save-interval 1000 --agent.logger wandb --agent.wandb-project lyd-multi-amp --agent.run-name AMP-F-seed42-controlled-scratch-4096x24 --agent.seed 42 --agent.resume False --gpu-ids [0] --enable-nan-guard True ",
+      "action": "SIGSTOP"
+    },
+    {
+      "pid": 72219,
+      "cwd": "/root/workplace/lyd-c-controlled-ablations-c2526b7",
+      "command": "/root/autodl-tmp/bj-backup-20261021/rootfs/root/autodl-tmp/cra-throughput-20261014/python/bin/python3.12 -u scripts/train.py Unitree-G1-AMP-Controlled-G-Unbalanced-Flat --env.scene.num-envs 4096 --agent.num-steps-per-env 24 --agent.max-iterations 100000 --agent.save-interval 1000 --agent.logger wandb --agent.wandb-project lyd-multi-amp --agent.run-name AMP-G-seed42-controlled-scratch-4096x24 --agent.seed 42 --agent.resume False --gpu-ids [2] --enable-nan-guard True ",
+      "action": "SIGSTOP"
+    },
+    {
+      "pid": 72221,
+      "cwd": "/root/workplace/lyd-c-controlled-ablations-c2526b7",
+      "command": "/root/autodl-tmp/bj-backup-20261021/rootfs/root/autodl-tmp/cra-throughput-20261014/python/bin/python3.12 -u scripts/train.py Unitree-G1-AMP-Controlled-H-Full-Flat --env.scene.num-envs 4096 --agent.num-steps-per-env 24 --agent.max-iterations 100000 --agent.save-interval 1000 --agent.logger wandb --agent.wandb-project lyd-multi-amp --agent.run-name AMP-H-seed42-controlled-scratch-4096x24 --agent.seed 42 --agent.resume False --gpu-ids [4] --enable-nan-guard True ",
+      "action": "SIGSTOP"
+    },
+    {
+      "pid": 72223,
+      "cwd": "/root/workplace/lyd-c-controlled-ablations-c2526b7",
+      "command": "/root/autodl-tmp/bj-backup-20261021/rootfs/root/autodl-tmp/cra-throughput-20261014/python/bin/python3.12 -u scripts/train.py Unitree-G1-AMP-Controlled-F-Shared-Flat --env.scene.num-envs 4096 --agent.num-steps-per-env 24 --agent.max-iterations 100000 --agent.save-interval 1000 --agent.logger wandb --agent.wandb-project lyd-multi-amp --agent.run-name AMP-F-seed43-controlled-scratch-4096x24 --agent.seed 43 --agent.resume False --gpu-ids [1] --enable-nan-guard True ",
+      "action": "SIGSTOP"
+    }
+  ]
+}

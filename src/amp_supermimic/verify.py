@@ -9,7 +9,11 @@ def verify(t):
         side=t.get_side_state();s=t.get_state();P=t.prepare(t.layout.unflatten(s))
         a,c=t.frames(P,side['command'],side['last_action'])
         for k,x,y in [('actor',a,side['actor_hist'][:,-1]),('critic',c,side['critic_hist'][:,-1])]:
-            obs_err[k]=max(obs_err.get(k,0),float((x-y).abs().max()))
+            err=float((x-y).abs().max())
+            if k=='critic' and hasattr(t,'terrain_map') and err>obs_err.get(k,0):
+                idx=(x-y).abs().flatten().argmax();row=int(idx//x.shape[1]);col=int(idx%x.shape[1])
+                print('TERRAIN_OBS_ERROR',dict(step=step,row=row,col=col,pred=float(x[row,col]),actual=float(y[row,col]),root=t.entity.data.root_link_pos_w[row].tolist(),sensor=t.env.scene['terrain_scan'].data.pos_w[row].tolist()),flush=True)
+            obs_err[k]=max(obs_err.get(k,0),err)
         amp_error=max(amp_error,float((P['amp']-t._obs['amp']).abs().max()))
         roll=t.imagine(side);roll._begin(t.layout.unflatten(s))
         action=.1*torch.randn(t.num_envs,29,device=t.device)
