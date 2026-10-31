@@ -14,8 +14,11 @@ and height observation; does not import or modify InstinctMJ.
 - Existing four-frame critic history is retained: 864 -> 1612 dimensions. Actor
   remains 384, AMP remains 195. Old actor inference interface remains the same;
   old full actor/critic checkpoints cannot be loaded as-is into the larger critic.
-- Pilot terrain: equal flat, slopes (0.05–0.2 gradient), stairs (2.5–7.5 cm steps),
-  8 m tiles with 3 m central platforms, 3 x 6 tiles. Fixed difficulty distribution,
+- Pilot terrain: flat, pyramid slopes, inverted pyramid slopes, pyramid stairs,
+  inverted pyramid stairs (20% requested proportion each). Slopes: 0.05–0.2 gradient;
+  steps: 2.5–7.5 cm. 8 m tiles with 3 m central platforms, 3 x 10 tiles.
+  Inverted tiles spawn in the central depression, so outward travel climbs; regular
+  pyramid tiles spawn on top, so outward travel descends. Fixed difficulty distribution,
   not a terrain curriculum. Existing speed curriculum still targets up to 3 m/s.
 - Stratified resets remain on the central flat platforms with tile-origin height.
   This deliberately does NOT implement arbitrary rough-surface recovery resets.
