@@ -1,0 +1,105 @@
+{
+  "layout": "Left F42, center F43, right H42; all model_50000.pt",
+  "recordings": [
+    {
+      "backend": "amp",
+      "name": "F42 50k",
+      "task": "Unitree-G1-AMP-Controlled-F-Shared-Flat",
+      "checkpoint": "logs/eval_controlled_50k/F42.pt",
+      "checkpoint_sha256": "4b76b175234af8bb213e076f720283c2a6a88973b8faff7c4efb9be31cbc4043",
+      "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+      "bank_rows": [
+        756,
+        757,
+        758,
+        759
+      ],
+      "initial_state_hash": "311df42750571bed42949efb2196d3009086154c4677b290b1435c26bd18e426",
+      "protocol": "Nominal physics, deterministic policy, no resets/pushes; first procedural low pose per direction; recovery 10s at zero command; walk/run 0/.5/1/2/3 m/s and yaw 0/1/-1/1/-1 rad/s each 5s; Command changes enter observations after one 0.02s control step, matching the existing evaluation protocol.",
+      "fps": 25
+    },
+    {
+      "backend": "amp",
+      "name": "F43 50k",
+      "task": "Unitree-G1-AMP-Controlled-F-Shared-Flat",
+      "checkpoint": "logs/eval_controlled_50k/F43.pt",
+      "checkpoint_sha256": "dfbc59756faf7adf6e365dc22ffa8a667de662234e1ca40b46037c1a685c5e9e",
+      "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+      "bank_rows": [
+        756,
+        757,
+        758,
+        759
+      ],
+      "initial_state_hash": "311df42750571bed42949efb2196d3009086154c4677b290b1435c26bd18e426",
+      "protocol": "Nominal physics, deterministic policy, no resets/pushes; first procedural low pose per direction; recovery 10s at zero command; walk/run 0/.5/1/2/3 m/s and yaw 0/1/-1/1/-1 rad/s each 5s; Command changes enter observations after one 0.02s control step, matching the existing evaluation protocol.",
+      "fps": 25
+    },
+    {
+      "backend": "amp",
+      "name": "H42 50k",
+      "task": "Unitree-G1-AMP-Controlled-H-Full-Flat",
+      "checkpoint": "logs/eval_controlled_50k/H42.pt",
+      "checkpoint_sha256": "67847afdc6a9581a996e402622a2bcc31c1321869eb3780e85ecd192619268ea",
+      "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+      "bank_rows": [
+        756,
+        757,
+        758,
+        759
+      ],
+      "initial_state_hash": "311df42750571bed42949efb2196d3009086154c4677b290b1435c26bd18e426",
+      "protocol": "Nominal physics, deterministic policy, no resets/pushes; first procedural low pose per direction; recovery 10s at zero command; walk/run 0/.5/1/2/3 m/s and yaw 0/1/-1/1/-1 rad/s each 5s; Command changes enter observations after one 0.02s control step, matching the existing evaluation protocol.",
+      "fps": 25
+    }
+  ],
+  "matched_initial_states": true,
+  "all_traces_finite": true,
+  "files": {
+    "recovery": {
+      "path": "/home/luyd/workspace/AMP_mjlab/logs/amp_stability/videos/FH-50k/recovery_FH.mp4",
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 1920,
+            "height": 464,
+            "duration": "40.000000",
+            "nb_frames": "1000"
+          }
+        ]
+      },
+      "sha256": "312241357fa1b3f8b94cac79fcc9fa9500d96a11cd83ac88c42af16bc846c29a"
+    },
+    "walk_run": {
+      "path": "/home/luyd/workspace/AMP_mjlab/logs/amp_stability/videos/FH-50k/walk_run_FH.mp4",
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 1920,
+            "height": 464,
+            "duration": "25.000000",
+            "nb_frames": "625"
+          }
+        ]
+      },
+      "sha256": "97bc6631089e815f9b98e6be98264ca875bf30751b350a0a98580c108675f719"
+    },
+    "turn": {
+      "path": "/home/luyd/workspace/AMP_mjlab/logs/amp_stability/videos/FH-50k/turn_FH.mp4",
+      "probe": {
+        "programs": [],
+        "streams": [
+          {
+            "width": 1920,
+            "height": 464,
+            "duration": "25.000000",
+            "nb_frames": "625"
+          }
+        ]
+      },
+      "sha256": "47a66eaddd11296410a3fe0b0e274d84aca1f571a9b0c654a56ec4a13c649946"
+    }
+  }
+}
