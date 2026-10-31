@@ -1,0 +1,21 @@
+{
+  "shapes": {
+    "actor": [
+      128,
+      384
+    ],
+    "critic": [
+      128,
+      1612
+    ],
+    "amp": [
+      128,
+      195
+    ]
+  },
+  "rays": 187,
+  "reset_center_miss_fraction": 0.0,
+  "reset_ground_origin_max_error": 1.4901161193847656e-07,
+  "displaced_ground_origin_max_difference": 0.070750892162323,
+  "displaced_miss_fraction": 0.0
+}

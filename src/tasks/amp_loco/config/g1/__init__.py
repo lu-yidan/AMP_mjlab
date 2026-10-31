@@ -162,3 +162,5 @@ for variant, shared, balanced in (
     task_id='Unitree-G1-AMP-Controlled-' + variant + '-Flat',
     env_cfg=dual_tracking_env_cfg(), play_env_cfg=dual_tracking_env_cfg(play=True),
     rl_cfg=cfg, runner_cls=AMPOnPolicyRunner)
+
+from . import terrain_controlled  # noqa: F401

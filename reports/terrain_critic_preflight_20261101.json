@@ -1,0 +1,29 @@
+{
+  "results": [
+    {
+      "label": "I",
+      "environments": 512,
+      "rollout_steps": 24,
+      "iterations": 20,
+      "skipped_ppo_batches": 0,
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/rsl_rl/g1_i-shared-terraincritic/2026-11-01_00-58-07_terrain-critic-512-preflight/model_19.pt",
+      "sha256": "030b53dcf1269da82d07e09f815b8cbb4aaa6206d7ab37334300930e28d33d31",
+      "checkpoint_finite": true,
+      "last_iteration_seconds": 1.06
+    },
+    {
+      "label": "J",
+      "environments": 512,
+      "rollout_steps": 24,
+      "iterations": 20,
+      "skipped_ppo_batches": 0,
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/rsl_rl/g1_j-dual-terraincritic/2026-11-01_00-57-33_terrain-critic-512-preflight/model_19.pt",
+      "sha256": "8322a899bea560111ba2b3e3df7eeaa6930bee44372abd5d1b8f890439bf3a9c",
+      "checkpoint_finite": true,
+      "last_iteration_seconds": 1.06
+    }
+  ],
+  "unit_tests_passed": 2,
+  "server_gpus_used": 0,
+  "scope": "Integration smoke tests only; not locomotion/recovery success evaluation"
+}
