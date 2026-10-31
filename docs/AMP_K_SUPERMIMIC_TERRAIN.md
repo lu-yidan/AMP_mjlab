@@ -89,3 +89,22 @@ Deployment preflight: the first archive exposed a pre-existing packaging bug:
 adds the source and an explicit ignore exception. Server source is isolated at
 `/root/workplace/lyd-supermimic-terrain-4b7abd6`. Full-size preflight uses GPU 0;
 old jobs remain SIGSTOP-paused (and still hold memory). GPUs 5/6 are not used.
+
+Full-size compiled preflight passed: 4096 x 24, three iterations including two
+actor/critic updates, all logged metrics finite, no wild imagined states, and
+`model_3.pt` saved. Third iteration took about 2.62 s (compile excluded), not a
+reliable full-run ETA. Its world-model error is still high after three updates;
+this is execution validation, not evidence of learned dynamics accuracy.
+
+The relocated Python runtime lacks headers in its own prefix. Compilation uses
+`CPATH=/root/workplace/lyd-amp-c-supermimic/runtime-include/python3.12`, as in the
+previous E setup, without modifying the shared runtime. Deployment history is
+recorded in `reports/amp_k_server_preflight_20261101.json`.
+
+Formal scratch run: GPU 0, 4096 x 24, 100000 iterations, 300 model-only warmup
+iterations, checkpoint every 1000. W&B run `410eb2b9`:
+https://wandb.ai/tabletennis/lyd-multi-amp/runs/410eb2b9
+Server output:
+`/root/workplace/lyd-supermimic-terrain-4b7abd6/records/K-SuperMimic-Shared-Terrain-seed42-4096x24-100k`.
+The preflight checkpoint is not loaded. Existing F/G/H processes and all old
+queues stay paused; GPUs 5 and 6 remain reserved.
