@@ -1,0 +1,27 @@
+{
+  "date": "2026-11-03",
+  "server": "root@10.177.36.91:28036",
+  "user_authorization": "All idle GPUs may be used; repair/restart faulty GPUs/server when needed. Supersedes earlier GPU reservations. Does not request resuming previously paused training.",
+  "healthy_active": {
+    "0": "K training",
+    "2": "other workload",
+    "3": "L training"
+  },
+  "idle_compute_verified": [
+    1,
+    4
+  ],
+  "idle_note": "GPU1/4 retain ~4.3 GiB from paused training; CUDA matrix multiplication passed.",
+  "faulty": {
+    "5": {
+      "pci": "0000:c8:00.0",
+      "reset_result": "Resetting GPU is not supported"
+    },
+    "6": {
+      "pci": "0000:d8:00.0",
+      "reset_result": "Resetting GPU is not supported"
+    }
+  },
+  "blocked_reason": "SSH is container root: PID1 bash, /sys read-only, capabilities exclude SYS_BOOT/SYS_ADMIN/SYS_MODULE. Host GPU reset/reboot requires provider/host control access.",
+  "actions": "Attempted targeted nvidia-smi reset of GPUs5/6; validated GPUs1/4 via finite CUDA matmul; did not interrupt healthy training or reboot container."
+}
