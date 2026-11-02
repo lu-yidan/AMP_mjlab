@@ -32,11 +32,18 @@ def main():
     p.add_argument('--sim-steps',type=int,default=24);p.add_argument('--output',required=True)
     p.add_argument('--verify-only',action='store_true');p.add_argument('--smoke',action='store_true')
     p.add_argument('--terrain',action='store_true')
+    p.add_argument('--recovery-height-weight',type=float,default=1.0)
     p.add_argument('--no-compile',action='store_true');p.add_argument('--wandb',action='store_true')
-    a=p.parse_args();out=Path(a.output);out.mkdir(parents=True,exist_ok=True)
+    a=p.parse_args()
+    if not 0 <= a.recovery_height_weight <= 1: p.error('--recovery-height-weight must be between 0 and 1')
+    out=Path(a.output);out.mkdir(parents=True,exist_ok=True)
     task_id='Unitree-G1-AMP-I-Shared-TerrainCritic' if a.terrain else 'Unitree-G1-MultiAMP-Phase-Tracking-Flat'
     experiment='K-SuperMimic-Shared-Terrain' if a.terrain else 'AMP-E'
+    if a.recovery_height_weight != 1.0:
+        if not a.terrain or a.recovery_height_weight != .5: p.error('Only the terrain half-height ablation is currently named')
+        experiment='L-SuperMimic-HalfHeight-Terrain'
     cfg=load_env_cfg(task_id);cfg.scene.num_envs=a.num_envs;cfg.seed=42
+    cfg.rewards['track_root_height'].weight=a.recovery_height_weight
     if a.verify_only:
         cfg.observations['actor'].enable_corruption=False
         cfg.events.pop('push_robot',None)
@@ -74,7 +81,8 @@ def main():
     if a.smoke:
         train['algorithm'].update(wm_warmup_iters=1)
         train['log_interval']=1
-    train.update(experiment=experiment,max_iterations=a.iterations,task=task_id,expert_sha256=expected)
+    train.update(experiment=experiment,max_iterations=a.iterations,task=task_id,expert_sha256=expected,
+        recovery_height_weight=a.recovery_height_weight)
     if a.terrain:
         train['terrain_map_sha256']=task.terrain_map.fingerprint
         train['algorithm']['fail_on_nonfinite']=True

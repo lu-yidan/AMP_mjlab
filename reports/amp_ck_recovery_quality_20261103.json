@@ -1,0 +1,716 @@
+{
+  "checkpoints": {
+    "C-71k": "logs/amp_stability/videos/BCE-latest-20261029/C-71k/model.pt",
+    "K-61k": "logs/eval_k_61000/K-61000.pt"
+  },
+  "initial_state_hash": "beb879b875c97bfa08c359f32a04f6f12d575f5e13b1da0e75e0822fd4b2da3b",
+  "results": {
+    "C-71k": {
+      "name": "C-71k",
+      "checkpoint": "logs/amp_stability/videos/BCE-latest-20261029/C-71k/model.pt",
+      "initial_state_hash": "beb879b875c97bfa08c359f32a04f6f12d575f5e13b1da0e75e0822fd4b2da3b",
+      "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+      "protocol": "20s, no resets, deterministic policy, nominal dynamics; hroot>.65 and gz<-.9 for 1s; zero command for recovery; 128 standing trials commands 0/.5/1/2m/s every 5s",
+      "groups": {
+        "natural/low": {
+          "n": 376,
+          "success_1s_percent": 99.99999237060547,
+          "mean_success_time_s": 2.0081915855407715,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0053191184997559,
+          "recovery_route_percent": 4.211170196533203
+        },
+        "natural/supine": {
+          "n": 314,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 2.020063638687134,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0063694715499878,
+          "recovery_route_percent": 4.266879081726074
+        },
+        "natural/prone": {
+          "n": 36,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.8511110544204712,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 3.4000000953674316
+        },
+        "natural/left_side_down": {
+          "n": 13,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.7507692575454712,
+          "last5s_upright_percent": 100.00001525878906,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 3.038461923599243
+        },
+        "natural/right_side_down": {
+          "n": 13,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 2.413846015930176,
+          "last5s_upright_percent": 100.00001525878906,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 6.284615993499756
+        },
+        "natural/middle": {
+          "n": 328,
+          "success_1s_percent": 99.99999237060547,
+          "mean_success_time_s": 1.7841463088989258,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 0.9999999403953552,
+          "recovery_route_percent": 3.1240854263305664
+        },
+        "natural/late": {
+          "n": 52,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.5453846454620361,
+          "last5s_upright_percent": 100.00001525878906,
+          "ever_continuous_failure_5s_percent": 1.9230769872665405,
+          "route_switches_mean": 0.5769230723381042,
+          "recovery_route_percent": 2.075000047683716
+        },
+        "procedural/low": {
+          "n": 512,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 2.124882698059082,
+          "last5s_upright_percent": 99.86172485351562,
+          "ever_continuous_failure_5s_percent": 0.390625,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 4.875391006469727
+        },
+        "procedural/supine": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.9392187595367432,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 3.8265626430511475
+        },
+        "procedural/prone": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 2.5140624046325684,
+          "last5s_upright_percent": 99.44688415527344,
+          "ever_continuous_failure_5s_percent": 1.5625,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 6.775781631469727
+        },
+        "procedural/left_side_down": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.795937418937683,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 3.281250238418579
+        },
+        "procedural/right_side_down": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 2.250312328338623,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 5.617969036102295
+        }
+      },
+      "motion_quality": {
+        "first3s": {
+          "joint_acc_control_rms_rad_s2": 51.03693771362305,
+          "joint_speed_rms_rad_s": 1.8117414712905884,
+          "root_ang_speed_rms_rad_s": 2.1337034702301025,
+          "root_vertical_speed_rms_m_s": 0.44330012798309326,
+          "feet_netforce_rms_N": 296.2303771972656,
+          "action_delta_rms_normalized": 0.24658973515033722
+        },
+        "last5s": {
+          "joint_acc_control_rms_rad_s2": 0.5699329972267151,
+          "joint_speed_rms_rad_s": 0.1206354945898056,
+          "root_ang_speed_rms_rad_s": 0.12712590396404266,
+          "root_vertical_speed_rms_m_s": 0.0016219887183979154,
+          "action_delta_rms_normalized": 0.0011979887494817376,
+          "feet_netforce_rms_N": 336.8313903808594
+        }
+      },
+      "motion_quality_notes": "Mean per-pose RMS over all recovery starts; fixed first 3s and last 5s. Joint acceleration is finite-difference at 50Hz. Foot force is summed foot net-force magnitudes sampled at control rate, NOT whole-body impact or peak physics-step force. Normalized action deltas depend on model output scale; compare physical joint measures first.",
+      "locomotion": {
+        "n": 128,
+        "success_1s_percent": 100.0,
+        "mean_success_time_s": 1.0,
+        "last5s_upright_percent": 100.0,
+        "ever_continuous_failure_5s_percent": 0.0,
+        "route_switches_mean": 0.0,
+        "recovery_route_percent": 0.0,
+        "vx_mae_by_5s": [
+          0.012524304911494255,
+          0.0726686418056488,
+          0.07779453694820404,
+          0.1122872605919838
+        ]
+      }
+    },
+    "K-61k": {
+      "name": "K-61k",
+      "checkpoint": "logs/eval_k_61000/K-61000.pt",
+      "initial_state_hash": "beb879b875c97bfa08c359f32a04f6f12d575f5e13b1da0e75e0822fd4b2da3b",
+      "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+      "protocol": "20s, no resets, deterministic policy, nominal dynamics; hroot>.65 and gz<-.9 for 1s; zero command for recovery; 128 standing trials commands 0/.5/1/2m/s every 5s",
+      "groups": {
+        "natural/low": {
+          "n": 376,
+          "success_1s_percent": 99.99999237060547,
+          "mean_success_time_s": 1.8265957832336426,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0159573554992676,
+          "recovery_route_percent": 3.701861619949341
+        },
+        "natural/supine": {
+          "n": 314,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.815477728843689,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0191082954406738,
+          "recovery_route_percent": 3.670382499694824
+        },
+        "natural/prone": {
+          "n": 36,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.8138890266418457,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 3.5
+        },
+        "natural/left_side_down": {
+          "n": 13,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.8569231033325195,
+          "last5s_upright_percent": 100.00001525878906,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 3.6769232749938965
+        },
+        "natural/right_side_down": {
+          "n": 13,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 2.0999999046325684,
+          "last5s_upright_percent": 100.00001525878906,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 5.046154022216797
+        },
+        "natural/middle": {
+          "n": 328,
+          "success_1s_percent": 99.99999237060547,
+          "mean_success_time_s": 1.8343291282653809,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 0.9817072749137878,
+          "recovery_route_percent": 3.6338415145874023
+        },
+        "natural/late": {
+          "n": 52,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.274230718612671,
+          "last5s_upright_percent": 100.00001525878906,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 0.6538462042808533,
+          "recovery_route_percent": 0.7865385413169861
+        },
+        "procedural/low": {
+          "n": 512,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.852929711341858,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0078125,
+          "recovery_route_percent": 3.7884767055511475
+        },
+        "procedural/supine": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.6814062595367432,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 3.125
+        },
+        "procedural/prone": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.7101562023162842,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.015625,
+          "recovery_route_percent": 2.9507813453674316
+        },
+        "procedural/left_side_down": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.9848437309265137,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.015625,
+          "recovery_route_percent": 4.373437404632568
+        },
+        "procedural/right_side_down": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 2.0353126525878906,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 1.0,
+          "recovery_route_percent": 4.704687595367432
+        }
+      },
+      "motion_quality": {
+        "first3s": {
+          "joint_acc_control_rms_rad_s2": 101.03959655761719,
+          "joint_speed_rms_rad_s": 2.9844629764556885,
+          "root_ang_speed_rms_rad_s": 3.226675271987915,
+          "root_vertical_speed_rms_m_s": 0.5010340213775635,
+          "feet_netforce_rms_N": 325.26385498046875,
+          "action_delta_rms_normalized": 0.5065683126449585
+        },
+        "last5s": {
+          "joint_acc_control_rms_rad_s2": 3.798936128616333,
+          "joint_speed_rms_rad_s": 0.13994759321212769,
+          "root_ang_speed_rms_rad_s": 0.14979492127895355,
+          "root_vertical_speed_rms_m_s": 0.004782006610184908,
+          "action_delta_rms_normalized": 0.04577212780714035,
+          "feet_netforce_rms_N": 332.61322021484375
+        }
+      },
+      "motion_quality_notes": "Mean per-pose RMS over all recovery starts; fixed first 3s and last 5s. Joint acceleration is finite-difference at 50Hz. Foot force is summed foot net-force magnitudes sampled at control rate, NOT whole-body impact or peak physics-step force. Normalized action deltas depend on model output scale; compare physical joint measures first.",
+      "locomotion": {
+        "n": 128,
+        "success_1s_percent": 100.0,
+        "mean_success_time_s": 1.0,
+        "last5s_upright_percent": 99.9937515258789,
+        "ever_continuous_failure_5s_percent": 0.0,
+        "route_switches_mean": 0.0,
+        "recovery_route_percent": 0.0,
+        "vx_mae_by_5s": [
+          0.022137340158224106,
+          0.05812656506896019,
+          0.07885883748531342,
+          0.12713155150413513
+        ]
+      }
+    }
+  },
+  "comparison": {
+    "all": {
+      "n": 1268,
+      "metrics": {
+        "first3s__joint_acc_control_rms_rad_s2": {
+          "C-71k": 51.03694152832031,
+          "K-61k": 101.03959655761719,
+          "K_change_percent": 97.9734551717808
+        },
+        "first3s__joint_speed_rms_rad_s": {
+          "C-71k": 1.811741590499878,
+          "K-61k": 2.9844627380371094,
+          "K_change_percent": 64.7289411297152
+        },
+        "first3s__root_ang_speed_rms_rad_s": {
+          "C-71k": 2.1337032318115234,
+          "K-61k": 3.226675033569336,
+          "K_change_percent": 51.224171452834824
+        },
+        "first3s__root_vertical_speed_rms_m_s": {
+          "C-71k": 0.4433000683784485,
+          "K-61k": 0.5010340213775635,
+          "K_change_percent": 13.023673380042688
+        },
+        "first3s__feet_netforce_rms_N": {
+          "C-71k": 296.2303771972656,
+          "K-61k": 325.2638854980469,
+          "K_change_percent": 9.800989545865257
+        },
+        "first3s__action_delta_rms_normalized": {
+          "C-71k": 0.24658970534801483,
+          "K-61k": 0.5065683126449585,
+          "K_change_percent": 105.42962729528101
+        },
+        "last5s__joint_acc_control_rms_rad_s2": {
+          "C-71k": 0.5699329972267151,
+          "K-61k": 3.798935890197754,
+          "K_change_percent": 566.5583338187674
+        },
+        "last5s__joint_speed_rms_rad_s": {
+          "C-71k": 0.1206354945898056,
+          "K-61k": 0.13994759321212769,
+          "K_change_percent": 16.00863716602532
+        },
+        "last5s__root_ang_speed_rms_rad_s": {
+          "C-71k": 0.12712590396404266,
+          "K-61k": 0.14979493618011475,
+          "K_change_percent": 17.831953605996766
+        },
+        "last5s__root_vertical_speed_rms_m_s": {
+          "C-71k": 0.0016219884855672717,
+          "K-61k": 0.004782006610184908,
+          "K_change_percent": 194.8237088447922
+        },
+        "last5s__action_delta_rms_normalized": {
+          "C-71k": 0.0011979886330664158,
+          "K-61k": 0.04577212408185005,
+          "K_change_percent": 3720.747778273158
+        },
+        "last5s__feet_netforce_rms_N": {
+          "C-71k": 336.8313903808594,
+          "K-61k": 332.61322021484375,
+          "K_change_percent": -1.2523091037465628
+        }
+      }
+    },
+    "low": {
+      "n": 888,
+      "metrics": {
+        "first3s__joint_acc_control_rms_rad_s2": {
+          "C-71k": 53.28896713256836,
+          "K-61k": 109.02757263183594,
+          "K_change_percent": 104.59689594021438
+        },
+        "first3s__joint_speed_rms_rad_s": {
+          "C-71k": 1.9274901151657104,
+          "K-61k": 3.1823184490203857,
+          "K_change_percent": 65.1016741399369
+        },
+        "first3s__root_ang_speed_rms_rad_s": {
+          "C-71k": 2.3217625617980957,
+          "K-61k": 3.437793731689453,
+          "K_change_percent": 48.06827314103317
+        },
+        "first3s__root_vertical_speed_rms_m_s": {
+          "C-71k": 0.48106053471565247,
+          "K-61k": 0.5276023745536804,
+          "K_change_percent": 9.67484058228516
+        },
+        "first3s__feet_netforce_rms_N": {
+          "C-71k": 288.53289794921875,
+          "K-61k": 323.7428283691406,
+          "K_change_percent": 12.20309041713461
+        },
+        "first3s__action_delta_rms_normalized": {
+          "C-71k": 0.2593972980976105,
+          "K-61k": 0.5439044237136841,
+          "K_change_percent": 109.68006517516397
+        },
+        "last5s__joint_acc_control_rms_rad_s2": {
+          "C-71k": 0.5766249895095825,
+          "K-61k": 3.7624335289001465,
+          "K_change_percent": 552.4922778841205
+        },
+        "last5s__joint_speed_rms_rad_s": {
+          "C-71k": 0.1211421862244606,
+          "K-61k": 0.13950422406196594,
+          "K_change_percent": 15.157426500032688
+        },
+        "last5s__root_ang_speed_rms_rad_s": {
+          "C-71k": 0.12789881229400635,
+          "K-61k": 0.14983415603637695,
+          "K_change_percent": 17.150545301348785
+        },
+        "last5s__root_vertical_speed_rms_m_s": {
+          "C-71k": 0.0017002648673951626,
+          "K-61k": 0.0047694542445242405,
+          "K_change_percent": 180.51242697445917
+        },
+        "last5s__action_delta_rms_normalized": {
+          "C-71k": 0.0012613720027729869,
+          "K-61k": 0.045613911002874374,
+          "K_change_percent": 3516.2140036878286
+        },
+        "last5s__feet_netforce_rms_N": {
+          "C-71k": 336.57379150390625,
+          "K-61k": 332.4943542480469,
+          "K_change_percent": -1.2120484003318555
+        }
+      }
+    },
+    "procedural/supine": {
+      "n": 128,
+      "metrics": {
+        "first3s__joint_acc_control_rms_rad_s2": {
+          "C-71k": 51.194244384765625,
+          "K-61k": 131.2233428955078,
+          "K_change_percent": 156.32440613686884
+        },
+        "first3s__joint_speed_rms_rad_s": {
+          "C-71k": 1.9017126560211182,
+          "K-61k": 3.4104857444763184,
+          "K_change_percent": 79.33759517654731
+        },
+        "first3s__root_ang_speed_rms_rad_s": {
+          "C-71k": 2.5770044326782227,
+          "K-61k": 3.577521324157715,
+          "K_change_percent": 38.82480289099377
+        },
+        "first3s__root_vertical_speed_rms_m_s": {
+          "C-71k": 0.5240076184272766,
+          "K-61k": 0.595124363899231,
+          "K_change_percent": 13.57170067210085
+        },
+        "first3s__feet_netforce_rms_N": {
+          "C-71k": 298.2926330566406,
+          "K-61k": 336.3711242675781,
+          "K_change_percent": 12.765481608024508
+        },
+        "first3s__action_delta_rms_normalized": {
+          "C-71k": 0.25625622272491455,
+          "K-61k": 0.6230686902999878,
+          "K_change_percent": 143.1428527567264
+        },
+        "last5s__joint_acc_control_rms_rad_s2": {
+          "C-71k": 0.4238918125629425,
+          "K-61k": 4.165648460388184,
+          "K_change_percent": 882.7150081530858
+        },
+        "last5s__joint_speed_rms_rad_s": {
+          "C-71k": 0.11765219271183014,
+          "K-61k": 0.14203396439552307,
+          "K_change_percent": 20.723601593564943
+        },
+        "last5s__root_ang_speed_rms_rad_s": {
+          "C-71k": 0.12659291923046112,
+          "K-61k": 0.1503293514251709,
+          "K_change_percent": 18.750205255554487
+        },
+        "last5s__root_vertical_speed_rms_m_s": {
+          "C-71k": 0.0012087167706340551,
+          "K-61k": 0.0052660186775028706,
+          "K_change_percent": 335.67019217748435
+        },
+        "last5s__action_delta_rms_normalized": {
+          "C-71k": 0.0006975469877943397,
+          "K-61k": 0.05026077479124069,
+          "K_change_percent": 7105.360451797874
+        },
+        "last5s__feet_netforce_rms_N": {
+          "C-71k": 335.95709228515625,
+          "K-61k": 332.91632080078125,
+          "K_change_percent": -0.9051070967699748
+        }
+      }
+    },
+    "procedural/prone": {
+      "n": 128,
+      "metrics": {
+        "first3s__joint_acc_control_rms_rad_s2": {
+          "C-71k": 61.012115478515625,
+          "K-61k": 90.73358154296875,
+          "K_change_percent": 48.7140395499301
+        },
+        "first3s__joint_speed_rms_rad_s": {
+          "C-71k": 2.0476016998291016,
+          "K-61k": 2.7855052947998047,
+          "K_change_percent": 36.03745762822381
+        },
+        "first3s__root_ang_speed_rms_rad_s": {
+          "C-71k": 2.0805792808532715,
+          "K-61k": 2.8795089721679688,
+          "K_change_percent": 38.39938706815567
+        },
+        "first3s__root_vertical_speed_rms_m_s": {
+          "C-71k": 0.428916335105896,
+          "K-61k": 0.4284750521183014,
+          "K_change_percent": -0.10288323187449544
+        },
+        "first3s__feet_netforce_rms_N": {
+          "C-71k": 262.592041015625,
+          "K-61k": 311.375,
+          "K_change_percent": 18.5774705111768
+        },
+        "first3s__action_delta_rms_normalized": {
+          "C-71k": 0.2993021607398987,
+          "K-61k": 0.4569069743156433,
+          "K_change_percent": 52.65742592239662
+        },
+        "last5s__joint_acc_control_rms_rad_s2": {
+          "C-71k": 0.8444142937660217,
+          "K-61k": 4.046215057373047,
+          "K_change_percent": 379.1741550616397
+        },
+        "last5s__joint_speed_rms_rad_s": {
+          "C-71k": 0.13137754797935486,
+          "K-61k": 0.14094732701778412,
+          "K_change_percent": 7.284181494948494
+        },
+        "last5s__root_ang_speed_rms_rad_s": {
+          "C-71k": 0.13934552669525146,
+          "K-61k": 0.15063264966011047,
+          "K_change_percent": 8.10009709859143
+        },
+        "last5s__root_vertical_speed_rms_m_s": {
+          "C-71k": 0.00435143755748868,
+          "K-61k": 0.005112332291901112,
+          "K_change_percent": 17.48605430642012
+        },
+        "last5s__action_delta_rms_normalized": {
+          "C-71k": 0.0026729709934443235,
+          "K-61k": 0.05001784861087799,
+          "K_change_percent": 1771.2454693130148
+        },
+        "last5s__feet_netforce_rms_N": {
+          "C-71k": 338.72930908203125,
+          "K-61k": 332.3041076660156,
+          "K_change_percent": -1.8968542856324322
+        }
+      }
+    },
+    "procedural/left_side_down": {
+      "n": 128,
+      "metrics": {
+        "first3s__joint_acc_control_rms_rad_s2": {
+          "C-71k": 50.300926208496094,
+          "K-61k": 113.51737976074219,
+          "K_change_percent": 125.67651993169164
+        },
+        "first3s__joint_speed_rms_rad_s": {
+          "C-71k": 1.7519676685333252,
+          "K-61k": 3.330765962600708,
+          "K_change_percent": 90.11572087908948
+        },
+        "first3s__root_ang_speed_rms_rad_s": {
+          "C-71k": 1.8972227573394775,
+          "K-61k": 3.642024517059326,
+          "K_change_percent": 91.9660990239558
+        },
+        "first3s__root_vertical_speed_rms_m_s": {
+          "C-71k": 0.4695923924446106,
+          "K-61k": 0.5337536334991455,
+          "K_change_percent": 13.663177276046445
+        },
+        "first3s__feet_netforce_rms_N": {
+          "C-71k": 302.3799133300781,
+          "K-61k": 330.99505615234375,
+          "K_change_percent": 9.463308097131872
+        },
+        "first3s__action_delta_rms_normalized": {
+          "C-71k": 0.2511824369430542,
+          "K-61k": 0.5840510129928589,
+          "K_change_percent": 132.5206412123749
+        },
+        "last5s__joint_acc_control_rms_rad_s2": {
+          "C-71k": 0.48981693387031555,
+          "K-61k": 3.841773748397827,
+          "K_change_percent": 684.3284873885107
+        },
+        "last5s__joint_speed_rms_rad_s": {
+          "C-71k": 0.11998766660690308,
+          "K-61k": 0.14021703600883484,
+          "K_change_percent": 16.859540629459936
+        },
+        "last5s__root_ang_speed_rms_rad_s": {
+          "C-71k": 0.127534881234169,
+          "K-61k": 0.14891472458839417,
+          "K_change_percent": 16.76391834714557
+        },
+        "last5s__root_vertical_speed_rms_m_s": {
+          "C-71k": 0.001346729462966323,
+          "K-61k": 0.004801956005394459,
+          "K_change_percent": 256.5642645715652
+        },
+        "last5s__action_delta_rms_normalized": {
+          "C-71k": 0.0008741180645301938,
+          "K-61k": 0.045706190168857574,
+          "K_change_percent": 5128.834870655941
+        },
+        "last5s__feet_netforce_rms_N": {
+          "C-71k": 336.80535888671875,
+          "K-61k": 332.5946044921875,
+          "K_change_percent": -1.2502040966478445
+        }
+      }
+    },
+    "procedural/right_side_down": {
+      "n": 128,
+      "metrics": {
+        "first3s__joint_acc_control_rms_rad_s2": {
+          "C-71k": 49.613075256347656,
+          "K-61k": 84.99626922607422,
+          "K_change_percent": 71.31828411543492
+        },
+        "first3s__joint_speed_rms_rad_s": {
+          "C-71k": 1.8711657524108887,
+          "K-61k": 2.5962071418762207,
+          "K_change_percent": 38.7481113595179
+        },
+        "first3s__root_ang_speed_rms_rad_s": {
+          "C-71k": 2.1996917724609375,
+          "K-61k": 2.821475028991699,
+          "K_change_percent": 28.266835577383297
+        },
+        "first3s__root_vertical_speed_rms_m_s": {
+          "C-71k": 0.5241831541061401,
+          "K-61k": 0.4665076732635498,
+          "K_change_percent": -11.002925292580423
+        },
+        "first3s__feet_netforce_rms_N": {
+          "C-71k": 273.8271789550781,
+          "K-61k": 288.9299011230469,
+          "K_change_percent": 5.515421159287626
+        },
+        "first3s__action_delta_rms_normalized": {
+          "C-71k": 0.23985178768634796,
+          "K-61k": 0.43339914083480835,
+          "K_change_percent": 80.69456351168019
+        },
+        "last5s__joint_acc_control_rms_rad_s2": {
+          "C-71k": 0.7429401278495789,
+          "K-61k": 3.9063239097595215,
+          "K_change_percent": 425.7925589598015
+        },
+        "last5s__joint_speed_rms_rad_s": {
+          "C-71k": 0.12193284928798676,
+          "K-61k": 0.13881339132785797,
+          "K_change_percent": 13.84412989480952
+        },
+        "last5s__root_ang_speed_rms_rad_s": {
+          "C-71k": 0.12233477830886841,
+          "K-61k": 0.1503264456987381,
+          "K_change_percent": 22.881201712890586
+        },
+        "last5s__root_vertical_speed_rms_m_s": {
+          "C-71k": 0.0010729226050898433,
+          "K-61k": 0.00493602454662323,
+          "K_change_percent": 360.05411044628914
+        },
+        "last5s__action_delta_rms_normalized": {
+          "C-71k": 0.0014975594822317362,
+          "K-61k": 0.04828473925590515,
+          "K_change_percent": 3124.2284749817672
+        },
+        "last5s__feet_netforce_rms_N": {
+          "C-71k": 334.0955810546875,
+          "K-61k": 332.22869873046875,
+          "K_change_percent": -0.5587868951529629
+        }
+      }
+    }
+  },
+  "all_traces_finite": true,
+  "reward_audit": {
+    "extra_L4_recovery_guidance": false,
+    "height_reward": "Both use delayed-termination-only height shaping, multiplier 3.5 and weight 1.0; disabled when delay counter is zero.",
+    "K_imagined_height_reward": "AMPTask.transition uses the same delay gate and factor; terrain height is relative to measured/predicted ground."
+  },
+  "limitations": [
+    "C 71k vs K 61k: different algorithm, discriminator architecture and training terrain, not a matched training ablation.",
+    "First 3s RMS includes both recovery and standing; faster recovery can lower this statistic.",
+    "50Hz joint acceleration and foot resultant force do not measure physics-step peak whole-body collision impulse.",
+    "Smoothness proxies do not establish human-like recovery choreography; video assessment remains necessary.",
+    "Videos reuse verified matching nominal recordings, half speed; quantitative rollouts rerun locally."
+  ]
+}

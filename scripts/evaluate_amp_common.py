@@ -47,10 +47,28 @@ init_hash=hashlib.sha256(torch.cat((r.data.root_link_pos_w-env.scene.env_origins
 hold=torch.zeros(n,device=env.device);success=torch.zeros(n,dtype=torch.bool,device=env.device);first=torch.full((n,),float('nan'),device=env.device)
 bad_count=torch.zeros(n,device=env.device);ever_timeout=torch.zeros_like(success);switch=torch.zeros(n,device=env.device);previous=None;rec_steps=torch.zeros(n,device=env.device)
 errors=[];stable_tail=torch.zeros(n,device=env.device);height_trace=[];gravity_trace=[]
+# Fixed windows avoid confounding smoothness with different recovery durations.
+quality={window:{} for window in ('first3s','last5s')}
+previous_qvel=r.data.joint_vel.clone();previous_action=None
 with torch.inference_mode():
  for step in range(1000):
   command=env.command_manager.get_command('twist');command.zero_();target=[0.,.5,1.,2.][step//250];command[nr:,0]=target
-  obs,_,done,_=_unpack_step(*w.step(policy(obs)))
+  action=policy(obs)
+  obs,_,done,_=_unpack_step(*w.step(action))
+  qvel=r.data.joint_vel
+  values={'joint_acc_control_rms_rad_s2':((qvel-previous_qvel)/env.step_dt).square().mean(-1),
+          'joint_speed_rms_rad_s':qvel.square().mean(-1),
+          'root_ang_speed_rms_rad_s':r.data.root_link_ang_vel_w.square().sum(-1),
+          'root_vertical_speed_rms_m_s':r.data.root_link_lin_vel_w[:,2].square()}
+  if previous_action is not None:values['action_delta_rms_normalized']= (action-previous_action).square().mean(-1)
+  force=env.scene['feet_ground_contact'].data.force
+  values['feet_netforce_rms_N']=force.reshape(n,-1,3).norm(dim=-1).sum(-1).square()
+  for window,active in [('first3s',step<150),('last5s',step>=750)]:
+   if active:
+    for key,value in values.items():
+     if key not in quality[window]:quality[window][key]=[torch.zeros_like(value),0]
+     quality[window][key][0]+=value;quality[window][key][1]+=1
+  previous_qvel=qvel.clone();previous_action=action.clone()
   if done.any():raise RuntimeError('Evaluation unexpectedly reset')
   h=r.data.root_link_pos_w[:,2]-env.scene.env_origins[:,2];gz=r.data.projected_gravity_b[:,2]
   stable=(h>.65)&(gz<-.9);hold=torch.where(stable,hold+1,0)
@@ -77,6 +95,9 @@ for source in ['natural','procedural']:
    for direction in ['supine','prone','left_side_down','right_side_down']:
     sub=mask&(bank['labels']==direction)
     if sub.any():result['groups'][source+'/'+direction]=report(np.r_[sub,np.zeros(128,dtype=bool)])
+result['motion_quality']={window:{key:float((total[:nr]/count).sqrt().mean()) for key,(total,count) in metrics.items()} for window,metrics in quality.items()}
+result['motion_quality_notes']='Mean per-pose RMS over all recovery starts; fixed first 3s and last 5s. Joint acceleration is finite-difference at 50Hz. Foot force is summed foot net-force magnitudes sampled at control rate, NOT whole-body impact or peak physics-step force. Normalized action deltas depend on model output scale; compare physical joint measures first.'
+quality_arrays={window+'__'+key:(total/count).sqrt().cpu().numpy() for window,metrics in quality.items() for key,(total,count) in metrics.items()}
 result['locomotion']=report(np.r_[np.zeros(nr,dtype=bool),np.ones(128,dtype=bool)])
 result['locomotion']['vx_mae_by_5s']=np.array(errors).reshape(4,250,128).mean((1,2)).tolist()
-out=Path(a.output);out.mkdir(parents=True,exist_ok=True);(out/(a.name+'.json')).write_text(json.dumps(result,indent=2));np.savez_compressed(out/(a.name+'_traces.npz'),height=np.array(height_trace),gravity_z=np.array(gravity_trace));print(json.dumps(result,indent=2));env.close()
+out=Path(a.output);out.mkdir(parents=True,exist_ok=True);(out/(a.name+'.json')).write_text(json.dumps(result,indent=2));np.savez_compressed(out/(a.name+'_traces.npz'),height=np.array(height_trace),gravity_z=np.array(gravity_trace),**quality_arrays);print(json.dumps(result,indent=2));env.close()
