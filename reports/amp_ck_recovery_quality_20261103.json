@@ -712,5 +712,61 @@
     "50Hz joint acceleration and foot resultant force do not measure physics-step peak whole-body collision impulse.",
     "Smoothness proxies do not establish human-like recovery choreography; video assessment remains necessary.",
     "Videos reuse verified matching nominal recordings, half speed; quantitative rollouts rerun locally."
-  ]
+  ],
+  "video_manifest": {
+    "left": {
+      "backend": "amp",
+      "name": "AMP-C 71k",
+      "task": "Unitree-G1-MultiAMP-Phase-Tracking-Flat",
+      "checkpoint": "logs/amp_stability/videos/BCE-latest-20261029/C-71k/model.pt",
+      "checkpoint_sha256": "615a062bfb93646f9761d4966902cf54ba1d48d21d0f51f7a4caded3cb64fd25",
+      "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+      "bank_rows": [
+        756,
+        757,
+        758,
+        759
+      ],
+      "initial_state_hash": "311df42750571bed42949efb2196d3009086154c4677b290b1435c26bd18e426",
+      "protocol": "Nominal physics, deterministic policy, no resets/pushes; first procedural low pose per direction; recovery 10s at zero command; walk/run 0/.5/1/2/3 m/s and yaw 0/1/-1/1/-1 rad/s each 5s; Command changes enter observations after one 0.02s control step, matching the existing evaluation protocol.",
+      "fps": 25
+    },
+    "right": {
+      "backend": "supermimic",
+      "name": "K-61000",
+      "task": "Unitree-G1-AMP-I-Shared-TerrainCritic",
+      "checkpoint": "/root/workplace/lyd-k-eval-fe25b99/logs/K-61000-eval/K-61000.pt",
+      "checkpoint_sha256": "0a12fe634b13dd2796c805674bdb6168f8e2f21ed3164699b149ee346fb41f21",
+      "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+      "bank_rows": [
+        756,
+        757,
+        758,
+        759
+      ],
+      "initial_state_hash": "311df42750571bed42949efb2196d3009086154c4677b290b1435c26bd18e426",
+      "protocol": "Nominal physics, deterministic policy, no resets/pushes; first procedural low pose per direction; recovery 10s at zero command; walk/run 0/.5/1/2/3 m/s and yaw 0/1/-1/1/-1 rad/s each 5s; Command changes enter observations after one 0.02s control step, matching the existing evaluation protocol.",
+      "fps": 25
+    },
+    "speed": 0.5,
+    "order": [
+      "supine",
+      "prone",
+      "left_side_down",
+      "right_side_down"
+    ]
+  },
+  "comparison_video": "/home/luyd/workspace/AMP_mjlab/logs/eval_ck_quality/C71_K61_recovery_half_speed.mp4",
+  "ablation_plan": {
+    "code": "L-SuperMimic-HalfHeight-Terrain",
+    "control": "K-SuperMimic-Shared-Terrain",
+    "single_change": "track_root_height.weight 1.0 -> 0.5; same real and imagined reward",
+    "scratch": true,
+    "seed": 42,
+    "num_envs": 4096,
+    "sim_steps": 24,
+    "iterations": 100000,
+    "save_interval": 1000,
+    "interpretation": "Tests delayed recovery height pressure; cannot alone explain post-recovery jitter where this reward is inactive."
+  }
 }
