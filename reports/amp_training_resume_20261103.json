@@ -1,0 +1,54 @@
+{
+  "date": "2026-11-03",
+  "authorization": "User allows paused old training to continue and permits additional server root@192.168.11.91:17535 for needed tasks. All idle GPUs permitted.",
+  "active_server": "root@10.177.36.91:28036",
+  "resumed_processes": [
+    {
+      "experiment": "F-shared-seed42",
+      "pid": 72217,
+      "gpu": 0,
+      "verified_iteration": 75861
+    },
+    {
+      "experiment": "G-unbalanced-seed42",
+      "pid": 72219,
+      "gpu": 2,
+      "verified_iteration": 78509
+    },
+    {
+      "experiment": "H-dual-full-seed42",
+      "pid": 72221,
+      "gpu": 4,
+      "verified_iteration": 77595
+    },
+    {
+      "experiment": "F-shared-seed43",
+      "pid": 72223,
+      "gpu": 1,
+      "verified_iteration": 78086
+    }
+  ],
+  "resume_method": "SIGCONT, existing optimizer/replay/environment state preserved; logs confirmed advancing",
+  "resumed_schedulers": [
+    72214,
+    73617,
+    297594
+  ],
+  "notes": [
+    "K remains GPU0 and L GPU3. F42 now shares GPU0 with K; G42 shares GPU2 with an existing other workload. These devices have 49140 MiB, observed usage below capacity.",
+    "G43 had failed before pause and is not restarted. H43 deferred scheduler waits for H44 then idle GPU4.",
+    "I/J terrain queues keep their existing dependency and idle-GPU gates."
+  ],
+  "additional_server": {
+    "ssh": "ssh -p 17535 root@192.168.11.91",
+    "gpu_count": 8,
+    "gpu_model": "RTX 4090",
+    "memory_per_gpu_MiB": 24564,
+    "all_idle_at_check": true,
+    "launched_tasks": []
+  },
+  "faulty_gpus_old_server": [
+    5,
+    6
+  ]
+}
