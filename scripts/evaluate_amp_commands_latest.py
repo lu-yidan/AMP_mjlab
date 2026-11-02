@@ -12,7 +12,7 @@ from mjlab.managers.event_manager import EventTermCfg
 from mjlab.tasks.registry import load_env_cfg,load_rl_cfg,load_runner_cls
 from mjlab.utils.lab_api.math import quat_apply,quat_apply_inverse,yaw_quat
 from rsl_rl.runners.amp_on_policy_runner import _unpack_obs,_unpack_step
-p=argparse.ArgumentParser();p.add_argument('--task',required=True);p.add_argument('--checkpoint',required=True);p.add_argument('--name',required=True);p.add_argument('--output',required=True);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--backend',choices=['amp','supermimic'],default='amp');p.add_argument('--task',required=True);p.add_argument('--checkpoint',required=True);p.add_argument('--name',required=True);p.add_argument('--output',required=True);a=p.parse_args()
 cases={'stand':[0,0,0],'forward05':[.5,0,0],'forward1':[1,0,0],'forward2':[2,0,0],'forward3':[3,0,0],'backward05':[-.5,0,0],'backward1':[-1,0,0],'left05':[0,.5,0],'right05':[0,-.5,0],'yaw_left':[0,0,1],'yaw_right':[0,0,-1],'forward_turn':[1,0,1]}
 n=len(cases)*8
 rng=np.random.default_rng(12345);jitter=rng.normal(0,.01,(8,29)).astype(np.float32)
@@ -25,7 +25,13 @@ cfg=load_env_cfg('Unitree-G1-AMP-Flat',play=True);cfg.seed=12345;cfg.scene.num_e
 c=cfg.commands['twist'];c.heading_command=False;c.ranges.heading=None;c.rel_standing_envs=0.;c.rel_heading_envs=0.;c.resampling_time_range=(1000.,1000.)
 c.ranges.lin_vel_x=(0.,0.);c.ranges.lin_vel_y=(0.,0.);c.ranges.ang_vel_z=(0.,0.)
 agent=load_rl_cfg(a.task);agent.amp_num_preload_transitions=2048;env=ManagerBasedRlEnv(cfg=cfg,device='cuda:0');w=RslRlVecEnvWrapper(env,clip_actions=agent.clip_actions)
-runner=load_runner_cls(a.task)(w,asdict(agent),log_dir=None,device='cuda:0');load_inference_checkpoint(runner,a.checkpoint);policy=runner.get_inference_policy(device='cuda:0');obs,_=_unpack_obs(w.get_observations())
+obs,_=_unpack_obs(w.get_observations())
+if a.backend=='supermimic':
+ from src.amp_supermimic.inference import load_policy
+ policy=load_policy(a.checkpoint,obs)
+else:
+ runner=load_runner_cls(a.task)(w,asdict(agent),log_dir=None,device='cuda:0');load_inference_checkpoint(runner,a.checkpoint)
+ policy=runner.get_inference_policy(device='cuda:0')
 r=env.scene['robot'];body=list(r.body_names).index('torso_link');target=torch.tensor(list(cases.values()),device=env.device).repeat_interleave(8,dim=0)
 actual=[];upright=[];guidance=[];route=[]
 with torch.inference_mode():

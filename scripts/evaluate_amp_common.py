@@ -13,7 +13,7 @@ from mjlab.tasks.registry import load_env_cfg,load_rl_cfg,load_runner_cls
 from mjlab.utils.lab_api.math import quat_apply
 from rsl_rl.runners.amp_on_policy_runner import _unpack_obs,_unpack_step
 
-p=argparse.ArgumentParser();p.add_argument('--task',required=True);p.add_argument('--checkpoint',required=True);p.add_argument('--name',required=True);p.add_argument('--bank',required=True);p.add_argument('--output',required=True);a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--backend',choices=['amp','supermimic'],default='amp');p.add_argument('--task',required=True);p.add_argument('--checkpoint',required=True);p.add_argument('--name',required=True);p.add_argument('--bank',required=True);p.add_argument('--output',required=True);a=p.parse_args()
 bank=np.load(a.bank);nr=len(bank['qpos']);n=nr+128
 
 def reset_eval(env,env_ids):
@@ -35,8 +35,14 @@ cmdcfg=cfg.commands['twist'];cmdcfg.heading_command=False;cmdcfg.ranges.heading=
 cmdcfg.ranges.lin_vel_x=(0.,0.);cmdcfg.ranges.lin_vel_y=(0.,0.);cmdcfg.ranges.ang_vel_z=(0.,0.)
 agent=load_rl_cfg(a.task);agent.amp_num_preload_transitions=2048
 env=ManagerBasedRlEnv(cfg=cfg,device='cuda:0');w=RslRlVecEnvWrapper(env,clip_actions=agent.clip_actions)
-runner=load_runner_cls(a.task)(w,asdict(agent),log_dir=None,device='cuda:0');load_inference_checkpoint(runner,a.checkpoint)
-policy=runner.get_inference_policy(device='cuda:0');obs,_=_unpack_obs(w.get_observations());r=env.scene['robot'];body=list(r.body_names).index('torso_link')
+obs,_=_unpack_obs(w.get_observations())
+if a.backend=='supermimic':
+ from src.amp_supermimic.inference import load_policy
+ policy=load_policy(a.checkpoint,obs)
+else:
+ runner=load_runner_cls(a.task)(w,asdict(agent),log_dir=None,device='cuda:0');load_inference_checkpoint(runner,a.checkpoint)
+ policy=runner.get_inference_policy(device='cuda:0')
+r=env.scene['robot'];body=list(r.body_names).index('torso_link')
 init_hash=hashlib.sha256(torch.cat((r.data.root_link_pos_w-env.scene.env_origins,r.data.root_link_quat_w,r.data.joint_pos),-1).cpu().numpy().tobytes()).hexdigest()
 hold=torch.zeros(n,device=env.device);success=torch.zeros(n,dtype=torch.bool,device=env.device);first=torch.full((n,),float('nan'),device=env.device)
 bad_count=torch.zeros(n,device=env.device);ever_timeout=torch.zeros_like(success);switch=torch.zeros(n,device=env.device);previous=None;rec_steps=torch.zeros(n,device=env.device)

@@ -40,16 +40,8 @@ agent=load_rl_cfg(a.task);agent.amp_num_preload_transitions=2048
 env=ManagerBasedRlEnv(cfg=cfg,device='cuda:0',render_mode='rgb_array');w=RslRlVecEnvWrapper(env,clip_actions=agent.clip_actions)
 obs,obs_extras=_unpack_obs(w.get_observations())
 if a.backend=='supermimic':
- import sys
- sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'third_party/mbrl_supermimic'))
- from supermimic.modules.actor_critic import ActorCritic
- checkpoint=torch.load(a.checkpoint,map_location='cuda:0',weights_only=False)
- model=ActorCritic({'policy':obs,'critic':obs_extras['observations']['critic']},29).to('cuda:0')
- model.load_state_dict(checkpoint['policy'],strict=True);model.eval()
- clip=checkpoint['cfg'].get('action_clip')
- def policy(observations):
-  action=model.act_inference({'policy':observations})
-  return action if clip is None else action.clamp(-clip,clip)
+ from src.amp_supermimic.inference import load_policy
+ policy=load_policy(a.checkpoint,obs)
 else:
  runner=load_runner_cls(a.task)(w,asdict(agent),log_dir=None,device='cuda:0')
  # Inference may move an expert bank between hosts. Preserve all semantic
