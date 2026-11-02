@@ -1,0 +1,492 @@
+{
+  "experiment": "K-SuperMimic-Shared-Terrain",
+  "checkpoint_iteration": 61000,
+  "checkpoint_sha256": "0a12fe634b13dd2796c805674bdb6168f8e2f21ed3164699b149ee346fb41f21",
+  "checkpoint_local": "/home/luyd/workspace/AMP_mjlab/logs/eval_k_61000/K-61000.pt",
+  "wandb": "https://wandb.ai/tabletennis/lyd-multi-amp/runs/410eb2b9",
+  "recovery": {
+    "name": "K-61000",
+    "checkpoint": "/root/workplace/lyd-k-eval-fe25b99/logs/K-61000-eval/K-61000.pt",
+    "initial_state_hash": "beb879b875c97bfa08c359f32a04f6f12d575f5e13b1da0e75e0822fd4b2da3b",
+    "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+    "protocol": "20s, no resets, deterministic policy, nominal dynamics; hroot>.65 and gz<-.9 for 1s; zero command for recovery; 128 standing trials commands 0/.5/1/2m/s every 5s",
+    "groups": {
+      "natural/low": {
+        "n": 376,
+        "success_1s_percent": 99.99999237060547,
+        "mean_success_time_s": 1.8253189325332642,
+        "last5s_upright_percent": 100.0,
+        "ever_continuous_failure_5s_percent": 0.0,
+        "route_switches_mean": 1.0159573554992676,
+        "recovery_route_percent": 3.702659845352173
+      },
+      "natural/supine": {
+        "n": 314,
+        "success_1s_percent": 100.0,
+        "mean_success_time_s": 1.8154774904251099,
+        "last5s_upright_percent": 100.0,
+        "ever_continuous_failure_5s_percent": 0.0,
+        "route_switches_mean": 1.0191082954406738,
+        "recovery_route_percent": 3.674203872680664
+      },
+      "natural/prone": {
+        "n": 36,
+        "success_1s_percent": 100.0,
+        "mean_success_time_s": 1.8127778768539429,
+        "last5s_upright_percent": 100.0,
+        "ever_continuous_failure_5s_percent": 0.0,
+        "route_switches_mean": 1.0,
+        "recovery_route_percent": 3.4944448471069336
+      },
+      "natural/left_side_down": {
+        "n": 13,
+        "success_1s_percent": 100.0,
+        "mean_success_time_s": 1.8276923894882202,
+        "last5s_upright_percent": 100.00001525878906,
+        "ever_continuous_failure_5s_percent": 0.0,
+        "route_switches_mean": 1.0,
+        "recovery_route_percent": 3.630769729614258
+      },
+      "natural/right_side_down": {
+        "n": 13,
+        "success_1s_percent": 100.0,
+        "mean_success_time_s": 2.0953845977783203,
+        "last5s_upright_percent": 100.00001525878906,
+        "ever_continuous_failure_5s_percent": 0.0,
+        "route_switches_mean": 1.0,
+        "recovery_route_percent": 5.038461685180664
+      },
+      "natural/middle": {
+        "n": 328,
+        "success_1s_percent": 99.99999237060547,
+        "mean_success_time_s": 1.8359757661819458,
+        "last5s_upright_percent": 100.0,
+        "ever_continuous_failure_5s_percent": 0.0,
+        "route_switches_mean": 0.9817072749137878,
+        "recovery_route_percent": 3.642073154449463
+      },
+      "natural/late": {
+        "n": 52,
+        "success_1s_percent": 100.0,
+        "mean_success_time_s": 1.2738462686538696,
+        "last5s_upright_percent": 100.00001525878906,
+        "ever_continuous_failure_5s_percent": 0.0,
+        "route_switches_mean": 0.6538462042808533,
+        "recovery_route_percent": 0.7865385413169861
+      },
+      "procedural/low": {
+        "n": 512,
+        "success_1s_percent": 100.0,
+        "mean_success_time_s": 1.8545702695846558,
+        "last5s_upright_percent": 100.0,
+        "ever_continuous_failure_5s_percent": 0.0,
+        "route_switches_mean": 1.0078125,
+        "recovery_route_percent": 3.790039300918579
+      },
+      "procedural/supine": {
+        "n": 128,
+        "success_1s_percent": 100.0,
+        "mean_success_time_s": 1.6826562881469727,
+        "last5s_upright_percent": 100.0,
+        "ever_continuous_failure_5s_percent": 0.0,
+        "route_switches_mean": 1.0,
+        "recovery_route_percent": 3.121875286102295
+      },
+      "procedural/prone": {
+        "n": 128,
+        "success_1s_percent": 100.0,
+        "mean_success_time_s": 1.7104686498641968,
+        "last5s_upright_percent": 100.0,
+        "ever_continuous_failure_5s_percent": 0.0,
+        "route_switches_mean": 1.015625,
+        "recovery_route_percent": 2.9351563453674316
+      },
+      "procedural/left_side_down": {
+        "n": 128,
+        "success_1s_percent": 100.0,
+        "mean_success_time_s": 1.9889062643051147,
+        "last5s_upright_percent": 100.0,
+        "ever_continuous_failure_5s_percent": 0.0,
+        "route_switches_mean": 1.015625,
+        "recovery_route_percent": 4.40000057220459
+      },
+      "procedural/right_side_down": {
+        "n": 128,
+        "success_1s_percent": 100.0,
+        "mean_success_time_s": 2.036250114440918,
+        "last5s_upright_percent": 100.0,
+        "ever_continuous_failure_5s_percent": 0.0,
+        "route_switches_mean": 1.0,
+        "recovery_route_percent": 4.703125476837158
+      }
+    },
+    "locomotion": {
+      "n": 128,
+      "success_1s_percent": 100.0,
+      "mean_success_time_s": 1.0,
+      "last5s_upright_percent": 99.87813568115234,
+      "ever_continuous_failure_5s_percent": 0.0,
+      "route_switches_mean": 0.015625,
+      "recovery_route_percent": 0.0015625000232830644,
+      "vx_mae_by_5s": [
+        0.022406205534934998,
+        0.058097273111343384,
+        0.07879474759101868,
+        0.12680630385875702
+      ]
+    }
+  },
+  "commands": {
+    "name": "K-61000",
+    "checkpoint": "/root/workplace/lyd-k-eval-fe25b99/logs/K-61000-eval/K-61000.pt",
+    "protocol": "8 matched initial joint perturbations per command, 2s standing then 10s command; no resets/push/DR/smoothing; torso yaw-frame xy velocity and world torso yaw rate; final5s means",
+    "cases": {
+      "stand": {
+        "command": [
+          0,
+          0,
+          0
+        ],
+        "mean_actual": [
+          0.003204895183444023,
+          0.008791306987404823,
+          -0.02961399219930172
+        ],
+        "mae": [
+          0.007802452314577635,
+          0.01023686945460986,
+          0.05820710929317556
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0,
+        "recovery_route_percent": 0.0
+      },
+      "forward05": {
+        "command": [
+          0.5,
+          0,
+          0
+        ],
+        "mean_actual": [
+          0.46558505296707153,
+          0.029091909527778625,
+          0.009946290403604507
+        ],
+        "mae": [
+          0.03832214578986168,
+          0.041063428575849686,
+          0.055148436747682356
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0,
+        "recovery_route_percent": 0.0
+      },
+      "forward1": {
+        "command": [
+          1,
+          0,
+          0
+        ],
+        "mean_actual": [
+          0.9908900260925293,
+          0.03131234273314476,
+          -0.008131117559969425
+        ],
+        "mae": [
+          0.05052832874655724,
+          0.05430827677484922,
+          0.0600147941255143
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0,
+        "recovery_route_percent": 0.0
+      },
+      "forward2": {
+        "command": [
+          2,
+          0,
+          0
+        ],
+        "mean_actual": [
+          1.9861518144607544,
+          -0.009524194523692131,
+          0.003807154716923833
+        ],
+        "mae": [
+          0.04842876261472702,
+          0.06712847781210439,
+          0.07711624655093692
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0,
+        "recovery_route_percent": 0.0
+      },
+      "forward3": {
+        "command": [
+          3,
+          0,
+          0
+        ],
+        "mean_actual": [
+          2.9283084869384766,
+          0.05576565861701965,
+          0.017268404364585876
+        ],
+        "mae": [
+          0.08783264565467834,
+          0.07659513054548006,
+          0.06933975494909556
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.01977282203733921,
+        "recovery_route_percent": 0.0
+      },
+      "backward05": {
+        "command": [
+          -0.5,
+          0,
+          0
+        ],
+        "mean_actual": [
+          -0.44601505994796753,
+          0.01723114587366581,
+          -0.01768263801932335
+        ],
+        "mae": [
+          0.05825903233885765,
+          0.06213606739651732,
+          0.05552155511632281
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0,
+        "recovery_route_percent": 0.0
+      },
+      "backward1": {
+        "command": [
+          -1,
+          0,
+          0
+        ],
+        "mean_actual": [
+          -0.8712444305419922,
+          0.01549548003822565,
+          0.020331548526883125
+        ],
+        "mae": [
+          0.1296828645169735,
+          0.043414970250072654,
+          0.07086597152608738
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0,
+        "recovery_route_percent": 0.0
+      },
+      "left05": {
+        "command": [
+          0,
+          0.5,
+          0
+        ],
+        "mean_actual": [
+          0.014009011909365654,
+          0.48289528489112854,
+          0.003679777029901743
+        ],
+        "mae": [
+          0.04934096654566747,
+          0.06730331331491471,
+          0.06264349284755508
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0,
+        "recovery_route_percent": 0.0
+      },
+      "right05": {
+        "command": [
+          0,
+          -0.5,
+          0
+        ],
+        "mean_actual": [
+          0.05350276455283165,
+          -0.4821125566959381,
+          0.014471517875790596
+        ],
+        "mae": [
+          0.09769142854765232,
+          0.08851558423042297,
+          0.053126286846814766
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0,
+        "recovery_route_percent": 0.0
+      },
+      "yaw_left": {
+        "command": [
+          0,
+          0,
+          1
+        ],
+        "mean_actual": [
+          0.10367938876152039,
+          -0.04757325351238251,
+          0.9151319265365601
+        ],
+        "mae": [
+          0.10367943499423564,
+          0.04762360212818021,
+          0.087167755484581
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0,
+        "recovery_route_percent": 0.0
+      },
+      "yaw_right": {
+        "command": [
+          0,
+          0,
+          -1
+        ],
+        "mean_actual": [
+          -0.006614188198000193,
+          0.03996118903160095,
+          -0.974315345287323
+        ],
+        "mae": [
+          0.010000749182937398,
+          0.04783282453728316,
+          0.07284513381123543
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0,
+        "recovery_route_percent": 0.0
+      },
+      "forward_turn": {
+        "command": [
+          1,
+          0,
+          1
+        ],
+        "mean_actual": [
+          0.990909218788147,
+          -0.11960737407207489,
+          1.025485634803772
+        ],
+        "mae": [
+          0.06251759427785873,
+          0.11984637939138337,
+          0.0816309749186039
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0,
+        "recovery_route_percent": 0.0
+      }
+    }
+  },
+  "trace_finite_checks": {
+    "logs/eval_k_61000/recovery/K-61000_traces.npz": {
+      "height": true,
+      "gravity_z": true
+    },
+    "logs/eval_k_61000/commands/K-61000_traces.npz": {
+      "actual": true,
+      "guidance_gate": true
+    },
+    "terrain": {
+      "actual": true,
+      "upright": true,
+      "positions": true,
+      "height": true,
+      "miss": true
+    }
+  },
+  "video_manifest": {
+    "backend": "supermimic",
+    "name": "K-61000",
+    "task": "Unitree-G1-AMP-I-Shared-TerrainCritic",
+    "checkpoint": "/root/workplace/lyd-k-eval-fe25b99/logs/K-61000-eval/K-61000.pt",
+    "checkpoint_sha256": "0a12fe634b13dd2796c805674bdb6168f8e2f21ed3164699b149ee346fb41f21",
+    "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+    "bank_rows": [
+      756,
+      757,
+      758,
+      759
+    ],
+    "initial_state_hash": "311df42750571bed42949efb2196d3009086154c4677b290b1435c26bd18e426",
+    "protocol": "Nominal physics, deterministic policy, no resets/pushes; first procedural low pose per direction; recovery 10s at zero command; walk/run 0/.5/1/2/3 m/s and yaw 0/1/-1/1/-1 rad/s each 5s; Command changes enter observations after one 0.02s control step, matching the existing evaluation protocol.",
+    "fps": 25
+  },
+  "gpu_notes": "User authorized 3/5/6. GPU5 requires reset; GPU6 subsequently CUDA unavailable. Finished evaluation/recording on GPU3. K training GPU0 preserved; old paused jobs not resumed.",
+  "limitations": [
+    "Nominal simulation, deterministic actor, no pushes/domain randomization or resets.",
+    "Flat recovery benchmark does not establish recovery success on terrain.",
+    "Single checkpoint and seed; no causal comparison with AMP or other discriminator methods."
+  ],
+  "terrain": {
+    "checkpoint": "/root/workplace/lyd-k-eval-fe25b99/logs/K-61000-eval/K-61000.pt",
+    "checkpoint_sha256": "0a12fe634b13dd2796c805674bdb6168f8e2f21ed3164699b149ee346fb41f21",
+    "initial_state_hash": "0d8c18f4528875ba2d377e75e6ea0c9639b3155afd5e8a9738d5a98c9ee782e5",
+    "protocol": "Nominal controlled-column terrain seed12345, fixed difficulty0.5 (evaluation-only layout), 8 standing starts per type, 2s stand then 10s vx=1 m/s, no resets/push/DR; final5s torso yaw-frame errors; first trial of every type recorded, no selection by outcome.",
+    "cases": {
+      "flat": {
+        "mae": [
+          0.051228037327528,
+          0.05475133969805029,
+          0.06224744316304077
+        ],
+        "upright_percent": 100.0,
+        "displacement_x_m": 9.652652740478516,
+        "ground_ray_miss_percent": 0.0
+      },
+      "slope": {
+        "mae": [
+          0.08813442718982696,
+          0.06135980085067877,
+          0.08429316693927467
+        ],
+        "upright_percent": 100.0,
+        "displacement_x_m": 9.343192100524902,
+        "ground_ray_miss_percent": 0.0
+      },
+      "slope_inverted": {
+        "mae": [
+          0.07746886485815048,
+          0.060483457301003,
+          0.08270190294328131
+        ],
+        "upright_percent": 100.0,
+        "displacement_x_m": 9.484842300415039,
+        "ground_ray_miss_percent": 0.0
+      },
+      "stairs_inverted": {
+        "mae": [
+          0.1941700870289933,
+          0.08394581619375822,
+          0.15263213659339636
+        ],
+        "upright_percent": 98.4,
+        "displacement_x_m": 8.743316650390625,
+        "ground_ray_miss_percent": 0.0
+      },
+      "stairs": {
+        "mae": [
+          0.08568856388330459,
+          0.07299553231123719,
+          0.10822528154611791
+        ],
+        "upright_percent": 99.6,
+        "displacement_x_m": 9.547452926635742,
+        "ground_ray_miss_percent": 0.0
+      }
+    },
+    "step_height_m": 0.05,
+    "slope_gradient": 0.125
+  },
+  "videos": {
+    "recovery": "/home/luyd/workspace/AMP_mjlab/logs/eval_k_61000/K-61k-recovery.mp4",
+    "tracking": "/home/luyd/workspace/AMP_mjlab/logs/eval_k_61000/K-61k-walk-run-turn.mp4",
+    "terrain": "/home/luyd/workspace/AMP_mjlab/logs/eval_k_61000/K-61k-terrain.mp4"
+  },
+  "evaluation_script_sha256": "74146b7d6d560db441ce231f7f0a8b3b05b0d855c8fb0ee565c4f51fe6ec4fe5"
+}
