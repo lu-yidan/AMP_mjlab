@@ -12,6 +12,10 @@ PLATE_HALF_SIZE = (0.45, 0.32, 0.035)
 PLATE_FRICTION = (1.2, 0.01, 0.001)
 PLATE_MASS_KG = 6.0
 A6_PHYSICS_SUFFIX = "a6_29_v2"
+PRONE_EXIT_CORE_CLEARANCE_M = 0.025
+PRONE_EXIT_TRAILING_OVERLAP_M = 0.020
+PRONE_EXIT_MAX_LIFT_M = 0.030
+PRONE_EXIT_CONFIRM_STEPS = 15
 
 
 def quotas(num_envs: int) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
@@ -128,6 +132,44 @@ def footprint(
     score = torch.where(covered, overlap.clamp_min(0).amin(-1), 0.0).sum(-1)
     clearance = torch.where(covered, 0.0, (-overlap).clamp_min(0).norm(dim=-1)).amin(-1)
     return covered.sum(-1), score, clearance
+
+
+def prone_exit_geometry(
+    pos: torch.Tensor,
+    ext: torch.Tensor,
+    plate_pos: torch.Tensor,
+    plate_ext: torch.Tensor,
+    core_indices: torch.Tensor,
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """Core XY clearance and deepest trailing-tip overlap, irrespective of height.
+
+    The core contains pelvis, torso, head, hips, and thighs. An arm or foot may
+    remain a little inside the plate's XY edge, but no deep overlap is accepted.
+    """
+    core_clearance = footprint(
+        pos[:, core_indices], ext[:, core_indices], plate_pos, plate_ext
+    )[2]
+    overlap = (
+        ext[..., :2]
+        + plate_ext[:, None, :2]
+        - (pos[..., :2] - plate_pos[:, None, :2]).abs()
+    )
+    deepest_overlap = overlap.amin(-1).clamp_min(0).amax(-1)
+    return core_clearance, deepest_overlap
+
+
+def prone_flexible_clearance(
+    core_clearance: torch.Tensor,
+    trailing_overlap: torch.Tensor,
+    plate_lift: torch.Tensor,
+    legacy_clearance: torch.Tensor,
+) -> torch.Tensor:
+    """Accept a clear core and only shallow trailing tips without lifting."""
+    relaxed = (
+        (core_clearance >= PRONE_EXIT_CORE_CLEARANCE_M)
+        & (trailing_overlap <= PRONE_EXIT_TRAILING_OVERLAP_M)
+    )
+    return (legacy_clearance | relaxed) & (plate_lift <= PRONE_EXIT_MAX_LIFT_M)
 
 
 def plate_footprint_inputs(env):

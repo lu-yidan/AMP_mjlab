@@ -1,0 +1,89 @@
+{
+  "checkpoint": "/home/ray1/code/G1Recovery_HoST/logs/host_a6_free_specialist_v17_from374_seed42_525/model_00499.pt",
+  "checkpoint_sha256": "8af1b5d20a4296ac9173377a0da93964318698a03c83ce163981e8553027cb47",
+  "controller_version": "v62",
+  "composite_components": {
+    "main": "logs/host_a6_free_specialist_v17_from374_seed42_525/model_00499.pt",
+    "prone": "logs/host_a6_guided_prone_specialist_v18_from449_seed42_600/model_00474.pt",
+    "side": "logs/host_a6_side_teacher_all_v33_gpu4_from549_seed42_700/model_00624.pt",
+    "side_gate": "artifacts/a6_proprio_phase_detector/side_scene_canonical_v48/side_early31_45_seed48.pt",
+    "right_side_gate": "artifacts/a6_proprio_phase_detector/side_scene_mirror_v44/side_v17_mirror_seed48.pt",
+    "prone_scene_gate": "artifacts/a6_proprio_phase_detector/scene_id_prone_v1/prone_scene_shuffled_seed42_to44.pt",
+    "recovery": "artifacts/a6_proprio_phase_detector/proprio_recovery_controller_v1.pt",
+    "supine_flat_gate": "artifacts/a6_proprio_phase_detector/recovery_gate_v1/supine_flat_recovery_gate_unweighted_v1.pt",
+    "flat": "logs/host_ground29_pose_v6_from2999_4096_seed42_1000/model_00999.pt"
+  },
+  "proprio_recovery_controller": "artifacts/a6_proprio_phase_detector/proprio_recovery_controller_v1.pt",
+  "proprio_supine_flat_gate": "artifacts/a6_proprio_phase_detector/recovery_gate_v1/supine_flat_recovery_gate_unweighted_v1.pt",
+  "flat_expert_checkpoint": "logs/host_ground29_pose_v6_from2999_4096_seed42_1000/model_00999.pt",
+  "flat_gate_threshold": 0.8,
+  "seed": 103,
+  "layout": [
+    "free_supine",
+    "guided_prone",
+    "guided_supine",
+    "flat_supine"
+  ],
+  "control_steps": 750,
+  "video_frames": 375,
+  "fps": 25.0,
+  "auto_reset": true,
+  "guided_offset_m": 0.0,
+  "assist_force_n": 0.0,
+  "camera": "smooth follow: 80% robot root, 20% scene origin",
+  "all_success": true,
+  "scenes": {
+    "free_supine": {
+      "escaped": true,
+      "first_escape_step": 90,
+      "first_flat_gate_trigger_step": 0,
+      "invalid": false,
+      "first_invalid_step": 0,
+      "ended_early": false,
+      "reset_count": 0,
+      "stood_at_end": true,
+      "success": true,
+      "final_pelvis_height_m": 0.7505,
+      "final_upright": 0.9996
+    },
+    "guided_prone": {
+      "escaped": true,
+      "first_escape_step": 212,
+      "first_flat_gate_trigger_step": 0,
+      "invalid": false,
+      "first_invalid_step": 0,
+      "ended_early": false,
+      "reset_count": 0,
+      "stood_at_end": true,
+      "success": true,
+      "final_pelvis_height_m": 0.7506,
+      "final_upright": 0.9997
+    },
+    "guided_supine": {
+      "escaped": true,
+      "first_escape_step": 520,
+      "first_flat_gate_trigger_step": 0,
+      "invalid": false,
+      "first_invalid_step": 0,
+      "ended_early": false,
+      "reset_count": 0,
+      "stood_at_end": true,
+      "success": true,
+      "final_pelvis_height_m": 0.7515,
+      "final_upright": 0.9997
+    },
+    "flat_supine": {
+      "escaped": false,
+      "first_escape_step": 0,
+      "first_flat_gate_trigger_step": 0,
+      "invalid": false,
+      "first_invalid_step": 0,
+      "ended_early": false,
+      "reset_count": 0,
+      "stood_at_end": true,
+      "success": true,
+      "final_pelvis_height_m": 0.7508,
+      "final_upright": 0.9996
+    }
+  }
+}

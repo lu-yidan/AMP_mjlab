@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Centered guided sides are teacher-driven during training. Student actions
+# are learned from its proprio history and used alone during evaluation.
+export A6_RESUME="${A6_RESUME:-logs/host_a6_side_axis_v29_from499_seed42_650/model_00549.pt}"
+export A6_OUTPUT="${A6_OUTPUT:-logs/host_a6_side_teacher_all_v33_from549_seed42_700}"
+export A6_ITERATIONS="${A6_ITERATIONS:-700}"
+export A6_SIDE_CENTER_ONLY_V1=1
+export A6_TEACHER_FORCE_GUIDED_SIDE_V1=1
+
+exec bash "$(dirname "${BASH_SOURCE[0]}")/train_a6_side_teacher_v31_server.sh"

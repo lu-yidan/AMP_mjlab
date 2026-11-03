@@ -1,0 +1,21 @@
+{
+  "samples": 768,
+  "mean_root_height_m": 0.3571493327617645,
+  "sources": [
+    {
+      "source": "assets/a6/host29/escaped_prone_legacy_v24_phase_delay20_center256.npz",
+      "sha256": "093c287fb9be58a225dee874abb9cb1eb8ac962f8ba8159916f68e0f75bdcfde",
+      "samples": 256
+    },
+    {
+      "source": "assets/a6/host29/escaped_prone_legacy_v24_phase_delay60_center256.npz",
+      "sha256": "13e27bbd98d12e39db6cd72a7cea0a663e6d83f58d86370165cd1c509368c80e",
+      "samples": 256
+    },
+    {
+      "source": "assets/a6/host29/escaped_prone_legacy_v24_phase_delay120_center256.npz",
+      "sha256": "99b08130913a90ea4f0252049a12216118b5ffa3e0ec28b77934d466c87e9f52",
+      "samples": 256
+    }
+  ]
+}

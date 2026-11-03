@@ -8,9 +8,12 @@ from mjlab.utils.lab_api.math import quat_apply_inverse
 
 from .a6_geometry import (
     PLATE_HALF_SIZE,
+    PRONE_EXIT_CONFIRM_STEPS,
     completion_clearance,
     footprint,
     plate_footprint_inputs,
+    prone_exit_geometry,
+    prone_flexible_clearance,
 )
 from .model import HOST29_JOINT_NAMES, HOST29_TARGET_JOINT_POS
 
@@ -77,6 +80,8 @@ def joint_stall_cost(load_per_joint, motion_span):
 def lateral_travel(displacement_xy, lateral_axis_xy, toward_near_edge=False):
     """Measure pelvis motion toward the near edge, or either edge for legacy A6."""
     projected = (displacement_xy * lateral_axis_xy).sum(-1)
+    if isinstance(toward_near_edge, torch.Tensor):
+        return torch.where(toward_near_edge, (-projected).clamp_min(0), projected.abs())
     return (-projected).clamp_min(0) if toward_near_edge else projected.abs()
 
 
@@ -97,6 +102,21 @@ def new_torso_progress(distance, previous_best):
     return torch.maximum(previous_best, distance), (
         (distance - previous_best) / 0.025
     ).clamp(0, 1)
+
+
+def free_plate_motion_signal(plate_shift, previous_best, root_travel, eligible):
+    """Credit fresh board translation, discounted when the pelvis does the moving."""
+    new_best = torch.maximum(previous_best, plate_shift)
+    increment = ((plate_shift - previous_best) / 0.025).clamp(0, 1)
+    board_share = plate_shift / (plate_shift + root_travel + 0.05)
+    progress = eligible.float() * increment * (0.25 + 0.75 * board_share)
+    excess_crawl = eligible.float() * gate(root_travel - plate_shift, 0.20, 0.80)
+    return new_best, progress, excess_crawl
+
+
+def free_plate_anchor_cost(root_travel, eligible):
+    """Discourage the failed free-board pattern of crawling metres from reset."""
+    return eligible.float() * gate(root_travel, 0.20, 0.60)
 
 
 def guided_exit_margin(root_xy, plate_xy):
@@ -226,9 +246,14 @@ def outward_hand_drive(
     """Reward loaded hands only when the pelvis moves farther toward an edge."""
     lateral = (displacement * lateral_axis).sum(-1)
     lateral_speed = (velocity * lateral_axis).sum(-1)
-    outward_speed = (
-        -lateral_speed if toward_near_edge else lateral_speed * lateral.sign()
-    )
+    if isinstance(toward_near_edge, torch.Tensor):
+        outward_speed = torch.where(
+            toward_near_edge, -lateral_speed, lateral_speed * lateral.sign()
+        )
+    else:
+        outward_speed = (
+            -lateral_speed if toward_near_edge else lateral_speed * lateral.sign()
+        )
     return hand_load * gate(outward_speed, 0.01, 0.12)
 
 
@@ -532,27 +557,53 @@ def _update(env):
     # A guided-board episode is complete only after horizontal escape. The
     # previous 3D clearance test also accepted lifting the board overhead.
     guided = env._a6_scene == 1
-    clear = (
-        active
-        & env._a6_ever_contact
-        & ~contact
-        & torch.where(guided, clearance >= 0.04, completion_clearance(env) >= 0.025)
-    )
-    env._a6_clear_age = torch.where(clear, env._a6_clear_age + 1, 0)
-    if getattr(env, "_a6_arm_extraction_v1", False):
-        # Once the policy has kept the full body clear for 25 control steps,
-        # preserve the stand-up phase even if a hand briefly touches the board.
-        env._a6_escaped |= env._a6_clear_age >= 25
-    else:
-        env._a6_escaped = env._a6_clear_age >= 25
-    env._a6_knee_reward_done |= env._a6_escaped
-    motor_active = real_steps > 30
-    if hasattr(env, "_a6_postescape_start"):
-        motor_active |= env._a6_postescape_start
     plate_lift = torch.maximum(
         (plate_pos[:, 2] - env._a6_initial_plate_z).clamp_min(0),
         env._a6_plate_lift_peak,
     )
+    legacy_clearance = torch.where(
+        guided, clearance >= 0.04, completion_clearance(env) >= 0.025
+    )
+    flexible_prone = (
+        guided & (env._a6_direction == 1)
+        if getattr(env, "_a6_prone_flexible_exit_v1", False)
+        else torch.zeros_like(guided)
+    )
+    if getattr(env, "_a6_prone_flexible_exit_v1", False):
+        core_clearance, trailing_overlap = prone_exit_geometry(
+            pos, ext, plate_pos_for_footprint, plate_ext,
+            env._a6_prone_core_collision_indices,
+        )
+        env._a6_prone_core_clearance_m = core_clearance
+        env._a6_prone_trailing_overlap_m = trailing_overlap
+        geometric_clearance = torch.where(
+            flexible_prone,
+            prone_flexible_clearance(
+                core_clearance, trailing_overlap, plate_lift, legacy_clearance
+            ),
+            legacy_clearance,
+        )
+    else:
+        geometric_clearance = legacy_clearance
+    clear = (
+        active
+        & env._a6_ever_contact
+        & ~contact
+        & geometric_clearance
+    )
+    env._a6_clear_age = torch.where(clear, env._a6_clear_age + 1, 0)
+    confirm_steps = torch.where(
+        flexible_prone, PRONE_EXIT_CONFIRM_STEPS, 25
+    )
+    if getattr(env, "_a6_arm_extraction_v1", False):
+        # Keep the confirmed recovery phase after later incidental board contact.
+        env._a6_escaped |= env._a6_clear_age >= confirm_steps
+    else:
+        env._a6_escaped = env._a6_clear_age >= confirm_steps
+    env._a6_knee_reward_done |= env._a6_escaped
+    motor_active = real_steps > 30
+    if hasattr(env, "_a6_postescape_start"):
+        motor_active |= env._a6_postescape_start
     staged_v5 = bool(getattr(env, "_a6_staged_escape_v5", False))
     force_invalid = force > PLATE_FORCE_INVALID_N
     lift_invalid = (
@@ -577,7 +628,35 @@ def _update(env):
         )
     )
     displacement = data.root_link_pos_w[:, :2] - env._a6_initial_root_xy
+    if getattr(env, "_a6_free_plate_motion_reward_v1", False):
+        free_eligible = (
+            (env._a6_scene == 2) & env._a6_ever_contact
+            & ~env._a6_escaped & ~env._a6_invalid & motor_active
+        )
+        best_shift, free_motion, free_crawl = free_plate_motion_signal(
+            (plate_pos[:, :2] - env._a6_initial_plate_xy).norm(dim=-1),
+            env._a6_best_plate_shift,
+            displacement.norm(dim=-1),
+            free_eligible,
+        )
+        env._a6_best_plate_shift = torch.where(
+            free_eligible, best_shift, env._a6_best_plate_shift
+        )
+        env._a6_free_plate_motion_reward = free_motion
+        env._a6_free_crawl_cost = free_crawl
+        if getattr(env, "_a6_free_plate_anchor_v1", False):
+            env._a6_free_anchor_cost = free_plate_anchor_cost(
+                displacement.norm(dim=-1), free_eligible
+            )
     toward_near_edge = getattr(env, "_a6_edge_curriculum", False)
+    if toward_near_edge and getattr(env, "_a6_side_center_bidirectional_v1", False):
+        # A centred board has two equally valid exits. A signed near-edge
+        # target there suppresses half of the physically useful side motion.
+        side_center = (
+            (env._a6_scene == 1) & (env._a6_direction >= 2)
+            & (env._a6_initial_edge_offset_m <= 0.01)
+        )
+        toward_near_edge = ~side_center
     previous_lateral = env._a6_best_lateral.clone()
     best_lateral, lateral_gain = new_lateral_progress(
         displacement,
@@ -620,6 +699,9 @@ def _update(env):
         env._a6_arm_extraction_reward.zero_()
     prone_trapped = guided_trapped & (env._a6_direction == 1)
     supine_trapped = guided_trapped & (env._a6_direction == 0)
+    env._a6_side_lateral_reward = (
+        guided_trapped & (env._a6_direction >= 2)
+    ).float() * lateral_gain
     env._a6_best_lateral = torch.where(guided_trapped, best_lateral, previous_lateral)
     previous_leg_score = env._a6_best_leg_score.clone()
     env._a6_best_leg_score = torch.minimum(previous_leg_score, leg_score)
@@ -788,6 +870,18 @@ def _update(env):
         if staged_v5
         else torch.zeros_like(torso_travel)
     )
+    if getattr(env, "_a6_scene_phase_reward_v1", False):
+        # A movable free plate can leave the robot, unlike a guided plate.
+        # Reward new relative XY separation only until clearance is confirmed.
+        free_escape_progress = (
+            (env._a6_scene == 2) & ~env._a6_escaped & ~env._a6_invalid
+        ).float() * separation
+        if getattr(env, "_a6_free_plate_motion_reward_v1", False):
+            env._a6_aux_progress_reward += (
+                env.step_dt * 3.0 * env._a6_free_plate_motion_reward
+            )
+        else:
+            env._a6_aux_progress_reward += env.step_dt * 3.0 * free_escape_progress
     overcurl = guided_trapped * guided_overcurl(knees, hips)
     lift_cost = guided * motor_active * gate(plate_lift, 0.005, GUIDED_MAX_LIFT_M)
     env._a6_escape_values = torch.stack(
@@ -795,7 +889,11 @@ def _update(env):
             g,
             dense,
             env._a6_escaped.float(),
-            active * env._a6_ever_contact * separation,
+            active * env._a6_ever_contact * (
+                ~env._a6_escaped
+                if getattr(env, "_a6_scene_phase_reward_v1", False)
+                else torch.ones_like(active)
+            ) * separation,
             active * ((force - 300).clamp_min(0) / 300).square(),
             quiet * (foot_motion / 0.1**2).clamp_max(10),
             stall_cost,
@@ -862,7 +960,8 @@ def _standing_pose_cost(env):
     )
 
 
-def _guided_recovery_reward(env, *, include_supine=False):
+def _guided_recovery_reward(env, *, include_supine=False,
+                            include_flat_free=False):
     """Reward rising after true guided clearance, without rewarding board lifting.
 
     The usual constant escaped bonus has no gradient between a low, curled
@@ -875,9 +974,43 @@ def _guided_recovery_reward(env, *, include_supine=False):
     upright = ((-robot.projected_gravity_b[:, 2] + 1.0) * 0.5).clamp(0.0, 1.0)
     progress = height * (0.65 + 0.35 * upright)
     stable = (pelvis_z > 0.60) & (upright > 0.90)
-    eligible = (env._a6_scene == 1) & env._a6_escaped & ~env._a6_invalid
+    guided_eligible = (env._a6_scene == 1) & env._a6_escaped
     if not include_supine:
-        eligible &= env._a6_direction == 1
+        guided_eligible &= env._a6_direction == 1
+    eligible = guided_eligible
+    if include_flat_free:
+        eligible |= (env._a6_scene == 0) | (
+            (env._a6_scene == 2) & env._a6_escaped
+        )
+    eligible &= ~env._a6_invalid
+    if getattr(env, "_a6_recovery_bridge_v2", False):
+        # A successful prone get-up briefly folds the knees and tips the torso
+        # farther down before rising. Rewarding uprightness immediately makes
+        # that necessary first motion worse than remaining flat. The knee term
+        # is gated by confirmed escape and fades as the pelvis rises; no knee
+        # folding is paid while the robot is still under the guided board.
+        knees = robot.joint_pos[:, env._a6_knee_ids]
+        knee_fold = ((knees - 0.40) / 1.80).clamp(0.0, 1.0).mean(-1)
+        low_stage = ((0.50 - pelvis_z) / 0.20).clamp(0.0, 1.0)
+        upright_stage = ((-robot.projected_gravity_b[:, 2] - 0.40) / 0.60).clamp(0.0, 1.0)
+        bridge_score = (
+            20.0 * height
+            + 4.0 * knee_fold * low_stage
+            + 4.0 * upright_stage
+            + 2.0 * stable.float()
+        )
+        strong_score = 20.0 * progress + 4.0 * upright + 2.0 * stable.float()
+        return eligible.float() * torch.where(
+            (env._a6_scene == 1) & (env._a6_direction == 1),
+            bridge_score, strong_score,
+        )
+    if getattr(env, "_a6_strong_recovery_v1", False):
+        # The original 2.5*height*upright term gives almost no gradient when
+        # an escaped robot remains at ~0.11 m pelvis height. Pay separately
+        # for raising the pelvis and turning the torso before a full stand.
+        return eligible.float() * (
+            20.0 * progress + 4.0 * upright + 2.0 * stable.float()
+        )
     return eligible.float() * (2.5 * progress + 0.5 * stable.float())
 
 
@@ -957,6 +1090,13 @@ def a6_reward(env, group: str, arm: str, preserve_pose: bool = False):
         hand_push_weight = 3.00 if staged_v5 else 2.50 if staged else 1.50
         hand_drive_weight = 2.50 if staged_v5 else 2.00 if staged else 1.20
         lift_weight = 5.0 if staged_v5 else 0.45
+        if getattr(env, "_a6_side_lift_anticipation_v1", False):
+            # Side failures occur at 5 cm plate lift long before escape. The
+            # existing lift feature starts at 5 mm; a larger side-only weight
+            # makes rising against the guided plate costly before reset.
+            side_guided = ((env._a6_scene == 1) & (env._a6_direction >= 2)
+                           & ~env._a6_escaped).float()
+            lift_weight = lift_weight + 20.0 * side_guided
         result = (
             0.60 * e[:, 2]
             + env._a6_arm_extraction_reward
@@ -967,7 +1107,19 @@ def a6_reward(env, group: str, arm: str, preserve_pose: bool = False):
             + (
                 (0.45 + 0.20 * guided_scale) * e[:, 0]
                 + (0.08 + 0.04 * guided_scale) * e[:, 1]
-                + (0.10 + 0.05 * guided_scale) * e[:, 3]
+                + (
+                    torch.where(
+                        env._a6_scene == 2,
+                        e.new_full(
+                            (len(e),),
+                            0.10 if getattr(env, "_a6_free_plate_motion_reward_v1", False)
+                            else 3.0,
+                        ),
+                        e.new_full((len(e),), 0.10) + 0.05 * guided_scale,
+                    )
+                    if getattr(env, "_a6_scene_phase_reward_v1", False)
+                    else 0.10 + 0.05 * guided_scale
+                ) * e[:, 3]
                 + lateral_weight * e[:, 7]
                 - (0.15 + 1.35 * guided_scale) * e[:, 8]
                 - (0.10 + 0.02 * guided_scale) * e[:, 9]
@@ -990,11 +1142,37 @@ def a6_reward(env, group: str, arm: str, preserve_pose: bool = False):
                 else 0.0
             )
         )
+        if getattr(env, "_a6_side_directional_progress_v1", False):
+            # This progress is signed toward the selected near board edge.
+            # It is new pelvis travel, not hand or foot movement in place.
+            result += 5.0 * env._a6_side_lateral_reward
         if getattr(env, "_a6_prone_recovery_v1", False) and arm == "G+":
             result += _guided_recovery_reward(
                 env,
                 include_supine=getattr(env, "_a6_bidirectional_recovery_v1", False),
+                include_flat_free=getattr(env, "_a6_scene_phase_reward_v1", False),
             )
+        if getattr(env, "_a6_free_plate_motion_reward_v1", False) and arm == "G+":
+            result += (
+                3.0 * env._a6_free_plate_motion_reward
+                - 0.40 * env._a6_free_crawl_cost
+            )
+        if getattr(env, "_a6_free_plate_anchor_v1", False) and arm == "G+":
+            result -= 2.0 * env._a6_free_anchor_cost
+        if getattr(env, "_a6_flat_prone_compact_v1", False) and arm == "G+":
+            # Flat prone starts should rise near their reset point. Preserve
+            # lateral travel in both plate scenes, where moving is necessary.
+            flat_prone = (env._a6_scene == 0) & (env._a6_direction == 1)
+            pelvis_z = r.root_link_pos_w[:, 2] - env.scene.env_origins[:, 2]
+            low = ((0.55 - pelvis_z) / 0.30).clamp(0, 1)
+            drift = (
+                r.root_link_pos_w[:, :2] - env._a6_initial_root_xy
+            ).norm(dim=-1)
+            result -= 5.0 * flat_prone.float() * low * (drift - 0.20).clamp_min(0)
+            upright = ((-r.projected_gravity_b[:, 2] + 1.0) * 0.5).clamp(0, 1)
+            result += 3.0 * flat_prone.float() * (
+                (pelvis_z > 0.60) & (upright > 0.90)
+            ).float()
         return result - _standing_pose_cost(env) if preserve_pose else result
     raise ValueError(group)
 

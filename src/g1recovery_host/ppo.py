@@ -34,6 +34,7 @@ class HostPolicy(nn.Module):
         log_std_bounds=None,
         upper_residual=False,
         waist_residual_scale=2.0,
+        critic_obs_dim=None,
     ):
         super().__init__()
         self.log_std_bounds = log_std_bounds
@@ -53,7 +54,9 @@ class HostPolicy(nn.Module):
                 persistent=False,
             )
         self.actor = _mlp(obs_dim, (512, 256, 128), action_dim, True)
-        self.critics = nn.ModuleList(_mlp(obs_dim, (512, 256), 1) for _ in GROUPS)
+        self.critics = nn.ModuleList(
+            _mlp(critic_obs_dim or obs_dim, (512, 256), 1) for _ in GROUPS
+        )
         self.log_std = nn.Parameter(torch.full((action_dim,), math.log(0.8)))
 
     def mean_action(self, obs):
@@ -106,9 +109,9 @@ def grouped_gae(
             raise ValueError("advantage scales must match rollout reward groups")
         if (
             not torch.isfinite(advantage_scales).all()
-            or ((advantage_scales < 0) | (advantage_scales > 1)).any()
+            or ((advantage_scales < 0) | (advantage_scales > 3)).any()
         ):
-            raise ValueError("advantage scales must be finite values in [0, 1]")
+            raise ValueError("advantage scales must be finite values in [0, 3]")
         # Scaling a reward group before its own advantage normalization is
         # nearly cancelled by that normalization. Apply the stage weight here.
         normalized = normalized * advantage_scales
@@ -157,6 +160,12 @@ def ppo_update(
     knee_prior_joint_ids=(3, 9),
     knee_prior_weight=0.0,
     entropy_coef=0.01,
+    critic_obs=None,
+    next_critic_obs=None,
+    imitation_actions=None,
+    imitation_mask=None,
+    imitation_weight=0.0,
+    policy_active=None,
 ):
     """Clipped PPO objective with separate value losses and HoST group weights."""
     if len(batch) not in (11, 13):
@@ -189,6 +198,10 @@ def ppo_update(
         raise ValueError("knee prior actions and mask must be provided together")
     if knee_prior_weight < 0:
         raise ValueError("knee prior weight must be nonnegative")
+    if (imitation_actions is None) != (imitation_mask is None):
+        raise ValueError("imitation actions and mask must be provided together")
+    if not math.isfinite(imitation_weight) or imitation_weight < 0:
+        raise ValueError("imitation weight must be finite and nonnegative")
     if not math.isfinite(entropy_coef) or entropy_coef < 0:
         raise ValueError("entropy coefficient must be finite and nonnegative")
     if not math.isfinite(max_learning_rate) or max_learning_rate < 1e-5:
@@ -207,6 +220,16 @@ def ppo_update(
         continue_mask,
     ) = batch[:11]
     n = obs.shape[0]
+    if policy_active is None:
+        policy_active = active
+    elif policy_active.shape != (n,) or not torch.isfinite(policy_active).all() or ((policy_active < 0) | (policy_active > active)).any():
+        raise ValueError("policy_active must be a [batch] mask within active")
+    if critic_obs is None:
+        critic_obs = obs
+    if next_critic_obs is None:
+        next_critic_obs = next_obs
+    if critic_obs.shape[0] != n or next_critic_obs.shape != critic_obs.shape:
+        raise ValueError("critic observations must align with actor rollout samples")
     # A raw log_std slightly outside the clamp has zero gradient through the
     # distribution bound. Project the parameter itself so later PPO gradients
     # can move exploration back inside the supported interval.
@@ -221,6 +244,10 @@ def ppo_update(
         knee_prior_actions.shape != (n, 2) or knee_prior_mask.shape != (n,)
     ):
         raise ValueError("knee prior actions/mask must have shapes (n, 2)/(n,)")
+    if imitation_actions is not None and (
+        imitation_actions.shape != actions.shape or imitation_mask.shape != (n,)
+    ):
+        raise ValueError("imitation actions/mask must match rollout action/sample shapes")
     if n < minibatches:
         raise ValueError(f"Batch size {n} is smaller than {minibatches} minibatches")
     losses = []
@@ -254,10 +281,10 @@ def ppo_update(
                 ratio.clamp(0.8, 1.2) * advantages[idx],
             )
             # The initial 30 policy steps have no motor command in HoST.
-            policy_loss = -(surrogate * active[idx]).sum() / active[
+            policy_loss = -(surrogate * policy_active[idx]).sum() / policy_active[
                 idx
             ].sum().clamp_min(1)
-            value = policy.values(obs[idx])
+            value = policy.values(critic_obs[idx])
             clipped = old_values[idx] + (value - old_values[idx]).clamp(-0.2, 0.2)
             value_loss = torch.maximum(
                 (value - returns[idx]).square(),
@@ -268,10 +295,13 @@ def ppo_update(
                 2.0 * torch.rand_like(continue_mask[idx]).unsqueeze(-1) - 1.0
             )
             mixed_obs = obs[idx] + mix_amount * (next_obs[idx] - obs[idx])
+            mixed_critic_obs = critic_obs[idx] + mix_amount * (
+                next_critic_obs[idx] - critic_obs[idx]
+            )
             policy_smooth = (
                 (dist.mean - policy.mean_action(mixed_obs)).square().sum(-1).mean()
             )
-            value_smooth = (value - policy.values(mixed_obs)).square().sum(-1).mean()
+            value_smooth = (value - policy.values(mixed_critic_obs)).square().sum(-1).mean()
             smoothness = (1.0 / 9.0) * policy_smooth + (1.0 / 90.0) * value_smooth
             teacher_loss = obs.new_zeros(())
             if pose_teacher is not None:
@@ -289,7 +319,11 @@ def ppo_update(
                             obs[idx][selected, :teacher_obs_dim]
                         )
                     frozen_teacher_loss = (
-                        (dist.mean[selected] - target_action).square().sum(-1).mean()
+                        (
+                            (dist.mean[selected] - target_action).square().sum(-1)
+                            * frozen_teacher_mask[idx][selected]
+                        ).sum()
+                        / frozen_teacher_mask[idx][selected].sum().clamp_min(1)
                     )
             supine_teacher_loss = obs.new_zeros(())
             if supine_teacher is not None:
@@ -316,6 +350,17 @@ def ppo_update(
                     knee_prior_loss = (
                         (knee_logits - target_logits).square().sum(-1).mean()
                     )
+            imitation_loss = obs.new_zeros(())
+            if imitation_actions is not None:
+                selected = (imitation_mask[idx] > 0) & (active[idx] > 0)
+                if selected.any():
+                    error = (
+                        (dist.mean[selected] - imitation_actions[idx][selected])
+                        .square().sum(-1)
+                    )
+                    weight = imitation_mask[idx][selected]
+                    # Binary masks produce exactly the previous mean loss.
+                    imitation_loss = (error * weight).sum() / weight.sum().clamp_min(1e-6)
             loss = (
                 policy_loss
                 + value_loss
@@ -325,6 +370,7 @@ def ppo_update(
                 + frozen_teacher_weight * frozen_teacher_loss
                 + supine_teacher_weight * supine_teacher_loss
                 + knee_prior_weight * knee_prior_loss
+                + imitation_weight * imitation_loss
             )
             if not torch.isfinite(loss):
                 raise FloatingPointError("Non-finite PPO loss")
@@ -352,9 +398,10 @@ def ppo_update(
                     float(frozen_teacher_loss.detach()),
                     float(supine_teacher_loss.detach()),
                     float(knee_prior_loss.detach()),
+                    float(imitation_loss.detach()),
                 )
             )
     return (
-        *tuple(sum(item[i] for item in losses) / len(losses) for i in range(8)),
+        *tuple(sum(item[i] for item in losses) / len(losses) for i in range(9)),
         sum(kl_values) / len(kl_values),
     )

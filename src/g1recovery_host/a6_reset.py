@@ -24,33 +24,109 @@ MAX_GUIDED_EDGE_OFFSET_M = 0.50
 
 
 def focused_guided_layout(
-    num_envs: int, postescape_prone: bool = False
+    num_envs: int,
+    postescape_prone: bool = False,
+    mix: str = "focused_v1",
+    postescape_stride: int = 4,
 ) -> np.ndarray:
-    """Train on 25% flat, 62.5% guided, 12.5% free worlds.
+    """Build a fixed A6 scene/direction allocation for training.
 
-    Half the guided worlds start prone and half supine. Evaluation keeps the
-    original A6 quotas; this layout is only an exploration curriculum.
+    The original mix has no guided side-lying resets. The diverse variants add
+    guided side directions and give free-prone starts four times their original
+    quota. V3 also doubles both free-side quotas. V4 rehearses flat and free
+    recovery more often while retaining all guided directions. Evaluation
+    layouts are supplied separately and are unaffected.
     """
     if num_envs < 32 or num_envs % 32:
         raise ValueError("focused A6 num_envs must be a positive multiple of 32")
-    flat, guided, free = num_envs // 4, 5 * num_envs // 8, num_envs // 8
+    if postescape_stride not in (2, 4):
+        raise ValueError("postescape stride must be 2 or 4")
+    flat_low_fraction, flat_late_fraction = 0.4, 0.2
+    if mix == "focused_v1":
+        flat, guided, free = num_envs // 4, 5 * num_envs // 8, num_envs // 8
+        guided_directions = (guided // 2, guided // 2, 0, 0)
+        free_directions = (free // 4,) * 4
+    elif mix == "diverse_v2":
+        unit = num_envs // 32
+        flat, guided, free = 4 * unit, 20 * unit, 8 * unit
+        guided_directions = (6 * unit, 6 * unit, 4 * unit, 4 * unit)
+        free_directions = (2 * unit, 4 * unit, unit, unit)
+    elif mix == "diverse_v3":
+        unit = num_envs // 32
+        flat, guided, free = 4 * unit, 18 * unit, 10 * unit
+        guided_directions = (6 * unit, 6 * unit, 3 * unit, 3 * unit)
+        free_directions = (2 * unit, 4 * unit, 2 * unit, 2 * unit)
+    elif mix == "diverse_v4_recovery":
+        unit = num_envs // 32
+        flat, guided, free = 8 * unit, 14 * unit, 10 * unit
+        guided_directions = (5 * unit, 5 * unit, 2 * unit, 2 * unit)
+        free_directions = (3 * unit, 3 * unit, 2 * unit, 2 * unit)
+        flat_low_fraction, flat_late_fraction = 0.6, 0.1
+    elif mix == "free_specialist_v1":
+        unit = num_envs // 32
+        flat, guided, free = 4 * unit, 4 * unit, 24 * unit
+        guided_directions = (unit,) * 4
+        free_directions = (6 * unit,) * 4
+        flat_low_fraction, flat_late_fraction = 0.6, 0.1
+    elif mix == "guided_prone_specialist_v1":
+        unit = num_envs // 32
+        flat, guided, free = 4 * unit, 20 * unit, 8 * unit
+        guided_directions = (unit, 17 * unit, unit, unit)
+        free_directions = (2 * unit,) * 4
+        flat_low_fraction, flat_late_fraction = 0.6, 0.1
+    elif mix == "prone_compact_v1":
+        unit = num_envs // 32
+        flat, guided, free = 16 * unit, 8 * unit, 8 * unit
+        guided_directions = (unit, 5 * unit, unit, unit)
+        free_directions = (unit, 5 * unit, unit, unit)
+        flat_low_fraction, flat_late_fraction = 0.6, 0.1
+    elif mix == "flat_prone_specialist_v1":
+        unit = num_envs // 32
+        flat, guided, free = 24 * unit, 4 * unit, 4 * unit
+        guided_directions = (unit,) * 4
+        free_directions = (unit,) * 4
+        flat_low_fraction, flat_late_fraction = 0.6, 0.1
+    elif mix == "side_specialist_v1":
+        unit = num_envs // 32
+        flat, guided, free = 4 * unit, 16 * unit, 12 * unit
+        guided_directions = (2 * unit, 2 * unit, 6 * unit, 6 * unit)
+        free_directions = (unit, unit, 5 * unit, 5 * unit)
+        flat_low_fraction, flat_late_fraction = 0.6, 0.1
+    elif mix == "guided_side_specialist_v1":
+        unit = num_envs // 32
+        flat, guided, free = 4 * unit, 24 * unit, 4 * unit
+        guided_directions = (2 * unit, 2 * unit, 10 * unit, 10 * unit)
+        free_directions = (unit,) * 4
+        flat_low_fraction, flat_late_fraction = 0.6, 0.1
+    elif mix == "guided_left_side_specialist_v1":
+        unit = num_envs // 32
+        flat, guided, free = 4 * unit, 24 * unit, 4 * unit
+        guided_directions = (2 * unit, 2 * unit, 18 * unit, 2 * unit)
+        free_directions = (unit,) * 4
+        flat_low_fraction, flat_late_fraction = 0.6, 0.1
+    else:
+        raise ValueError(f"unknown A6 reset mix: {mix}")
     rows = np.zeros((num_envs, 3), dtype=np.int64)
     rows[flat : flat + guided, 0] = 1
     rows[flat + guided :, 0] = 2
     rows[:flat, 1] = np.repeat(np.arange(4), flat // 4)
-    rows[flat : flat + guided, 1] = np.repeat((0, 1), guided // 2)
-    rows[flat + guided :, 1] = np.repeat(np.arange(4), free // 4)
-    # Preserve low/middle/late flat starts to rehearse the original expert.
+    if mix in ("prone_compact_v1", "flat_prone_specialist_v1"):
+        rows[:flat, 1] = 1
+    rows[flat : flat + guided, 1] = np.repeat(np.arange(4), guided_directions)
+    rows[flat + guided :, 1] = np.repeat(np.arange(4), free_directions)
+    # Retain all flat start tiers. V4 prioritizes low poses that were rare in
+    # the guided-heavy V3 mix, without turning every flat start into a fall.
     flat_ids = np.arange(flat).reshape(4, flat // 4)
     for ids in flat_ids:
-        rows[ids[round(len(ids) * 0.4) : round(len(ids) * 0.8)], 2] = 1
-        rows[ids[round(len(ids) * 0.8) :], 2] = 2
+        low_end = round(len(ids) * flat_low_fraction)
+        late_start = len(ids) - round(len(ids) * flat_late_fraction)
+        rows[ids[low_end:late_start], 2] = 1
+        rows[ids[late_start:], 2] = 2
     if postescape_prone:
-        # One quarter of guided-prone worlds rehearse standing from poses
-        # actually reached after 25 contact-free exit steps. Stratum 3 is
+        # Rehearse standing from physically reached escape poses. Stratum 3 is
         # reserved for this replay and never appears in ordinary playback.
         prone = np.flatnonzero((rows[:, 0] == 1) & (rows[:, 1] == 1))
-        rows[prone[::4], 2] = 3
+        rows[prone[::postescape_stride], 2] = 3
     return rows
 
 
@@ -73,6 +149,57 @@ def edge_offset_for_iteration(
     return max_offset_m * max(0.0, 1.0 - elapsed_anneal / anneal_updates)
 
 
+def side_bridge_tiers(tier, scene, direction, edge_offset_m):
+    """Use the half-offset bridge instead of centred guided-side resets."""
+    if edge_offset_m <= 0.05:
+        return tier
+    return torch.where((scene == 1) & (direction >= 2) & (tier == 3), 2, tier)
+
+
+def side_center_tiers(tier, scene, direction):
+    """Give every guided-side world a centered board without changing others."""
+    return torch.where(
+        (scene == 1) & (direction >= 2), torch.full_like(tier, 3), tier
+    )
+
+
+def side_staged_offset_scale(tier, scene, direction, edge_offset_m):
+    """Use 1.0/0.75/0.5 side difficulty before exposing centred starts."""
+    scale = torch.where(tier < 2, 1.0, torch.where(tier == 2, 0.5, 0.0))
+    if edge_offset_m <= 0.05:
+        return scale
+    guided_side = (scene == 1) & (direction >= 2)
+    side_scale = torch.where(tier < 2, 1.0, torch.where(tier == 2, 0.75, 0.5))
+    return torch.where(guided_side, side_scale, scale)
+
+
+def planar_escape_axis(root_quat, direction):
+    """Stable horizontal body axis for a lying robot's guided-board exit.
+
+    The anatomical left/right axis is nearly vertical in a side-lying pose.
+    Its tiny XY projection used to choose a noisy, effectively random plate
+    edge. The torso-up axis is horizontal in that pose and supplies the same
+    left/right board-exit direction without that singularity.
+    """
+    left = quat_apply(
+        root_quat,
+        root_quat.new_tensor((0.0, 1.0, 0.0)).expand(len(root_quat), -1),
+    )[:, :2]
+    up = quat_apply(
+        root_quat,
+        root_quat.new_tensor((0.0, 0.0, 1.0)).expand(len(root_quat), -1),
+    )[:, :2]
+    # A direction label also covers middle/late recovery-bank poses which can
+    # already be upright. Use body-up only while its planar projection is
+    # reliable; then the ordinary left/right axis is stable again.
+    side_up = (direction >= 2) & (up.norm(dim=-1) >= 0.20)
+    axis = torch.where(side_up[:, None], up, left)
+    norm = axis.norm(dim=-1, keepdim=True)
+    if (norm < 0.20).any():
+        raise ValueError("A6 planar escape axis is ill-defined for this reset pose")
+    return axis / norm
+
+
 def _bank(path: Path, device: str) -> dict[str, torch.Tensor]:
     if not path.is_file():
         raise FileNotFoundError(
@@ -92,7 +219,7 @@ def initialize(env, layout=None) -> None:
     if layout is None:
         scene, direction, stratum = quotas(env.num_envs)
     else:
-        # Playback-only layout; training keeps the frozen 50/25/25 quotas.
+        # Explicit layouts are used by both evaluation and training curricula.
         rows = np.asarray(layout, dtype=np.int64)
         if (
             rows.shape != (env.num_envs, 3)
@@ -109,6 +236,9 @@ def initialize(env, layout=None) -> None:
     env._a6_stratum = torch.as_tensor(stratum, device=dev)
     env._a6_source = torch.zeros(n, device=dev, dtype=torch.long)
     env._a6_postescape_start = env._a6_stratum == 3
+    env._a6_postescape_bank_index = torch.full(
+        (n,), -1, dtype=torch.long, device=dev
+    )
     for d in range(4):
         ids = torch.where((env._a6_stratum == 0) & (env._a6_direction == d))[0]
         env._a6_source[ids[: round(len(ids) * 0.25)]] = 1
@@ -174,6 +304,24 @@ def initialize(env, layout=None) -> None:
     env._a6_collision_geoms = torch.tensor(collision, device=dev, dtype=torch.long)
     if not collision:
         raise ValueError("Unitree G1 MJCF has no collision geoms")
+    core_names_expected = {
+        "pelvis_collision", "torso_collision", "head_collision",
+        "left_hip_collision", "right_hip_collision",
+        "left_thigh_collision", "right_thigh_collision",
+    }
+    core_local_ids, core_names = robot.find_geoms(
+        (r"(pelvis|torso|head|(left|right)_(hip|thigh))_collision",)
+    )
+    if set(core_names) != core_names_expected:
+        raise ValueError(f"Expected seven prone core collision geoms: {core_names}")
+    core_globals = {int(robot.indexing.geom_ids[i]) for i in core_local_ids}
+    env._a6_prone_core_collision_indices = torch.tensor(
+        [i for i, geom_id in enumerate(collision) if geom_id in core_globals],
+        device=dev,
+        dtype=torch.long,
+    )
+    if len(env._a6_prone_core_collision_indices) != len(core_names_expected):
+        raise ValueError("Prone core collision geoms are not in the robot bounds")
     arm_local_ids, arm_names = robot.find_geoms(
         (r"(left|right)_(shoulder_yaw|elbow_yaw|wrist|hand)_collision",)
     )
@@ -215,8 +363,12 @@ def initialize(env, layout=None) -> None:
         device=dev,
     )
     env._a6_initial_root_xy = torch.zeros(n, 2, device=dev)
+    env._a6_initial_plate_xy = torch.zeros(n, 2, device=dev)
+    env._a6_best_plate_shift = torch.zeros(n, device=dev)
     env._a6_initial_lateral_axis_xy = torch.zeros(n, 2, device=dev)
     env._a6_initial_edge_offset_m = torch.zeros(n, device=dev)
+    # Fixed per-world tiers keep curriculum accounting stable across resets.
+    env._a6_edge_tier = torch.zeros(n, device=dev, dtype=torch.long)
     env._a6_initial_plate_z = torch.zeros(n, device=dev)
     for name, dtype in (
         ("ever_contact", torch.bool),
@@ -247,6 +399,10 @@ def reset_a6_scene(
     aligned_edge=False,
     footprint_edge=False,
     footprint_overlap_m=0.25,
+    hard_mix=False,
+    side_bridge_curriculum=False,
+    side_staged_bridge=False,
+    side_center_only=False,
 ) -> None:
     initialize(env, layout=layout)
     env._a6_edge_curriculum = edge_curriculum
@@ -265,6 +421,29 @@ def reset_a6_scene(
         if env_ids is None
         else env_ids.long()
     )
+    # Guided starts: 50% at the curriculum's easy offset, 25% halfway in,
+    # and 25% with the plate centred on the robot. The latter two tiers
+    # supply hard examples from the first update without blocking the gate.
+    tier = ids.remainder(4) if hard_mix else torch.zeros_like(ids)
+    if side_center_only:
+        # A proprio-only actor cannot know which offset was sampled at reset.
+        # Keep every guided-side teacher label on the centred target geometry.
+        tier = side_center_tiers(tier, env._a6_scene[ids], env._a6_direction[ids])
+    if side_bridge_curriculum and not side_staged_bridge and edge_offset_m > 0.05:
+        # Side-lying cannot learn from a centred board while the half-offset
+        # starts still fail. Reallocate that quarter to the bridge tier.
+        tier = side_bridge_tiers(
+            tier, env._a6_scene[ids], env._a6_direction[ids], edge_offset_m
+        )
+    env._a6_edge_tier[ids] = tier
+    offset_scale = (
+        side_staged_offset_scale(
+            tier, env._a6_scene[ids], env._a6_direction[ids], edge_offset_m
+        )
+        if side_staged_bridge
+        else torch.where(tier < 2, 1.0, torch.where(tier == 2, 0.5, 0.0))
+    )
+    offsets = offset_scale * edge_offset_m
     # A normal guided-prone world may temporarily enter the postescape
     # controller phase. A new episode must restore its original reset type.
     env._a6_postescape_start[ids] = env._a6_stratum[ids] == 3
@@ -301,6 +480,7 @@ def reset_a6_scene(
             ]
             q[mask] = natural[index]
     postescape = env._a6_postescape_start[ids]
+    env._a6_postescape_bank_index[ids] = -1
     if postescape.any():
         bank = env._a6_postescape_bank
         index = torch.randint(
@@ -310,6 +490,7 @@ def reset_a6_scene(
             device=env.device,
         )
         q[postescape] = bank["qpos"][index]
+        env._a6_postescape_bank_index[ids[postescape]] = index
         qvel[postescape] = bank["qvel"][index]
         saved_plate[postescape] = bank["plate_xyz"][index]
     robot = env.scene["robot"]
@@ -343,11 +524,7 @@ def reset_a6_scene(
     free.write_root_state_to_sim(free_state, env_ids=ids)
     env.sim.forward()
     pos, ext = robot_bounds(env)
-    lateral = quat_apply(
-        root[:, 3:7],
-        root.new_tensor((0.0, 1.0, 0.0)).expand(len(ids), -1),
-    )[:, :2]
-    lateral = lateral / lateral.norm(dim=-1, keepdim=True).clamp_min(1e-6)
+    lateral = planar_escape_axis(root[:, 3:7], env._a6_direction[ids])
     guided_rows = env._a6_scene[ids] == 1
     if aligned_edge and edge_offset_m > 0:
         # The board is axis-aligned in world coordinates. Moving its centre
@@ -394,18 +571,18 @@ def reset_a6_scene(
                 root.new_full((len(ids),), PLATE_HALF_SIZE[1]),
             )
             easy_shift = (far_side - footprint_overlap_m + parallel_half).clamp_min(0.0)
-            shift = easy_shift * (edge_offset_m / 0.25)
+            shift = easy_shift * (offsets / 0.25)
         else:
-            shift_x = min(edge_offset_m * (0.38 / 0.25), 0.60)
+            shift_x = (offsets * (0.38 / 0.25)).clamp(max=0.60)
             shift = torch.where(
                 dominant_x,
-                torch.full_like(dominant_x, shift_x, dtype=root.dtype),
-                torch.full_like(dominant_x, edge_offset_m, dtype=root.dtype),
+                shift_x,
+                offsets,
             )
         board_xy = root[:, :2] + guided_rows[:, None] * shift[:, None] * exit_axis
         lateral = exit_axis
     else:
-        board_xy = root[:, :2] + guided_rows[:, None] * edge_offset_m * lateral
+        board_xy = root[:, :2] + guided_rows[:, None] * offsets[:, None] * lateral
     covered = (
         (pos[ids, :, :2] - board_xy[:, None, :]).abs()
         < ext[ids, :, :2] + root.new_tensor(PLATE_HALF_SIZE[:2])
@@ -440,9 +617,11 @@ def reset_a6_scene(
     # Frozen per-episode references: the guided plate has no horizontal DoF,
     # while the robot's initial body frame defines a useful prone escape side.
     env._a6_initial_root_xy[ids] = robot.data.root_link_pos_w[ids, :2]
+    env._a6_initial_plate_xy[ids] = board[:, :2]
+    env._a6_best_plate_shift[ids] = 0
     env._a6_initial_lateral_axis_xy[ids] = lateral
     env._a6_initial_edge_offset_m[ids] = (
-        guided_rows * shift if aligned_edge and edge_offset_m > 0 else guided_rows * edge_offset_m
+        guided_rows * shift if aligned_edge and edge_offset_m > 0 else guided_rows * offsets
     )
     env._a6_initial_plate_z[ids] = board[:, 2]
     pos, ext, plate_pos, plate_ext = plate_footprint_inputs(env)

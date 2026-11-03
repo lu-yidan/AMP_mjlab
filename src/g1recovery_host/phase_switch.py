@@ -5,6 +5,44 @@ from __future__ import annotations
 import torch
 
 
+def postescape_live_observation_enabled(checkpoint):
+    """Recover the effective training setting, including historical replay runs.
+
+    Early checkpoints stored the CLI flag, although training implicitly
+    enabled live proprioception whenever a postescape bank was supplied.
+    """
+    return bool(
+        checkpoint.get("a6_postescape_live_obs_v1")
+        or checkpoint.get("a6_proprio_postescape_bank_sha256")
+        or "_proprio_postescape_replay_v1" in checkpoint.get("reward_variant", "")
+    )
+
+
+def reset_actor_history_from_proprio(env, ids):
+    """Restart only the actor's six-frame memory after a proprio-only cue.
+
+    The decision is made by the caller from actor observations. This function
+    never reads board state or changes physical state, reward state, motor
+    activation, critic history, or simulator escape latches.
+    """
+    if len(ids):
+        manager = env.observation_manager
+        for buffer in manager._group_obs_term_history_buffer["actor"].values():
+            buffer.reset(batch_ids=ids)
+        actor = manager.compute_group("actor", update_history=True, env_ids=ids)
+        env.obs_buf["actor"] = actor
+    return env.obs_buf
+
+
+def reset_observation_history_from_proprio(env, ids):
+    """Reset both observation groups, without changing controller or physics."""
+    if len(ids):
+        manager = env.observation_manager
+        manager.reset(env_ids=ids)
+        env.obs_buf = manager.compute(update_history=True, env_ids=ids)
+    return env.obs_buf
+
+
 def reset_guided_history_after_escape(env, escaped_before, done=None, *, direction=1):
     """Start a guided recovery phase without moving or resetting the robot.
 

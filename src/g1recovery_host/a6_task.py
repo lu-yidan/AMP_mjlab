@@ -6,7 +6,7 @@ import torch
 from mjlab.entity import EntityCfg
 from mjlab.managers.event_manager import EventTermCfg
 from mjlab.managers.metrics_manager import MetricsTermCfg
-from mjlab.managers.observation_manager import ObservationTermCfg
+from mjlab.managers.observation_manager import ObservationGroupCfg, ObservationTermCfg
 from mjlab.managers.reward_manager import RewardTermCfg
 from mjlab.managers.termination_manager import TerminationTermCfg
 from mjlab.sensor import ContactMatch, ContactSensorCfg
@@ -15,7 +15,8 @@ from mjlab.utils.lab_api.math import quat_apply_inverse
 from .a6_geometry import free_plate_spec, guided_plate_spec, scene_spec
 from .a6_reset import focused_guided_layout, reset_a6_scene
 from .a6_reward import a6_invalid, a6_metric, a6_reward, a6_substep
-from .task import host_ground29_env_cfg
+from .model import HOST29_JOINT_NAMES
+from .task import host_frame, host_ground29_env_cfg
 
 
 def plate_frame(env):
@@ -48,6 +49,22 @@ def plate_frame(env):
     return result * active[:, None]
 
 
+def motor_torque_frame(env):
+    """Measured actuator torque in joint order, scaled to a comparable range.
+
+    This is an internal motor signal. The simulator's joint-space actuator
+    force corresponds to a real robot's estimated joint effort, subject to
+    later hardware interface and noise validation.
+    """
+    torque = env.scene["robot"].data.qfrc_actuator
+    if torque.shape[1] != len(HOST29_JOINT_NAMES):
+        raise ValueError("A6 motor torque does not follow the 29-axis joint order")
+    active = env.action_manager.get_term("joint_pos").real_steps > 30
+    if getattr(env, "_a6_postescape_live_obs_v1", False):
+        active |= env._a6_postescape_start
+    return (torque * 0.01).clamp(-1.5, 1.5) * active[:, None]
+
+
 def _contact(
     name: str, primary: ContactMatch, secondary: ContactMatch, fields=("found", "force")
 ):
@@ -68,16 +85,25 @@ def host_a6_env_cfg(
     preserve_pose=False,
     edge_curriculum=False,
     plate_observation=False,
+    critic_plate_observation=False,
+    proprio_motor_torque=False,
     focused_guided=False,
+    reset_mix="focused_v1",
     postescape_prone=False,
+    postescape_stride=4,
     safe_actions=False,
     prone_full_arms=False,
     supine_full_arms=False,
     aligned_edge=False,
     lateral_actions=False,
     lift_guard=False,
+    privileged_guided_actions=True,
     footprint_edge=False,
     footprint_overlap_m=0.25,
+    hard_mix=False,
+    side_bridge_curriculum=False,
+    side_staged_bridge=False,
+    side_center_only=False,
 ):
     if arm not in ("G+", "G-"):
         raise ValueError("A6 arm must be G+ or G-")
@@ -87,14 +113,30 @@ def host_a6_env_cfg(
         raise ValueError("aligned edge requires A6 edge curriculum")
     if footprint_edge and not aligned_edge:
         raise ValueError("footprint edge requires aligned edge")
+    if hard_mix and not (edge_curriculum and aligned_edge):
+        raise ValueError("hard mix requires the aligned guided-edge curriculum")
+    if side_bridge_curriculum and not hard_mix:
+        raise ValueError("side bridge curriculum requires the guided hard mix")
+    if side_staged_bridge and not side_bridge_curriculum:
+        raise ValueError("side staged bridge requires the side bridge curriculum")
+    if side_center_only and (not hard_mix or side_bridge_curriculum):
+        raise ValueError("center-only side resets require hard mix without the side bridge")
     if lateral_actions and not safe_actions:
         raise ValueError("lateral actions require guided safe actions")
     if prone_full_arms and not safe_actions:
         raise ValueError("prone full arms require guided safe actions")
     if supine_full_arms and not safe_actions:
         raise ValueError("supine full arms require guided safe actions")
-    if postescape_prone and not (focused_guided and plate_observation):
-        raise ValueError("postescape prone replay requires focused guided layout and plate observation")
+    if postescape_prone and not (focused_guided and (plate_observation or critic_plate_observation)):
+        raise ValueError("postescape prone replay requires a guided layout and plate-aware critic")
+    if critic_plate_observation and plate_observation:
+        raise ValueError("use a separate critic plate observation only with a proprioceptive actor")
+    if proprio_motor_torque and (plate_observation or not critic_plate_observation):
+        raise ValueError("motor torque mode requires separate privileged critic observations")
+    if not privileged_guided_actions and (safe_actions or lift_guard):
+        raise ValueError("privilege-free actions cannot use scene-dependent scaling or plate lift guard")
+    if reset_mix != "focused_v1" and not focused_guided:
+        raise ValueError("A6 reset mix requires focused guided layout")
     cfg = host_ground29_env_cfg(num_envs, seed)
     if safe_actions:
         cfg.actions["joint_pos"].guided_arm_scale = 0.25
@@ -107,9 +149,23 @@ def host_a6_env_cfg(
     if supine_full_arms:
         cfg.actions["joint_pos"].guided_supine_arm_scale = 1.0
     cfg.actions["joint_pos"].guided_lift_guard = lift_guard
+    cfg.actions["joint_pos"].privileged_guided_actions = privileged_guided_actions
     if plate_observation:
         cfg.observations["actor"].terms["plate_frame"] = ObservationTermCfg(
             func=plate_frame
+        )
+    if proprio_motor_torque:
+        cfg.observations["actor"].terms["motor_torque"] = ObservationTermCfg(
+            func=motor_torque_frame
+        )
+    if critic_plate_observation:
+        critic_terms = {"host_frame": ObservationTermCfg(func=host_frame)}
+        if proprio_motor_torque:
+            critic_terms["motor_torque"] = ObservationTermCfg(func=motor_torque_frame)
+        critic_terms["plate_frame"] = ObservationTermCfg(func=plate_frame)
+        cfg.observations["critic"] = ObservationGroupCfg(
+            terms=critic_terms,
+            history_length=6,
         )
     cfg.scene.spec_fn = scene_spec
     cfg.scene.entities.update(
@@ -167,12 +223,19 @@ def host_a6_env_cfg(
                 "aligned_edge": aligned_edge,
                 "footprint_edge": footprint_edge,
                 "footprint_overlap_m": footprint_overlap_m,
+                "hard_mix": hard_mix,
+                "side_bridge_curriculum": side_bridge_curriculum,
+                "side_staged_bridge": side_staged_bridge,
+                "side_center_only": side_center_only,
             },
         )
     }
     if focused_guided:
         cfg.events["reset_scene"].params["layout"] = focused_guided_layout(
-            num_envs, postescape_prone=postescape_prone
+            num_envs,
+            postescape_prone=postescape_prone,
+            mix=reset_mix,
+            postescape_stride=postescape_stride,
         )
     cfg.rewards = {
         group: RewardTermCfg(

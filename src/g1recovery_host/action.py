@@ -27,6 +27,8 @@ class HostActionCfg(RelativeJointPositionActionCfg):
     guided_hip_scale: float = 1.0
     guided_lateral_scale: float = 1.0
     guided_lift_guard: bool = False
+    privileged_guided_actions: bool = True
+    diagnostic_guided_assist: bool = False
 
     def build(self, env):
         return HostAction(self, env)
@@ -145,6 +147,7 @@ class HostAction(RelativeJointPositionAction):
                 or self.cfg.guided_prone_arm_scale is not None
                 or self.cfg.guided_supine_arm_scale is not None
             )
+            and self.cfg.privileged_guided_actions
             and hasattr(self._env, "_a6_scene")
         ):
             rows = torch.where(
@@ -188,7 +191,7 @@ class HostAction(RelativeJointPositionAction):
         )
         position_delta = self._processed_actions
         self.guided_lift_guard_factor.fill_(1.0)
-        if self.cfg.guided_lift_guard and hasattr(self._env, "_a6_scene"):
+        if self.cfg.guided_lift_guard and self.cfg.privileged_guided_actions and hasattr(self._env, "_a6_scene"):
             guided = (self._env._a6_scene == 1) & ~self._env._a6_escaped
             if guided.any():
                 current_z = self._env.sim.data.geom_xpos[
@@ -211,7 +214,9 @@ class HostAction(RelativeJointPositionAction):
             self.assist_force * (self._active & upright) / len(self._torso_ids)
         )
         forces[:, :, 2] = force_per_body
-        if hasattr(self._env, "_a6_scene"):
+        if (
+            self.cfg.privileged_guided_actions or self.cfg.diagnostic_guided_assist
+        ) and hasattr(self._env, "_a6_scene"):
             guided = (
                 (self._env._a6_scene == 1)
                 & ~self._env._a6_escaped

@@ -44,7 +44,7 @@ def beta_obs(env):
 
 
 def host_frame(env):
-    """One 76-value HoST frame in the original feature order."""
+    """One HoST frame: 76 values for 23 DoF or 94 for 29 DoF."""
     action_term = env.action_manager.get_term("joint_pos")
     frame = torch.cat(
         (

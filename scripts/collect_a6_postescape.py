@@ -11,8 +11,17 @@ import numpy as np
 import torch
 from mjlab.envs import ManagerBasedRlEnv
 
+from g1recovery_host.a6_geometry import PRONE_EXIT_CONFIRM_STEPS
 from g1recovery_host.a6_task import host_a6_env_cfg
+from g1recovery_host.phase_switch import (
+    postescape_live_observation_enabled,
+    reset_prone_history_after_escape,
+)
 from g1recovery_host.ppo import HostPolicy
+from g1recovery_host.proprio_recovery import (
+    load_recovery_controller,
+    validate_controller_provenance,
+)
 
 
 def main() -> None:
@@ -25,26 +34,41 @@ def main() -> None:
     parser.add_argument("--total-steps", type=int, default=1500)
     parser.add_argument("--max-samples", type=int, default=512)
     parser.add_argument("--guided-offset-m", type=float, default=0.15)
+    parser.add_argument("--postescape-delay-steps", type=int, default=0)
     parser.add_argument("--mean-action", action="store_true")
+    parser.add_argument("--proprio-recovery-controller", type=Path,
+                        help="apply the same frozen proprio controller used by the source checkpoint")
     args = parser.parse_args()
     if args.num_envs < 32 or args.num_envs % 32:
         parser.error("--num-envs must be a positive multiple of 32")
     if args.total_steps <= 0 or args.max_samples <= 0:
         parser.error("step and sample limits must be positive")
+    if args.postescape_delay_steps < 0:
+        parser.error("--postescape-delay-steps must be nonnegative")
     if not 0 <= args.guided_offset_m <= 0.5:
         parser.error("--guided-offset-m must be in [0, 0.5]")
     torch.manual_seed(args.seed)
     checkpoint = torch.load(
         args.checkpoint, map_location=args.device, weights_only=False
     )
+    validate_controller_provenance(checkpoint, args.proprio_recovery_controller)
+    recovery_controller = (
+        load_recovery_controller(
+            args.proprio_recovery_controller, args.num_envs, args.device
+        )[0]
+        if args.proprio_recovery_controller is not None else None
+    )
     variant = checkpoint["reward_variant"]
+    torque_v2 = checkpoint.get("observation_contract") == "proprio_torque_actor_privileged_critic_v2"
+    proprio = torque_v2 or checkpoint.get("observation_contract") == "proprio_actor_privileged_critic_v1"
     if checkpoint.get("model_source") != "unitree_g1_29" or not (
         "_staged_escape_v5" in variant and "_v8_edge_curriculum_v1" in variant
     ):
         raise ValueError("expected a 29-DoF staged-v5 A6 checkpoint")
     policy = HostPolicy(
-        612,
+        738 if torque_v2 else 564 if proprio else 612,
         29,
+        critic_obs_dim=(786 if torque_v2 else 612) if proprio else None,
         log_std_bounds=(-2.3, math.log(checkpoint.get("action_std_max", 0.7))),
         upper_residual=True,
         waist_residual_scale=5.0,
@@ -57,12 +81,16 @@ def main() -> None:
         args.seed,
         arm=checkpoint["arm"],
         edge_curriculum=True,
-        plate_observation=True,
-        safe_actions="_safe_actions_v1" in variant,
-        prone_full_arms="_prone_full_arms_v1" in variant,
+        plate_observation=not proprio,
+        critic_plate_observation=proprio,
+        proprio_motor_torque=torque_v2,
+        safe_actions="_safe_actions_v1" in variant and not proprio,
+        prone_full_arms="_prone_full_arms_v1" in variant and not proprio,
+        supine_full_arms="_supine_full_arms_v1" in variant and not proprio,
         aligned_edge="_aligned_edge_v1" in variant,
-        lateral_actions="_lateral_actions_v1" in variant,
-        lift_guard="_lift_guard_v1" in variant,
+        lateral_actions="_lateral_actions_v1" in variant and not proprio,
+        lift_guard="_lift_guard_v1" in variant and not proprio,
+        privileged_guided_actions=not proprio,
         footprint_edge="_footprint_edge_v1" in variant,
         footprint_overlap_m=checkpoint.get("a6_footprint_overlap_m", 0.25),
     )
@@ -79,14 +107,18 @@ def main() -> None:
         env._a6_staged_escape_v5 = True
         env._a6_knee_straight_prior_v1 = "_knee_straight_prior_v1" in variant
         env._a6_arm_extraction_v1 = "_arm_extraction_v1" in variant
+        env._a6_prone_flexible_exit_v1 = "_prone_flexible_exit_v1" in variant
+        env._a6_scene_phase_reward_v1 = "_scene_phase_reward_v1" in variant
+        env._a6_postescape_live_obs_v1 = postescape_live_observation_enabled(checkpoint)
         env._a6_edge_offset_m = args.guided_offset_m
-        obs, _ = env.reset()
         term = env.action_manager.get_term("joint_pos")
         term.beta.fill_(float(checkpoint["curriculum"]["beta"].float().mean()))
         term.assist_force.zero_()
         term.guided_escape_assist_force.zero_()
         term.guided_escape_assist_speed_target.zero_()
+        obs, _ = env.reset()
         steps_run = 0
+        escape_step = torch.full((args.num_envs,), -1, device=args.device, dtype=torch.long)
         for step in range(args.total_steps):
             with torch.no_grad():
                 before = env._a6_escaped.clone()
@@ -95,12 +127,29 @@ def main() -> None:
                     if args.mean_action
                     else policy.distribution(obs["actor"]).sample()
                 )
+                if recovery_controller is not None:
+                    action, _ = recovery_controller.apply(action)
                 obs, _, terminated, truncated, _ = env.step(action)
+                if recovery_controller is not None:
+                    recovery_controller.observe(
+                        obs["actor"], term.real_steps,
+                        eligible=~(terminated | truncated),
+                    )
+                if "_phase_history_reset_v1" in variant:
+                    obs, _ = reset_prone_history_after_escape(
+                        env, before, terminated | truncated
+                    )
+                new_escape = ~before & env._a6_escaped & ~env._a6_invalid
+                escape_step[new_escape] = step
                 selected = (
-                    ~before
+                    (escape_step >= 0)
+                    & (step - escape_step == args.postescape_delay_steps)
                     & env._a6_escaped
                     & ~env._a6_invalid
-                    & (env._a6_clear_age >= 25)
+                    & (env._a6_clear_age >= (
+                        PRONE_EXIT_CONFIRM_STEPS
+                        if env._a6_prone_flexible_exit_v1 else 25
+                    ))
                 ).nonzero(as_tuple=False).squeeze(-1)
                 if len(selected):
                     selected = selected[: args.max_samples - sum(len(x) for x in poses)]
@@ -144,6 +193,9 @@ def main() -> None:
                     break
                 finished = (terminated | truncated).nonzero(as_tuple=False).squeeze(-1)
                 if len(finished):
+                    escape_step[finished] = -1
+                    if recovery_controller is not None:
+                        recovery_controller.reset(finished)
                     obs, _ = env.reset(env_ids=finished)
         if not poses:
             raise RuntimeError("no guided-prone escapes were collected")
@@ -155,7 +207,7 @@ def main() -> None:
         real_steps = np.concatenate(real_step_counts)[: args.max_samples]
         if qpos.shape[1] != 36 or qvel.shape[1] != 35:
             raise RuntimeError(f"unexpected 29-DoF state shape: {qpos.shape}, {qvel.shape}")
-        if actor_obs.shape != (len(qpos), 612):
+        if actor_obs.shape != (len(qpos), 738 if torque_v2 else 564 if proprio else 612):
             raise RuntimeError(f"unexpected actor history shape: {actor_obs.shape}")
         args.output.parent.mkdir(parents=True, exist_ok=True)
         np.savez_compressed(
@@ -176,7 +228,12 @@ def main() -> None:
             "steps_run": steps_run,
             "num_samples": len(qpos),
             "guided_offset_m": args.guided_offset_m,
+            "postescape_delay_steps": args.postescape_delay_steps,
             "mean_action": args.mean_action,
+            "proprio_recovery_controller": (
+                str(args.proprio_recovery_controller)
+                if args.proprio_recovery_controller is not None else None
+            ),
             "min_xy_clearance_m": float(best_xy_clearance.min()),
             "max_xy_clearance_m": float(best_xy_clearance.max()),
             "mean_root_height_m": float(qpos[:, 2].mean()),
