@@ -1,4 +1,4 @@
-"""K nominal terrain traversal: fixed five tiles, no resets, deterministic actor."""
+"""Matched-checkpoint terrain stress test, no resets, deterministic actor."""
 import argparse,json,hashlib
 from pathlib import Path
 import numpy as np
@@ -12,7 +12,12 @@ from mjlab.managers.event_manager import EventTermCfg
 from mjlab.utils.lab_api.math import quat_apply_inverse,yaw_quat
 from src.amp_supermimic.inference import load_policy
 from src.tasks.amp_loco.mdp.terrain_tracking import ground_height
-p=argparse.ArgumentParser();p.add_argument('--checkpoint',required=True);p.add_argument('--output',required=True);p.add_argument('--name',default='K');p.add_argument('--backend',choices=['amp','supermimic'],default='supermimic');p.add_argument('--speed',type=float,default=1.);p.add_argument('--no-video',action='store_true');a=p.parse_args()
+p=argparse.ArgumentParser();p.add_argument('--checkpoint',required=True);p.add_argument('--output',required=True);p.add_argument('--name',default='K');p.add_argument('--backend',choices=['amp','supermimic'],default='supermimic');p.add_argument('--speed',type=float,default=1.);p.add_argument('--no-video',action='store_true')
+p.add_argument('--slope-degrees',type=float)
+p.add_argument('--step-height',type=float)
+a=p.parse_args()
+if a.slope_degrees is not None and not 0<a.slope_degrees<45:p.error('slope-degrees must be in (0,45)')
+if a.step_height is not None and not 0<a.step_height<=.4:p.error('step-height must be in (0,0.4]')
 out=Path(a.output);out.mkdir(parents=True,exist_ok=True)
 font=ImageFont.truetype('/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf',16)
 labels=['flat','slope','slope_inverted','stairs_inverted','stairs'];n=40
@@ -31,6 +36,9 @@ cfg.scene.terrain.terrain_generator.num_rows=5
 cfg.scene.terrain.terrain_generator.curriculum=True
 cfg.scene.terrain.terrain_generator.seed=12345
 cfg.scene.terrain.terrain_generator.difficulty_range=(.5,.5)
+for name,terrain in cfg.scene.terrain.terrain_generator.sub_terrains.items():
+ if name.startswith('slope') and a.slope_degrees is not None:terrain.slope_range=(float(np.tan(np.deg2rad(a.slope_degrees))),)*2
+ if name.startswith('stairs') and a.step_height is not None:terrain.step_height_range=(a.step_height,)*2
 flat=load_env_cfg('Unitree-G1-AMP-Flat',play=True)
 cfg.commands=flat.commands;cfg.events={'reset':EventTermCfg(func=reset,mode='reset')};cfg.terminations={};cfg.curriculum={};cfg.rewards={};cfg.metrics={}
 c=cfg.commands['twist'];c.heading_command=False;c.ranges.heading=None;c.rel_standing_envs=0;c.rel_heading_envs=0;c.resampling_time_range=(1000.,1000.);c.ranges.lin_vel_x=(0.,0.);c.ranges.lin_vel_y=(0.,0.);c.ranges.ang_vel_z=(0.,0.)
@@ -73,7 +81,7 @@ with torch.inference_mode():
   for w in writers.values():w.close()
   env.close()
 x=np.asarray(actual);u=np.asarray(up);pos=np.asarray(positions)
-result=dict(name=a.name,speed=a.speed,backend=a.backend,checkpoint=a.checkpoint,checkpoint_sha256=hashlib.sha256(Path(a.checkpoint).read_bytes()).hexdigest(),initial_state_hash=hashlib.sha256(initial.tobytes()).hexdigest(),protocol='Nominal controlled-column terrain seed12345, fixed difficulty0.5 (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; first trial of every type recorded, no selection by outcome.',cases={})
+result=dict(name=a.name,speed=a.speed,backend=a.backend,checkpoint=a.checkpoint,checkpoint_sha256=hashlib.sha256(Path(a.checkpoint).read_bytes()).hexdigest(),initial_state_hash=hashlib.sha256(initial.tobytes()).hexdigest(),protocol='Controlled-column terrain seed12345, fixed generator difficulty0.5 with explicit geometry overrides in terrain_parameters (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; when video is enabled, first trial of every type recorded, no selection by outcome.',cases={})
 for i,name in enumerate(labels):
  sl=slice(i*8,(i+1)*8);result['cases'][name]=dict(mean_vx=float(x[350:,sl,0].mean()),mae=np.abs(x[350:,sl]-[a.speed,0,0]).mean((0,1)).tolist(),upright_percent=float(u[350:,sl].mean()*100),displacement_x_m=float((pos[-1,sl,0]-pos[0,sl,0]).mean()),ground_ray_miss_percent=float(np.asarray(miss)[:,sl].mean()*100))
 b=np.asarray(bad);run=np.zeros(n,dtype=int);ever=np.zeros(n,dtype=bool)
@@ -83,6 +91,7 @@ for i,name in enumerate(labels):
  sl=slice(i*8,(i+1)*8)
  result['cases'][name]['sustained_fall_trials']=int(ever[sl].sum())
  result['cases'][name]['trials']=8
+result['terrain_parameters']={'slope_degrees':a.slope_degrees if a.slope_degrees is not None else float(np.rad2deg(np.arctan(.125))), 'step_height_m':a.step_height if a.step_height is not None else .05, 'step_width_m':.4}
 result['fall_definition']='root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz'
 result['video_recorded']=not a.no_video
 (out/'terrain.json').write_text(json.dumps(result,indent=2));np.savez_compressed(out/'traces.npz',actual=x,upright=u,positions=pos,height=np.asarray(heights),miss=np.asarray(miss),bad=b);print(json.dumps(result),flush=True)

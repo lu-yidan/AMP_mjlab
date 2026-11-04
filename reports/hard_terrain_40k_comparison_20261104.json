@@ -1,0 +1,1720 @@
+{
+  "date": "2026-11-04",
+  "names": {
+    "AMP-shared-terrain-40k": "AMP－分层 reset＋共享单判别器＋恢复均衡采样＋复杂地形高程 critic",
+    "SuperMimic-original-height-40k": "SuperMimic－共享单判别器＋复杂地形＋原高度奖励",
+    "SuperMimic-half-height-40k": "SuperMimic－共享单判别器＋复杂地形＋半强度高度奖励"
+  },
+  "checkpoint_iteration": 40000,
+  "environment_steps_nominal": 3932160000,
+  "timing": {
+    "AMP": {
+      "training_loop_hours": 22.96388888888889,
+      "wall_clock_hours": 23.60388888888889
+    },
+    "SuperMimic_original_height": {
+      "training_loop_hours": 27.426059782703717,
+      "wall_clock_hours": 29.585833333333333
+    },
+    "SuperMimic_half_height": {
+      "training_loop_hours": 27.244902840190463,
+      "wall_clock_hours": 29.406388888888888
+    }
+  },
+  "timing_method": "Training loop accumulators from iteration40000 logs; wall clock = process lstart to model_40000.pt mtime. AMP checkpoint iteration indexing includes 40001 rollouts vs SuperMimic40000 (one rollout,0.0025% difference). Timing includes shared-machine contention, not controlled exclusive-GPU benchmark. Setup, checkpoint/export/log overhead excluded from loop time but included in wall clock. GPUs RTX4090.",
+  "training_terrain": {
+    "max_slope_degrees": 11.309932474020215,
+    "step_height_range_m": [
+      0.025,
+      0.075
+    ],
+    "terrain_curriculum": false
+  },
+  "limitations": [
+    "OOD stress test of existing easy-terrain-trained models, not newly trained hard-terrain models.",
+    "One training seed; eight joint-position jitters per terrain, fixed map and forward commands.",
+    "No resets/pushes/domain randomization; 2s stand +10s forward, 1 and2m/s; does not test commanded turning or induced recovery.",
+    "Sustained-fall counts are not course-completion success rates; speed and ground excursions also reported.",
+    "One central ground ray miss among4800samples in SuperMimic half-height20deg/15cm invertedstairs1m/s (0.02083%); remaining cases had no central ray misses."
+  ],
+  "suggested_hard_training_curriculum": {
+    "slope_degrees": [
+      5,
+      10,
+      15,
+      20,
+      25
+    ],
+    "step_height_m": [
+      0.025,
+      0.05,
+      0.075,
+      0.1,
+      0.15
+    ],
+    "holdout_step_height_m": 0.2,
+    "both_inverted_and_upright": true,
+    "initial_hard_stairs_speed_mps": [
+      0.5,
+      1.0
+    ],
+    "note": "Proposed only; no training configuration or running jobs changed in this evaluation."
+  },
+  "results": [
+    {
+      "name": "AMP-shared-terrain-40k",
+      "speed": 1.0,
+      "backend": "amp",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_terrain_20261104/I-shared-terrain-40k.pt",
+      "checkpoint_sha256": "868dc3300a873acfd2e191ef266a305176ec9dd834f1205d2ba606000f05ee8b",
+      "initial_state_hash": "39535fb2c8293c12385c5340ea4ddef550d2bcdaf249f291749b154098dc6484",
+      "protocol": "Nominal controlled-column terrain seed12345, fixed difficulty0.5 (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 0.9940854907035828,
+          "mae": [
+            0.06167576026916504,
+            0.08781955080131593,
+            0.11589588340182308
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.676656723022461,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 0.9735336303710938,
+          "mae": [
+            0.08570545050501824,
+            0.09656539234869502,
+            0.12116377125485452
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.436420440673828,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 0.9187291264533997,
+          "mae": [
+            0.12774537220597268,
+            0.08614077021941194,
+            0.10546495819863957
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.257408142089844,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": 0.6201576590538025,
+          "mae": [
+            0.45231052465960236,
+            0.06512721887078078,
+            0.1324517100498124
+          ],
+          "upright_percent": 59.45,
+          "displacement_x_m": 6.990755081176758,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 4,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 0.8739821910858154,
+          "mae": [
+            0.24226658168599532,
+            0.12419059481640579,
+            0.2706117985164601
+          ],
+          "upright_percent": 82.15,
+          "displacement_x_m": 8.974990844726562,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 1,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 15.0,
+        "step_height_m": 0.1,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/AMP-shared-terrain-15deg-1mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.3700001835823059,
+        "slope_inverted": 0.3700002431869507,
+        "stairs_inverted": 0.40000003576278687,
+        "stairs": 0.3999999761581421
+      }
+    },
+    {
+      "name": "AMP-shared-terrain-40k",
+      "speed": 2.0,
+      "backend": "amp",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_terrain_20261104/I-shared-terrain-40k.pt",
+      "checkpoint_sha256": "868dc3300a873acfd2e191ef266a305176ec9dd834f1205d2ba606000f05ee8b",
+      "initial_state_hash": "39535fb2c8293c12385c5340ea4ddef550d2bcdaf249f291749b154098dc6484",
+      "protocol": "Nominal controlled-column terrain seed12345, fixed difficulty0.5 (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 2.021228313446045,
+          "mae": [
+            0.0747761048078537,
+            0.052661619226455514,
+            0.12365891864187142
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 18.95917510986328,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 2.0128355026245117,
+          "mae": [
+            0.09753296202421188,
+            0.08140705043766502,
+            0.14872856639004386
+          ],
+          "upright_percent": 99.85000000000001,
+          "displacement_x_m": 18.78968048095703,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 1.995404839515686,
+          "mae": [
+            0.09152610415220261,
+            0.07357005507277063,
+            0.1554223628765176
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 18.87324333190918,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": 0.7198154330253601,
+          "mae": [
+            1.3401791280092439,
+            0.15925926728836204,
+            0.5833400719904239
+          ],
+          "upright_percent": 36.4,
+          "displacement_x_m": 9.387895584106445,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 5,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 1.6977896690368652,
+          "mae": [
+            0.5596037122104899,
+            0.24429380943525758,
+            0.403315549172894
+          ],
+          "upright_percent": 70.5,
+          "displacement_x_m": 17.85179901123047,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 4,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 15.0,
+        "step_height_m": 0.1,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/AMP-shared-terrain-15deg-2mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.3700001835823059,
+        "slope_inverted": 0.3700002431869507,
+        "stairs_inverted": 0.40000003576278687,
+        "stairs": 0.40000003576278687
+      }
+    },
+    {
+      "name": "AMP-shared-terrain-40k",
+      "speed": 1.0,
+      "backend": "amp",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_terrain_20261104/I-shared-terrain-40k.pt",
+      "checkpoint_sha256": "868dc3300a873acfd2e191ef266a305176ec9dd834f1205d2ba606000f05ee8b",
+      "initial_state_hash": "3fc53db656eff469088d164e37ccf4615fbb68e1341b7f5a90b6eb0ad49a4ee1",
+      "protocol": "Controlled-column terrain seed12345, fixed generator difficulty0.5 with explicit geometry overrides in terrain_parameters (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 0.994642436504364,
+          "mae": [
+            0.06157473254203796,
+            0.08668905540820561,
+            0.11723895384432945
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.677553176879883,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 0.913276731967926,
+          "mae": [
+            0.12760278883203863,
+            0.12031182953515963,
+            0.1427908900081129
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.151238441467285,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 0.9268987774848938,
+          "mae": [
+            0.1357340789809823,
+            0.09165714086356093,
+            0.10948375055530675
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.076872825622559,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": 0.154375821352005,
+          "mae": [
+            0.8753924395774593,
+            0.1228649043253563,
+            0.35378368539564325
+          ],
+          "upright_percent": 16.55,
+          "displacement_x_m": 2.6800613403320312,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 7,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 0.05083063617348671,
+          "mae": [
+            0.9696892765261309,
+            0.2592566533136123,
+            0.8284245069893804
+          ],
+          "upright_percent": 6.0,
+          "displacement_x_m": 5.3466973304748535,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 20.0,
+        "step_height_m": 0.15,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/AMP-shared-terrain-20deg-1mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.5050001740455627,
+        "slope_inverted": 0.5050002336502075,
+        "stairs_inverted": 0.33750006556510925,
+        "stairs": 0.6000000238418579
+      }
+    },
+    {
+      "name": "AMP-shared-terrain-40k",
+      "speed": 2.0,
+      "backend": "amp",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_terrain_20261104/I-shared-terrain-40k.pt",
+      "checkpoint_sha256": "868dc3300a873acfd2e191ef266a305176ec9dd834f1205d2ba606000f05ee8b",
+      "initial_state_hash": "3fc53db656eff469088d164e37ccf4615fbb68e1341b7f5a90b6eb0ad49a4ee1",
+      "protocol": "Controlled-column terrain seed12345, fixed generator difficulty0.5 with explicit geometry overrides in terrain_parameters (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 2.0227465629577637,
+          "mae": [
+            0.0741284384727478,
+            0.052651852110924664,
+            0.12155038714009424
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 18.941986083984375,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 2.0209028720855713,
+          "mae": [
+            0.11193109804391861,
+            0.09756479216361186,
+            0.15239329242173152
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 18.133970260620117,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 1.9603036642074585,
+          "mae": [
+            0.1357027336359024,
+            0.09857819216566713,
+            0.18789605277707505
+          ],
+          "upright_percent": 99.45,
+          "displacement_x_m": 18.553789138793945,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": -0.030565470457077026,
+          "mae": [
+            2.0305654710596355,
+            0.05552982406155206,
+            0.15594635260706535
+          ],
+          "upright_percent": 0.0,
+          "displacement_x_m": 2.139603614807129,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 0.9013797640800476,
+          "mae": [
+            1.2275640225474818,
+            0.09148540052783209,
+            0.20540315413932966
+          ],
+          "upright_percent": 41.349999999999994,
+          "displacement_x_m": 11.311101913452148,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 5,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 20.0,
+        "step_height_m": 0.15,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/AMP-shared-terrain-20deg-2mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.505000114440918,
+        "slope_inverted": 0.5050002336502075,
+        "stairs_inverted": 0.33750006556510925,
+        "stairs": 0.75
+      }
+    },
+    {
+      "name": "AMP-shared-terrain-40k",
+      "speed": 1.0,
+      "backend": "amp",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_terrain_20261104/I-shared-terrain-40k.pt",
+      "checkpoint_sha256": "868dc3300a873acfd2e191ef266a305176ec9dd834f1205d2ba606000f05ee8b",
+      "initial_state_hash": "820f3ead40d69667f22b56a363c1ae9e4b6704ae9beb6683166a6add6f1c7bb2",
+      "protocol": "Controlled-column terrain seed12345, fixed generator difficulty0.5 with explicit geometry overrides in terrain_parameters (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; when video is enabled, first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 0.9956904053688049,
+          "mae": [
+            0.06188563206791878,
+            0.08681647064910794,
+            0.11630938847653306
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.680852890014648,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 0.7821658253669739,
+          "mae": [
+            0.27877771395421586,
+            0.2639843208119273,
+            0.1978008201407756
+          ],
+          "upright_percent": 99.75,
+          "displacement_x_m": 8.416244506835938,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 0.5200672149658203,
+          "mae": [
+            0.5458893567502965,
+            0.1820342737953688,
+            0.4083198082417985
+          ],
+          "upright_percent": 80.85,
+          "displacement_x_m": 5.886524200439453,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 2,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": 0.1453465074300766,
+          "mae": [
+            0.8877336552512279,
+            0.2305808528026646,
+            0.4768710245196707
+          ],
+          "upright_percent": 33.75,
+          "displacement_x_m": 1.5023549795150757,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 0.0680566132068634,
+          "mae": [
+            0.9618768485442051,
+            0.3537895182906595,
+            0.6663637560927819
+          ],
+          "upright_percent": 17.8,
+          "displacement_x_m": 4.952580451965332,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 7,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 25.0,
+        "step_height_m": 0.2,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/AMP-shared-terrain-25deg-1mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.6500001549720764,
+        "slope_inverted": 0.6151886582374573,
+        "stairs_inverted": 0.4999999701976776,
+        "stairs": 0.8000000715255737
+      }
+    },
+    {
+      "name": "AMP-shared-terrain-40k",
+      "speed": 2.0,
+      "backend": "amp",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_terrain_20261104/I-shared-terrain-40k.pt",
+      "checkpoint_sha256": "868dc3300a873acfd2e191ef266a305176ec9dd834f1205d2ba606000f05ee8b",
+      "initial_state_hash": "820f3ead40d69667f22b56a363c1ae9e4b6704ae9beb6683166a6add6f1c7bb2",
+      "protocol": "Controlled-column terrain seed12345, fixed generator difficulty0.5 with explicit geometry overrides in terrain_parameters (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; when video is enabled, first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 2.0237197875976562,
+          "mae": [
+            0.07458911448717118,
+            0.05271411780315975,
+            0.12250447443907615
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 18.99446678161621,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 1.4405277967453003,
+          "mae": [
+            0.6702201051692246,
+            0.15735087294093683,
+            0.2207708418825023
+          ],
+          "upright_percent": 73.5,
+          "displacement_x_m": 12.85264778137207,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 2,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 1.331802487373352,
+          "mae": [
+            0.7309297072262052,
+            0.17562543865387853,
+            0.24116468874979183
+          ],
+          "upright_percent": 67.05,
+          "displacement_x_m": 13.010834693908691,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 3,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": -0.008268557488918304,
+          "mae": [
+            2.008268557713037,
+            0.048306278775011376,
+            0.18179311878082352
+          ],
+          "upright_percent": 0.0,
+          "displacement_x_m": 1.7288854122161865,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 0.29163819551467896,
+          "mae": [
+            1.7786445753886073,
+            0.10553491460563964,
+            0.2525794062996065
+          ],
+          "upright_percent": 11.25,
+          "displacement_x_m": 6.437989234924316,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 7,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 25.0,
+        "step_height_m": 0.2,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/AMP-shared-terrain-25deg-2mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.6500002145767212,
+        "slope_inverted": 0.6843742728233337,
+        "stairs_inverted": 0.3999999761581421,
+        "stairs": 0.9000000357627869
+      }
+    },
+    {
+      "name": "SuperMimic-half-height-40k",
+      "speed": 1.0,
+      "backend": "supermimic",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/checkpoints/L-40k.pt",
+      "checkpoint_sha256": "6d42706aeaa6a5ad56ea3972813c97bf711f798b3e83c37f24c5cedaac255c5c",
+      "initial_state_hash": "39535fb2c8293c12385c5340ea4ddef550d2bcdaf249f291749b154098dc6484",
+      "protocol": "Nominal controlled-column terrain seed12345, fixed difficulty0.5 (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 0.979942262172699,
+          "mae": [
+            0.06044403931498527,
+            0.0758939948365587,
+            0.059098949130383514
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.505843162536621,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 0.9396477341651917,
+          "mae": [
+            0.09070378161966801,
+            0.0927556903017139,
+            0.09889234742592998
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.29462718963623,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 0.9905152916908264,
+          "mae": [
+            0.08810208740830422,
+            0.0858696290314183,
+            0.09760272562554383
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.437167167663574,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": 0.9287082552909851,
+          "mae": [
+            0.18290771727776156,
+            0.13981477440831078,
+            0.21264788943287566
+          ],
+          "upright_percent": 89.64999999999999,
+          "displacement_x_m": 8.681441307067871,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 1,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 1.0691190958023071,
+          "mae": [
+            0.1531335241496563,
+            0.11107675244408528,
+            0.19795459865673729
+          ],
+          "upright_percent": 85.05,
+          "displacement_x_m": 10.038957595825195,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 15.0,
+        "step_height_m": 0.1,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/SuperMimic-half-height-15deg-1mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.3700001835823059,
+        "slope_inverted": 0.3700002431869507,
+        "stairs_inverted": 0.4000000059604645,
+        "stairs": 0.4000000059604645
+      }
+    },
+    {
+      "name": "SuperMimic-half-height-40k",
+      "speed": 2.0,
+      "backend": "supermimic",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/checkpoints/L-40k.pt",
+      "checkpoint_sha256": "6d42706aeaa6a5ad56ea3972813c97bf711f798b3e83c37f24c5cedaac255c5c",
+      "initial_state_hash": "39535fb2c8293c12385c5340ea4ddef550d2bcdaf249f291749b154098dc6484",
+      "protocol": "Nominal controlled-column terrain seed12345, fixed difficulty0.5 (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 2.021369695663452,
+          "mae": [
+            0.061183983087539674,
+            0.09039143466507085,
+            0.08379045785743437
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 18.916488647460938,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 2.0177364349365234,
+          "mae": [
+            0.12034895759820938,
+            0.09034275669103409,
+            0.11880711984845402
+          ],
+          "upright_percent": 99.0,
+          "displacement_x_m": 18.752063751220703,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 1.9698132276535034,
+          "mae": [
+            0.12465018028020859,
+            0.13987053000178276,
+            0.12077667004234718
+          ],
+          "upright_percent": 97.35000000000001,
+          "displacement_x_m": 18.589078903198242,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": 0.9975919127464294,
+          "mae": [
+            1.0749109783629247,
+            0.19264085324082408,
+            0.3647298578087766
+          ],
+          "upright_percent": 34.0,
+          "displacement_x_m": 12.307880401611328,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 5,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 0.6641076803207397,
+          "mae": [
+            1.3980857207746957,
+            0.07661474447552064,
+            0.12320335937663185
+          ],
+          "upright_percent": 29.15,
+          "displacement_x_m": 10.81999683380127,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 7,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 15.0,
+        "step_height_m": 0.1,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/SuperMimic-half-height-15deg-2mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.3700001835823059,
+        "slope_inverted": 0.3700002431869507,
+        "stairs_inverted": 0.3750000298023224,
+        "stairs": 0.40000003576278687
+      }
+    },
+    {
+      "name": "SuperMimic-half-height-40k",
+      "speed": 1.0,
+      "backend": "supermimic",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/checkpoints/L-40k.pt",
+      "checkpoint_sha256": "6d42706aeaa6a5ad56ea3972813c97bf711f798b3e83c37f24c5cedaac255c5c",
+      "initial_state_hash": "3fc53db656eff469088d164e37ccf4615fbb68e1341b7f5a90b6eb0ad49a4ee1",
+      "protocol": "Controlled-column terrain seed12345, fixed generator difficulty0.5 with explicit geometry overrides in terrain_parameters (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 0.9811831116676331,
+          "mae": [
+            0.060966995626688,
+            0.07676659480933086,
+            0.05744043798643088
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.520995140075684,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 0.9322139620780945,
+          "mae": [
+            0.11304933853447437,
+            0.11602408886453486,
+            0.1527401458520253
+          ],
+          "upright_percent": 97.95,
+          "displacement_x_m": 9.238228797912598,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 0.7486709952354431,
+          "mae": [
+            0.3491127085872577,
+            0.2464933144984534,
+            0.48250009637952823
+          ],
+          "upright_percent": 66.35,
+          "displacement_x_m": 8.39689826965332,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 3,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": 0.08585416525602341,
+          "mae": [
+            0.943516896595349,
+            0.05010458505158021,
+            0.17640870590510166
+          ],
+          "upright_percent": 1.7999999999999998,
+          "displacement_x_m": 2.4749741554260254,
+          "ground_ray_miss_percent": 0.020833333333333336,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 0.034281156957149506,
+          "mae": [
+            1.0056076217108638,
+            0.17886025656646234,
+            0.5205660873766037
+          ],
+          "upright_percent": 1.7999999999999998,
+          "displacement_x_m": 5.052344799041748,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 20.0,
+        "step_height_m": 0.15,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/SuperMimic-half-height-20deg-1mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.5050001740455627,
+        "slope_inverted": 0.5050002336502075,
+        "stairs_inverted": 0.33750006556510925,
+        "stairs": 0.6000000238418579
+      }
+    },
+    {
+      "name": "SuperMimic-half-height-40k",
+      "speed": 2.0,
+      "backend": "supermimic",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/checkpoints/L-40k.pt",
+      "checkpoint_sha256": "6d42706aeaa6a5ad56ea3972813c97bf711f798b3e83c37f24c5cedaac255c5c",
+      "initial_state_hash": "3fc53db656eff469088d164e37ccf4615fbb68e1341b7f5a90b6eb0ad49a4ee1",
+      "protocol": "Controlled-column terrain seed12345, fixed generator difficulty0.5 with explicit geometry overrides in terrain_parameters (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 2.0170350074768066,
+          "mae": [
+            0.06088060998916626,
+            0.08735735144489445,
+            0.08261046819806324
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 19.028446197509766,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 0.0029361783526837826,
+          "mae": [
+            1.997063821586984,
+            0.004850066616316326,
+            0.01597217505563958
+          ],
+          "upright_percent": 0.0,
+          "displacement_x_m": 5.154363632202148,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 1.421066403388977,
+          "mae": [
+            0.6541858541841502,
+            0.11621098635855015,
+            0.15593063282156072
+          ],
+          "upright_percent": 66.75,
+          "displacement_x_m": 14.706562042236328,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 2,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": 0.1684233695268631,
+          "mae": [
+            1.842538437503048,
+            0.03390230095285733,
+            0.08791845147865751
+          ],
+          "upright_percent": 4.65,
+          "displacement_x_m": 4.363658905029297,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 0.0026263645850121975,
+          "mae": [
+            1.9973736355984566,
+            0.0036021147420287887,
+            0.04019698828454148
+          ],
+          "upright_percent": 0.0,
+          "displacement_x_m": 6.052558422088623,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 20.0,
+        "step_height_m": 0.15,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/SuperMimic-half-height-20deg-2mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.505000114440918,
+        "slope_inverted": 0.5050002336502075,
+        "stairs_inverted": 0.4687500596046448,
+        "stairs": 0.6000000238418579
+      }
+    },
+    {
+      "name": "SuperMimic-half-height-40k",
+      "speed": 1.0,
+      "backend": "supermimic",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/checkpoints/L-40k.pt",
+      "checkpoint_sha256": "6d42706aeaa6a5ad56ea3972813c97bf711f798b3e83c37f24c5cedaac255c5c",
+      "initial_state_hash": "820f3ead40d69667f22b56a363c1ae9e4b6704ae9beb6683166a6add6f1c7bb2",
+      "protocol": "Controlled-column terrain seed12345, fixed generator difficulty0.5 with explicit geometry overrides in terrain_parameters (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 0.979120135307312,
+          "mae": [
+            0.06228773704171181,
+            0.07782027854119951,
+            0.0596630929358821
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.511139869689941,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 0.18716666102409363,
+          "mae": [
+            0.8333397460048145,
+            0.23605250704759964,
+            0.4514099744858322
+          ],
+          "upright_percent": 22.0,
+          "displacement_x_m": 5.636077880859375,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 6,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 0.13270311057567596,
+          "mae": [
+            0.8713001327918027,
+            0.21810696210757669,
+            0.5261574544601281
+          ],
+          "upright_percent": 23.150000000000002,
+          "displacement_x_m": 2.479414463043213,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": 0.0036957606207579374,
+          "mae": [
+            1.0017627631044232,
+            0.03223429815243435,
+            0.1052121269028442
+          ],
+          "upright_percent": 0.7000000000000001,
+          "displacement_x_m": 2.051682472229004,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 0.06260731816291809,
+          "mae": [
+            0.9623020183246336,
+            0.16379424069740345,
+            0.5010247930927108
+          ],
+          "upright_percent": 7.35,
+          "displacement_x_m": 5.275035381317139,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 25.0,
+        "step_height_m": 0.2,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/SuperMimic-half-height-25deg-1mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.6500000953674316,
+        "slope_inverted": 0.4497460722923279,
+        "stairs_inverted": 0.3999999761581421,
+        "stairs": 0.8000000715255737
+      }
+    },
+    {
+      "name": "SuperMimic-half-height-40k",
+      "speed": 2.0,
+      "backend": "supermimic",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/checkpoints/L-40k.pt",
+      "checkpoint_sha256": "6d42706aeaa6a5ad56ea3972813c97bf711f798b3e83c37f24c5cedaac255c5c",
+      "initial_state_hash": "820f3ead40d69667f22b56a363c1ae9e4b6704ae9beb6683166a6add6f1c7bb2",
+      "protocol": "Controlled-column terrain seed12345, fixed generator difficulty0.5 with explicit geometry overrides in terrain_parameters (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; when video is enabled, first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 2.018782377243042,
+          "mae": [
+            0.060037805438041686,
+            0.08231068799016066,
+            0.08099608573851583
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 18.922151565551758,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": -0.00054289581021294,
+          "mae": [
+            2.000542895705439,
+            0.006574455823050812,
+            0.015826786187610197
+          ],
+          "upright_percent": 0.0,
+          "displacement_x_m": 4.711833953857422,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 0.003583852667361498,
+          "mae": [
+            1.9964161470561521,
+            0.005221259999787435,
+            0.025129136524632487
+          ],
+          "upright_percent": 0.0,
+          "displacement_x_m": 3.387322425842285,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": 0.003023880999535322,
+          "mae": [
+            1.9969761189189994,
+            0.00413360145639308,
+            0.02299298542297197
+          ],
+          "upright_percent": 0.0,
+          "displacement_x_m": 2.1673972606658936,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 0.00018597394227981567,
+          "mae": [
+            1.9998140260869333,
+            0.005118137457771809,
+            0.023754924911545457
+          ],
+          "upright_percent": 0.0,
+          "displacement_x_m": 5.420408248901367,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 25.0,
+        "step_height_m": 0.2,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/SuperMimic-half-height-25deg-2mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.6500000953674316,
+        "slope_inverted": 0.4818018078804016,
+        "stairs_inverted": 0.3999999463558197,
+        "stairs": 0.8000000715255737
+      }
+    },
+    {
+      "name": "SuperMimic-original-height-40k",
+      "speed": 1.0,
+      "backend": "supermimic",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/checkpoints/K-40k.pt",
+      "checkpoint_sha256": "fafc6a020d730d18f53bf6118a980726bbe994d8cbd67d6319f7fae107ba4afe",
+      "initial_state_hash": "39535fb2c8293c12385c5340ea4ddef550d2bcdaf249f291749b154098dc6484",
+      "protocol": "Nominal controlled-column terrain seed12345, fixed difficulty0.5 (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 0.9727103114128113,
+          "mae": [
+            0.059195476233959196,
+            0.052742555120494215,
+            0.06062376787361427
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.341609954833984,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 0.9573596715927124,
+          "mae": [
+            0.09016675788164139,
+            0.09617766042915536,
+            0.09660098078328337
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.514970779418945,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 0.9613970518112183,
+          "mae": [
+            0.10675192165374756,
+            0.06634883347612777,
+            0.1093261435615932
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.29050350189209,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": 1.011763572692871,
+          "mae": [
+            0.14929638862609862,
+            0.12539119227355694,
+            0.22531025354950907
+          ],
+          "upright_percent": 95.0,
+          "displacement_x_m": 7.970655918121338,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 1,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 0.9465821981430054,
+          "mae": [
+            0.28676930562220515,
+            0.21059229242370203,
+            0.4366552348233927
+          ],
+          "upright_percent": 78.64999999999999,
+          "displacement_x_m": 9.158020973205566,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 1,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 15.0,
+        "step_height_m": 0.1,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/SuperMimic-original-height-15deg-1mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.3700001835823059,
+        "slope_inverted": 0.3700002431869507,
+        "stairs_inverted": 0.40000003576278687,
+        "stairs": 0.4000000059604645
+      }
+    },
+    {
+      "name": "SuperMimic-original-height-40k",
+      "speed": 2.0,
+      "backend": "supermimic",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/checkpoints/K-40k.pt",
+      "checkpoint_sha256": "fafc6a020d730d18f53bf6118a980726bbe994d8cbd67d6319f7fae107ba4afe",
+      "initial_state_hash": "39535fb2c8293c12385c5340ea4ddef550d2bcdaf249f291749b154098dc6484",
+      "protocol": "Nominal controlled-column terrain seed12345, fixed difficulty0.5 (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 1.9637484550476074,
+          "mae": [
+            0.06135355204343796,
+            0.10052202325122198,
+            0.07487563308203243
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 18.580821990966797,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 1.9726457595825195,
+          "mae": [
+            0.11142182677984237,
+            0.1213268066130181,
+            0.13712396566079768
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 18.4204158782959,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 1.9534958600997925,
+          "mae": [
+            0.10377493458986282,
+            0.15051154730436975,
+            0.14486757010621204
+          ],
+          "upright_percent": 98.85000000000001,
+          "displacement_x_m": 18.18739891052246,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": 1.015309453010559,
+          "mae": [
+            1.025005839104415,
+            0.37540319249418097,
+            0.8604425317118967
+          ],
+          "upright_percent": 55.300000000000004,
+          "displacement_x_m": 6.034801006317139,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 7,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 0.7463744878768921,
+          "mae": [
+            1.2777255697571672,
+            0.36772786830342374,
+            1.0102590314090802
+          ],
+          "upright_percent": 50.8,
+          "displacement_x_m": 8.556497573852539,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 15.0,
+        "step_height_m": 0.1,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/SuperMimic-original-height-15deg-2mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.3700001835823059,
+        "slope_inverted": 0.3700002431869507,
+        "stairs_inverted": 0.3750000596046448,
+        "stairs": 0.4125000238418579
+      }
+    },
+    {
+      "name": "SuperMimic-original-height-40k",
+      "speed": 1.0,
+      "backend": "supermimic",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/checkpoints/K-40k.pt",
+      "checkpoint_sha256": "fafc6a020d730d18f53bf6118a980726bbe994d8cbd67d6319f7fae107ba4afe",
+      "initial_state_hash": "3fc53db656eff469088d164e37ccf4615fbb68e1341b7f5a90b6eb0ad49a4ee1",
+      "protocol": "Controlled-column terrain seed12345, fixed generator difficulty0.5 with explicit geometry overrides in terrain_parameters (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 0.9726760983467102,
+          "mae": [
+            0.05930220165848732,
+            0.05294079004286323,
+            0.05951424611298626
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.309671401977539,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 0.7945369482040405,
+          "mae": [
+            0.24276599208218977,
+            0.21424120650572148,
+            0.32587586671650204
+          ],
+          "upright_percent": 90.05,
+          "displacement_x_m": 8.289255142211914,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 1,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 0.9786496162414551,
+          "mae": [
+            0.11430323001742362,
+            0.08954387705229601,
+            0.13061630409078862
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.073028564453125,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": 0.3400932848453522,
+          "mae": [
+            0.720220905199647,
+            0.30951432141126134,
+            0.9160310412407052
+          ],
+          "upright_percent": 54.300000000000004,
+          "displacement_x_m": -0.4451943635940552,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 0.38723498582839966,
+          "mae": [
+            0.6953954565080348,
+            0.3642591484893346,
+            1.0999265535521408
+          ],
+          "upright_percent": 45.4,
+          "displacement_x_m": 4.433904647827148,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 20.0,
+        "step_height_m": 0.15,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/SuperMimic-original-height-20deg-1mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.505000114440918,
+        "slope_inverted": 0.5050002336502075,
+        "stairs_inverted": 0.39375007152557373,
+        "stairs": 0.6000000238418579
+      }
+    },
+    {
+      "name": "SuperMimic-original-height-40k",
+      "speed": 2.0,
+      "backend": "supermimic",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/checkpoints/K-40k.pt",
+      "checkpoint_sha256": "fafc6a020d730d18f53bf6118a980726bbe994d8cbd67d6319f7fae107ba4afe",
+      "initial_state_hash": "3fc53db656eff469088d164e37ccf4615fbb68e1341b7f5a90b6eb0ad49a4ee1",
+      "protocol": "Controlled-column terrain seed12345, fixed generator difficulty0.5 with explicit geometry overrides in terrain_parameters (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 1.970064401626587,
+          "mae": [
+            0.057717490017414094,
+            0.10175071206630673,
+            0.07427532961010912
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 18.635189056396484,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 1.6531322002410889,
+          "mae": [
+            0.42507702359603716,
+            0.24890533755673094,
+            0.3553836826077677
+          ],
+          "upright_percent": 91.55,
+          "displacement_x_m": 16.068078994750977,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 2,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 1.6396172046661377,
+          "mae": [
+            0.39871978157153354,
+            0.19037095686548855,
+            0.32818207828872253
+          ],
+          "upright_percent": 86.45,
+          "displacement_x_m": 13.498411178588867,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 3,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": 0.1015814021229744,
+          "mae": [
+            1.907380358699782,
+            0.27380382542721055,
+            0.9747247938950386
+          ],
+          "upright_percent": 11.0,
+          "displacement_x_m": 1.225199580192566,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 0.4927610158920288,
+          "mae": [
+            1.5636018042441866,
+            0.39057411119272,
+            1.1071426947166911
+          ],
+          "upright_percent": 32.65,
+          "displacement_x_m": 6.108065128326416,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 20.0,
+        "step_height_m": 0.15,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/SuperMimic-original-height-20deg-2mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.5050002336502075,
+        "slope_inverted": 0.6617404222488403,
+        "stairs_inverted": 0.3187500834465027,
+        "stairs": 0.675000011920929
+      }
+    },
+    {
+      "name": "SuperMimic-original-height-40k",
+      "speed": 1.0,
+      "backend": "supermimic",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/checkpoints/K-40k.pt",
+      "checkpoint_sha256": "fafc6a020d730d18f53bf6118a980726bbe994d8cbd67d6319f7fae107ba4afe",
+      "initial_state_hash": "820f3ead40d69667f22b56a363c1ae9e4b6704ae9beb6683166a6add6f1c7bb2",
+      "protocol": "Controlled-column terrain seed12345, fixed generator difficulty0.5 with explicit geometry overrides in terrain_parameters (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 0.9736750721931458,
+          "mae": [
+            0.05883706003427505,
+            0.052936168972722956,
+            0.05884152429435562
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 9.352676391601562,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 0.2308545708656311,
+          "mae": [
+            0.8814482432171062,
+            0.4990178259781096,
+            1.2871044128489049
+          ],
+          "upright_percent": 48.699999999999996,
+          "displacement_x_m": 4.315359115600586,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 6,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 0.6427417993545532,
+          "mae": [
+            0.41183958579110913,
+            0.23965082866628654,
+            0.5049993654839564
+          ],
+          "upright_percent": 88.75,
+          "displacement_x_m": 3.9614033699035645,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 2,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": 0.33333295583724976,
+          "mae": [
+            0.7371817290037871,
+            0.3732625798151712,
+            1.0926316964653033
+          ],
+          "upright_percent": 38.1,
+          "displacement_x_m": 0.5560282468795776,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 0.176559180021286,
+          "mae": [
+            0.8828531629646895,
+            0.44189839287265203,
+            1.2398541654629516
+          ],
+          "upright_percent": 35.25,
+          "displacement_x_m": 3.9353280067443848,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 25.0,
+        "step_height_m": 0.2,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/SuperMimic-original-height-25deg-1mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.6500001549720764,
+        "slope_inverted": 0.5729585886001587,
+        "stairs_inverted": 0.42500001192092896,
+        "stairs": 0.8000000715255737
+      }
+    },
+    {
+      "name": "SuperMimic-original-height-40k",
+      "speed": 2.0,
+      "backend": "supermimic",
+      "checkpoint": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/checkpoints/K-40k.pt",
+      "checkpoint_sha256": "fafc6a020d730d18f53bf6118a980726bbe994d8cbd67d6319f7fae107ba4afe",
+      "initial_state_hash": "820f3ead40d69667f22b56a363c1ae9e4b6704ae9beb6683166a6add6f1c7bb2",
+      "protocol": "Controlled-column terrain seed12345, fixed generator difficulty0.5 with explicit geometry overrides in terrain_parameters (evaluation-only layout), 8 standing starts per type, 2s stand then 10s specified vx; five rows to keep 2m/s trials inside terrain, no resets/push/DR; final5s torso yaw-frame errors; when video is enabled, first trial of every type recorded, no selection by outcome.",
+      "cases": {
+        "flat": {
+          "mean_vx": 1.9676979780197144,
+          "mae": [
+            0.05880406069755554,
+            0.10054804006835912,
+            0.0747462865051184
+          ],
+          "upright_percent": 100.0,
+          "displacement_x_m": 18.59905242919922,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 0,
+          "trials": 8
+        },
+        "slope": {
+          "mean_vx": 1.1011543273925781,
+          "mae": [
+            0.9293165917024017,
+            0.33766335431486366,
+            0.807982395455827
+          ],
+          "upright_percent": 61.1,
+          "displacement_x_m": 4.3755083084106445,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 7,
+          "trials": 8
+        },
+        "slope_inverted": {
+          "mean_vx": 0.4485459327697754,
+          "mae": [
+            1.5623857511558454,
+            0.44101695946860126,
+            1.188682826760647
+          ],
+          "upright_percent": 33.7,
+          "displacement_x_m": -0.26467108726501465,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        },
+        "stairs_inverted": {
+          "mean_vx": 0.04154742881655693,
+          "mae": [
+            1.9625680059076112,
+            0.34692512040608564,
+            1.4661346068021812
+          ],
+          "upright_percent": 15.7,
+          "displacement_x_m": 0.5400582551956177,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        },
+        "stairs": {
+          "mean_vx": 0.42956897616386414,
+          "mae": [
+            1.5998643498671299,
+            0.3370518044915516,
+            1.100476793861002
+          ],
+          "upright_percent": 26.55,
+          "displacement_x_m": 4.611409664154053,
+          "ground_ray_miss_percent": 0.0,
+          "sustained_fall_trials": 8,
+          "trials": 8
+        }
+      },
+      "terrain_parameters": {
+        "slope_degrees": 25.0,
+        "step_height_m": 0.2,
+        "step_width_m": 0.4
+      },
+      "fall_definition": "root ground-relative height<0.5m OR gz>-0.342, continuously >=0.5s; sampled at50Hz",
+      "video_recorded": false,
+      "result_path": "/home/luyd/workspace/AMP_mjlab/logs/eval_hard_40k_20261104/SuperMimic-original-height-25deg-2mps/terrain.json",
+      "terrain_ground_excursion_m": {
+        "flat": 1.1920928955078125e-07,
+        "slope": 0.6500000953674316,
+        "slope_inverted": 0.4615097641944885,
+        "stairs_inverted": 0.4000000059604645,
+        "stairs": 0.8000000715255737
+      }
+    }
+  ],
+  "new_training_destination": {
+    "ssh": "ssh -p 17535 root@192.168.11.91",
+    "all_new_training": true,
+    "availability_checked": "2026-11-04",
+    "available_gpus": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7
+    ],
+    "gpu_model": "RTX4090",
+    "existing_jobs_unchanged": true
+  }
+}
