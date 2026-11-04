@@ -4,11 +4,11 @@ from pathlib import Path
 import torch
 
 
-def load_policy(path, actor_obs, device='cuda:0'):
+def load_policy(path, actor_obs, device='cuda:0', use_ema=True):
     sys.path.insert(0, str(Path(__file__).resolve().parents[2]/'third_party/mbrl_supermimic'))
     from supermimic.modules.actor_critic import ActorCritic
     checkpoint=torch.load(path,map_location=device,weights_only=False)
-    weights=checkpoint['policy']
+    weights=checkpoint.get('policy_ema',checkpoint['policy']) if use_ema else checkpoint['policy']
     # A terrain-trained critic has extra inputs. It is restored strictly but
     # never evaluated when testing the proprioceptive actor on a flat task.
     width=weights['critic_norm.mean'].numel()
