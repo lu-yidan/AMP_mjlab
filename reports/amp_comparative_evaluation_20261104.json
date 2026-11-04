@@ -1,0 +1,3310 @@
+{
+  "date": "2026-11-04",
+  "server": "root@192.168.11.91:17535",
+  "source_commit": "a4651ee",
+  "results": [
+    {
+      "name": "K-original-height-47k",
+      "summary": {
+        "full_name": "SuperMimic－共享单判别器＋复杂地形＋原高度奖励（K，47k）",
+        "success": 1268,
+        "n": 1268,
+        "success_percent": 100.0,
+        "procedural_low_time_s": 1.9713281393051147,
+        "vx3_actual": 2.9890458583831787,
+        "vx3_upright_percent": 100.0,
+        "yaw_mae_rad_s": 0.06585179570317268,
+        "motion_quality": {
+          "first3s": {
+            "joint_acc_control_rms_rad_s2": 103.69505310058594,
+            "joint_speed_rms_rad_s": 3.0523250102996826,
+            "root_ang_speed_rms_rad_s": 3.2106130123138428,
+            "root_vertical_speed_rms_m_s": 0.5394803285598755,
+            "feet_netforce_rms_N": 336.9879150390625,
+            "action_delta_rms_normalized": 0.483045369386673
+          },
+          "last5s": {
+            "joint_acc_control_rms_rad_s2": 0.5967104434967041,
+            "joint_speed_rms_rad_s": 0.1277294009923935,
+            "root_ang_speed_rms_rad_s": 0.1355784386396408,
+            "root_vertical_speed_rms_m_s": 0.0013508336851373315,
+            "action_delta_rms_normalized": 0.00384413986466825,
+            "feet_netforce_rms_N": 329.7870788574219
+          }
+        }
+      },
+      "recovery": {
+        "name": "K-original-height-47k",
+        "checkpoint": "/root/workplace/lyd-eval-20261104/logs/eval_20261104/checkpoints/K-original-height-47k.pt",
+        "initial_state_hash": "beb879b875c97bfa08c359f32a04f6f12d575f5e13b1da0e75e0822fd4b2da3b",
+        "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+        "protocol": "20s, no resets, deterministic policy, nominal dynamics; hroot>.65 and gz<-.9 for 1s; zero command for recovery; 128 standing trials commands 0/.5/1/2m/s every 5s",
+        "groups": {
+          "natural/low": {
+            "n": 376,
+            "success_1s_percent": 99.99999237060547,
+            "mean_success_time_s": 1.9280318021774292,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.021276593208313,
+            "recovery_route_percent": 4.289361953735352
+          },
+          "natural/supine": {
+            "n": 314,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.8956050872802734,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 4.172612190246582
+          },
+          "natural/prone": {
+            "n": 36,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.0888888835906982,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.1666666269302368,
+            "recovery_route_percent": 4.761111259460449
+          },
+          "natural/left_side_down": {
+            "n": 13,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.0830769538879395,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 5.092308521270752
+          },
+          "natural/right_side_down": {
+            "n": 13,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.110769271850586,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.1538461446762085,
+            "recovery_route_percent": 5.0
+          },
+          "natural/middle": {
+            "n": 328,
+            "success_1s_percent": 99.99999237060547,
+            "mean_success_time_s": 2.0971341133117676,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0731706619262695,
+            "recovery_route_percent": 4.875304698944092
+          },
+          "natural/late": {
+            "n": 52,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.3265384435653687,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 0.692307710647583,
+            "recovery_route_percent": 1.0269230604171753
+          },
+          "procedural/low": {
+            "n": 512,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.9713281393051147,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.046875,
+            "recovery_route_percent": 4.503906726837158
+          },
+          "procedural/supine": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.7420313358306885,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.5679690837860107
+          },
+          "procedural/prone": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.106093645095825,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.09375,
+            "recovery_route_percent": 4.92578125
+          },
+          "procedural/left_side_down": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.9587500095367432,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.09375,
+            "recovery_route_percent": 4.285937309265137
+          },
+          "procedural/right_side_down": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.078437328338623,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 5.235937595367432
+          }
+        },
+        "motion_quality": {
+          "first3s": {
+            "joint_acc_control_rms_rad_s2": 103.69505310058594,
+            "joint_speed_rms_rad_s": 3.0523250102996826,
+            "root_ang_speed_rms_rad_s": 3.2106130123138428,
+            "root_vertical_speed_rms_m_s": 0.5394803285598755,
+            "feet_netforce_rms_N": 336.9879150390625,
+            "action_delta_rms_normalized": 0.483045369386673
+          },
+          "last5s": {
+            "joint_acc_control_rms_rad_s2": 0.5967104434967041,
+            "joint_speed_rms_rad_s": 0.1277294009923935,
+            "root_ang_speed_rms_rad_s": 0.1355784386396408,
+            "root_vertical_speed_rms_m_s": 0.0013508336851373315,
+            "action_delta_rms_normalized": 0.00384413986466825,
+            "feet_netforce_rms_N": 329.7870788574219
+          }
+        },
+        "motion_quality_notes": "Mean per-pose RMS over all recovery starts; fixed first 3s and last 5s. Joint acceleration is finite-difference at 50Hz. Foot force is summed foot net-force magnitudes sampled at control rate, NOT whole-body impact or peak physics-step force. Normalized action deltas depend on model output scale; compare physical joint measures first.",
+        "locomotion": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.0,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 0.0,
+          "recovery_route_percent": 0.0,
+          "vx_mae_by_5s": [
+            0.028505146503448486,
+            0.04747573286294937,
+            0.0776476263999939,
+            0.11950255185365677
+          ]
+        }
+      },
+      "commands": {
+        "name": "K-original-height-47k",
+        "checkpoint": "/root/workplace/lyd-eval-20261104/logs/eval_20261104/checkpoints/K-original-height-47k.pt",
+        "protocol": "8 matched initial joint perturbations per command, 2s standing then 10s command; no resets/push/DR/smoothing; torso yaw-frame xy velocity and world torso yaw rate; final5s means",
+        "cases": {
+          "stand": {
+            "command": [
+              0,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.007127111312001944,
+              0.0017028433503583074,
+              -0.007643467281013727
+            ],
+            "mae": [
+              0.008751168936351405,
+              0.004719713376800484,
+              0.06644446444782079
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward05": {
+            "command": [
+              0.5,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.5021510720252991,
+              0.03766908496618271,
+              0.021284786984324455
+            ],
+            "mae": [
+              0.022627236619591713,
+              0.052071242775939025,
+              0.06070970390867297
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward1": {
+            "command": [
+              1,
+              0,
+              0
+            ],
+            "mean_actual": [
+              1.0353246927261353,
+              0.01045170333236456,
+              -0.008189261890947819
+            ],
+            "mae": [
+              0.05027406358718872,
+              0.06467333615650205,
+              0.0622801022748472
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward2": {
+            "command": [
+              2,
+              0,
+              0
+            ],
+            "mean_actual": [
+              1.9857048988342285,
+              0.06537318229675293,
+              0.00427108583971858
+            ],
+            "mae": [
+              0.04661206775903702,
+              0.07094514867666293,
+              0.07433533209774032
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward3": {
+            "command": [
+              3,
+              0,
+              0
+            ],
+            "mean_actual": [
+              2.9890458583831787,
+              0.16316446661949158,
+              0.0440213717520237
+            ],
+            "mae": [
+              0.05201640629768372,
+              0.16337986828573048,
+              0.09822907501501003
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 5.1943301514256746e-05,
+            "recovery_route_percent": 0.0
+          },
+          "backward05": {
+            "command": [
+              -0.5,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.398803174495697,
+              -0.011530367657542229,
+              -0.01801210269331932
+            ],
+            "mae": [
+              0.10119684559106827,
+              0.040575742192369944,
+              0.053645868517935014
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "backward1": {
+            "command": [
+              -1,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.8136398196220398,
+              0.007841289043426514,
+              0.045016098767519
+            ],
+            "mae": [
+              0.18639034888148306,
+              0.03768562866863795,
+              0.07944411441748161
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "left05": {
+            "command": [
+              0,
+              0.5,
+              0
+            ],
+            "mean_actual": [
+              0.017159847542643547,
+              0.4788239300251007,
+              0.06979600340127945
+            ],
+            "mae": [
+              0.05495179070380982,
+              0.073084436327219,
+              0.09090568981893739
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "right05": {
+            "command": [
+              0,
+              -0.5,
+              0
+            ],
+            "mean_actual": [
+              0.030128229409456253,
+              -0.50855952501297,
+              0.04625602439045906
+            ],
+            "mae": [
+              0.05684298139752354,
+              0.07623970448970795,
+              0.0799010021211725
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "yaw_left": {
+            "command": [
+              0,
+              0,
+              1
+            ],
+            "mean_actual": [
+              0.0711476132273674,
+              -0.07373927533626556,
+              0.9859018325805664
+            ],
+            "mae": [
+              0.07114762871153653,
+              0.07373929368052631,
+              0.05760442113876343
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "yaw_right": {
+            "command": [
+              0,
+              0,
+              -1
+            ],
+            "mean_actual": [
+              0.022895125672221184,
+              0.024799570441246033,
+              -0.9522894620895386
+            ],
+            "mae": [
+              0.023675471938913686,
+              0.03984151419707632,
+              0.07409917026758193
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward_turn": {
+            "command": [
+              1,
+              0,
+              1
+            ],
+            "mean_actual": [
+              1.0742342472076416,
+              -0.09773503988981247,
+              0.961905837059021
+            ],
+            "mae": [
+              0.08470679107308388,
+              0.09996287445745838,
+              0.08427814799547195
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          }
+        }
+      },
+      "checkpoint_sha256": "dc8aecc52763b253aae14bc63b92044a46a4afbfae476e4a71b8e4c17354d3b3",
+      "traces_finite": true
+    },
+    {
+      "name": "K-original-height-89k",
+      "summary": {
+        "full_name": "SuperMimic－共享单判别器＋复杂地形＋原高度奖励（K，89k）",
+        "success": 1268,
+        "n": 1268,
+        "success_percent": 100.0,
+        "procedural_low_time_s": 1.7571876049041748,
+        "vx3_actual": 2.958678722381592,
+        "vx3_upright_percent": 93.5,
+        "yaw_mae_rad_s": 0.07776739916205407,
+        "motion_quality": {
+          "first3s": {
+            "joint_acc_control_rms_rad_s2": 92.54144287109375,
+            "joint_speed_rms_rad_s": 2.8221232891082764,
+            "root_ang_speed_rms_rad_s": 3.579591751098633,
+            "root_vertical_speed_rms_m_s": 0.5088860392570496,
+            "feet_netforce_rms_N": 327.66607666015625,
+            "action_delta_rms_normalized": 0.43143585324287415
+          },
+          "last5s": {
+            "joint_acc_control_rms_rad_s2": 4.997992992401123,
+            "joint_speed_rms_rad_s": 0.15851780772209167,
+            "root_ang_speed_rms_rad_s": 0.14318187534809113,
+            "root_vertical_speed_rms_m_s": 0.006207113154232502,
+            "action_delta_rms_normalized": 0.06430932134389877,
+            "feet_netforce_rms_N": 329.9909973144531
+          }
+        }
+      },
+      "recovery": {
+        "name": "K-original-height-89k",
+        "checkpoint": "/root/workplace/lyd-eval-20261104/logs/eval_20261104/checkpoints/K-original-height-89k.pt",
+        "initial_state_hash": "beb879b875c97bfa08c359f32a04f6f12d575f5e13b1da0e75e0822fd4b2da3b",
+        "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+        "protocol": "20s, no resets, deterministic policy, nominal dynamics; hroot>.65 and gz<-.9 for 1s; zero command for recovery; 128 standing trials commands 0/.5/1/2m/s every 5s",
+        "groups": {
+          "natural/low": {
+            "n": 376,
+            "success_1s_percent": 99.99999237060547,
+            "mean_success_time_s": 1.86058509349823,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0265957117080688,
+            "recovery_route_percent": 3.8664896488189697
+          },
+          "natural/supine": {
+            "n": 314,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.8892356157302856,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.012738823890686,
+            "recovery_route_percent": 4.0280256271362305
+          },
+          "natural/prone": {
+            "n": 36,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.6283334493637085,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.1666666269302368,
+            "recovery_route_percent": 2.461111068725586
+          },
+          "natural/left_side_down": {
+            "n": 13,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.7476924657821655,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.4153847694396973
+          },
+          "natural/right_side_down": {
+            "n": 13,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.924615502357483,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 4.307692527770996
+          },
+          "natural/middle": {
+            "n": 328,
+            "success_1s_percent": 99.99999237060547,
+            "mean_success_time_s": 1.8200608491897583,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0243902206420898,
+            "recovery_route_percent": 3.6091461181640625
+          },
+          "natural/late": {
+            "n": 52,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.2738462686538696,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 0.6538462042808533,
+            "recovery_route_percent": 0.7942308783531189
+          },
+          "procedural/low": {
+            "n": 512,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.7571876049041748,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.00390625,
+            "recovery_route_percent": 3.4380860328674316
+          },
+          "procedural/supine": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.8221875429153442,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.7093751430511475
+          },
+          "procedural/prone": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.588437557220459,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 2.6585938930511475
+          },
+          "procedural/left_side_down": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.7864062786102295,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.015625,
+            "recovery_route_percent": 3.480468988418579
+          },
+          "procedural/right_side_down": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.8317188024520874,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.9039063453674316
+          }
+        },
+        "motion_quality": {
+          "first3s": {
+            "joint_acc_control_rms_rad_s2": 92.54144287109375,
+            "joint_speed_rms_rad_s": 2.8221232891082764,
+            "root_ang_speed_rms_rad_s": 3.579591751098633,
+            "root_vertical_speed_rms_m_s": 0.5088860392570496,
+            "feet_netforce_rms_N": 327.66607666015625,
+            "action_delta_rms_normalized": 0.43143585324287415
+          },
+          "last5s": {
+            "joint_acc_control_rms_rad_s2": 4.997992992401123,
+            "joint_speed_rms_rad_s": 0.15851780772209167,
+            "root_ang_speed_rms_rad_s": 0.14318187534809113,
+            "root_vertical_speed_rms_m_s": 0.006207113154232502,
+            "action_delta_rms_normalized": 0.06430932134389877,
+            "feet_netforce_rms_N": 329.9909973144531
+          }
+        },
+        "motion_quality_notes": "Mean per-pose RMS over all recovery starts; fixed first 3s and last 5s. Joint acceleration is finite-difference at 50Hz. Foot force is summed foot net-force magnitudes sampled at control rate, NOT whole-body impact or peak physics-step force. Normalized action deltas depend on model output scale; compare physical joint measures first.",
+        "locomotion": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.0,
+          "last5s_upright_percent": 99.984375,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 0.0,
+          "recovery_route_percent": 0.0,
+          "vx_mae_by_5s": [
+            0.02080416865646839,
+            0.05589780956506729,
+            0.082099549472332,
+            0.12740296125411987
+          ]
+        }
+      },
+      "commands": {
+        "name": "K-original-height-89k",
+        "checkpoint": "/root/workplace/lyd-eval-20261104/logs/eval_20261104/checkpoints/K-original-height-89k.pt",
+        "protocol": "8 matched initial joint perturbations per command, 2s standing then 10s command; no resets/push/DR/smoothing; torso yaw-frame xy velocity and world torso yaw rate; final5s means",
+        "cases": {
+          "stand": {
+            "command": [
+              0,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.0018072339007630944,
+              -0.00010061806824523956,
+              0.05043618753552437
+            ],
+            "mae": [
+              0.0036880066854583903,
+              0.001034783678906024,
+              0.059870027894154194
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward05": {
+            "command": [
+              0.5,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.4682758152484894,
+              0.016407383605837822,
+              0.015747422352433205
+            ],
+            "mae": [
+              0.03567799890041351,
+              0.03811660294605099,
+              0.05693033446474874
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward1": {
+            "command": [
+              1,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.994005024433136,
+              0.012255972251296043,
+              0.017302853986620903
+            ],
+            "mae": [
+              0.04940144336223602,
+              0.05444092490679759,
+              0.05942116560401678
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward2": {
+            "command": [
+              2,
+              0,
+              0
+            ],
+            "mean_actual": [
+              2.0020854473114014,
+              -0.049805205315351486,
+              0.008081351406872272
+            ],
+            "mae": [
+              0.04365741515159607,
+              0.0571720213791059,
+              0.07352432302280432
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0007476678001694381,
+            "recovery_route_percent": 0.0
+          },
+          "forward3": {
+            "command": [
+              3,
+              0,
+              0
+            ],
+            "mean_actual": [
+              2.958678722381592,
+              -0.0006220266222953796,
+              0.008322680369019508
+            ],
+            "mae": [
+              0.06249234688282013,
+              0.06598839882617176,
+              0.07357996255045873
+            ],
+            "upright_percent": 93.5,
+            "guidance_gate_mean": 0.09060242027044296,
+            "recovery_route_percent": 0.0
+          },
+          "backward05": {
+            "command": [
+              -0.5,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.41702377796173096,
+              0.013764274306595325,
+              -0.020381350070238113
+            ],
+            "mae": [
+              0.0831598934084177,
+              0.05164542054890262,
+              0.05543565002641026
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "backward1": {
+            "command": [
+              -1,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.8858739733695984,
+              0.053191084414720535,
+              -0.056879594922065735
+            ],
+            "mae": [
+              0.11565529078245163,
+              0.06175194275160902,
+              0.0951382704562534
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "left05": {
+            "command": [
+              0,
+              0.5,
+              0
+            ],
+            "mean_actual": [
+              -0.004956106189638376,
+              0.47885236144065857,
+              0.01042651291936636
+            ],
+            "mae": [
+              0.04500820933937621,
+              0.06312427674233913,
+              0.06139373894295659
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "right05": {
+            "command": [
+              0,
+              -0.5,
+              0
+            ],
+            "mean_actual": [
+              0.04686591774225235,
+              -0.4899927079677582,
+              0.009499840438365936
+            ],
+            "mae": [
+              0.07720497499892372,
+              0.08738911584019661,
+              0.04571399331882458
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "yaw_left": {
+            "command": [
+              0,
+              0,
+              1
+            ],
+            "mean_actual": [
+              0.07812462747097015,
+              -0.03745332732796669,
+              0.9167870283126831
+            ],
+            "mae": [
+              0.07812467817589641,
+              0.03746280590473907,
+              0.09353056117892265
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "yaw_right": {
+            "command": [
+              0,
+              0,
+              -1
+            ],
+            "mean_actual": [
+              0.02959437668323517,
+              0.05569116771221161,
+              -0.9605749249458313
+            ],
+            "mae": [
+              0.029707867092249218,
+              0.05654781312086561,
+              0.06200423714518547
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward_turn": {
+            "command": [
+              1,
+              0,
+              1
+            ],
+            "mean_actual": [
+              1.0052297115325928,
+              -0.0990147814154625,
+              0.9917504191398621
+            ],
+            "mae": [
+              0.06904946142435074,
+              0.10164694108087315,
+              0.0712444324195385
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          }
+        }
+      },
+      "checkpoint_sha256": "64021b43fa380083245724be35a021c6a67ad46f15c1223cd806c8bb1e6529d7",
+      "traces_finite": true
+    },
+    {
+      "name": "L-half-height-47k",
+      "summary": {
+        "full_name": "SuperMimic－共享单判别器＋复杂地形＋半强度高度奖励（L，47k）",
+        "success": 1268,
+        "n": 1268,
+        "success_percent": 100.0,
+        "procedural_low_time_s": 2.0767970085144043,
+        "vx3_actual": 2.8874619007110596,
+        "vx3_upright_percent": 100.0,
+        "yaw_mae_rad_s": 0.0844763879030943,
+        "motion_quality": {
+          "first3s": {
+            "joint_acc_control_rms_rad_s2": 102.54318237304688,
+            "joint_speed_rms_rad_s": 3.130842447280884,
+            "root_ang_speed_rms_rad_s": 3.2193350791931152,
+            "root_vertical_speed_rms_m_s": 0.47894254326820374,
+            "feet_netforce_rms_N": 305.4132080078125,
+            "action_delta_rms_normalized": 0.4687681198120117
+          },
+          "last5s": {
+            "joint_acc_control_rms_rad_s2": 1.1484472751617432,
+            "joint_speed_rms_rad_s": 0.1280754804611206,
+            "root_ang_speed_rms_rad_s": 0.14390893280506134,
+            "root_vertical_speed_rms_m_s": 0.0015785761643201113,
+            "action_delta_rms_normalized": 0.012603027746081352,
+            "feet_netforce_rms_N": 334.37677001953125
+          }
+        }
+      },
+      "recovery": {
+        "name": "L-half-height-47k",
+        "checkpoint": "/root/workplace/lyd-eval-20261104/logs/eval_20261104/checkpoints/L-half-height-47k.pt",
+        "initial_state_hash": "beb879b875c97bfa08c359f32a04f6f12d575f5e13b1da0e75e0822fd4b2da3b",
+        "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+        "protocol": "20s, no resets, deterministic policy, nominal dynamics; hroot>.65 and gz<-.9 for 1s; zero command for recovery; 128 standing trials commands 0/.5/1/2m/s every 5s",
+        "groups": {
+          "natural/low": {
+            "n": 376,
+            "success_1s_percent": 99.99999237060547,
+            "mean_success_time_s": 2.3108510971069336,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0106382369995117,
+            "recovery_route_percent": 6.166489601135254
+          },
+          "natural/supine": {
+            "n": 314,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.411273956298828,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0063694715499878,
+            "recovery_route_percent": 6.669426918029785
+          },
+          "natural/prone": {
+            "n": 36,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.6450001001358032,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 2.9166667461395264
+          },
+          "natural/left_side_down": {
+            "n": 13,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.9369231462478638,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 4.3307695388793945
+          },
+          "natural/right_side_down": {
+            "n": 13,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.103076934814453,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.1538461446762085,
+            "recovery_route_percent": 4.853846549987793
+          },
+          "natural/middle": {
+            "n": 328,
+            "success_1s_percent": 99.99999237060547,
+            "mean_success_time_s": 2.103536367416382,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0243902206420898,
+            "recovery_route_percent": 4.989634037017822
+          },
+          "natural/late": {
+            "n": 52,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.3642308712005615,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 0.692307710647583,
+            "recovery_route_percent": 1.1634615659713745
+          },
+          "procedural/low": {
+            "n": 512,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.0767970085144043,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.02734375,
+            "recovery_route_percent": 4.923633098602295
+          },
+          "procedural/supine": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.3573436737060547,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 6.365625381469727
+          },
+          "procedural/prone": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.7001562118530273,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.0929689407348633
+          },
+          "procedural/left_side_down": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.8654688596725464,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.9921875
+          },
+          "procedural/right_side_down": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.384218692779541,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.109375,
+            "recovery_route_percent": 6.24375057220459
+          }
+        },
+        "motion_quality": {
+          "first3s": {
+            "joint_acc_control_rms_rad_s2": 102.54318237304688,
+            "joint_speed_rms_rad_s": 3.130842447280884,
+            "root_ang_speed_rms_rad_s": 3.2193350791931152,
+            "root_vertical_speed_rms_m_s": 0.47894254326820374,
+            "feet_netforce_rms_N": 305.4132080078125,
+            "action_delta_rms_normalized": 0.4687681198120117
+          },
+          "last5s": {
+            "joint_acc_control_rms_rad_s2": 1.1484472751617432,
+            "joint_speed_rms_rad_s": 0.1280754804611206,
+            "root_ang_speed_rms_rad_s": 0.14390893280506134,
+            "root_vertical_speed_rms_m_s": 0.0015785761643201113,
+            "action_delta_rms_normalized": 0.012603027746081352,
+            "feet_netforce_rms_N": 334.37677001953125
+          }
+        },
+        "motion_quality_notes": "Mean per-pose RMS over all recovery starts; fixed first 3s and last 5s. Joint acceleration is finite-difference at 50Hz. Foot force is summed foot net-force magnitudes sampled at control rate, NOT whole-body impact or peak physics-step force. Normalized action deltas depend on model output scale; compare physical joint measures first.",
+        "locomotion": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.0,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 0.0,
+          "recovery_route_percent": 0.0,
+          "vx_mae_by_5s": [
+            0.026333888992667198,
+            0.053582798689603806,
+            0.0847347155213356,
+            0.1354905217885971
+          ]
+        }
+      },
+      "commands": {
+        "name": "L-half-height-47k",
+        "checkpoint": "/root/workplace/lyd-eval-20261104/logs/eval_20261104/checkpoints/L-half-height-47k.pt",
+        "protocol": "8 matched initial joint perturbations per command, 2s standing then 10s command; no resets/push/DR/smoothing; torso yaw-frame xy velocity and world torso yaw rate; final5s means",
+        "cases": {
+          "stand": {
+            "command": [
+              0,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.0008209525258280337,
+              -0.0008341937209479511,
+              -0.054829467087984085
+            ],
+            "mae": [
+              0.002442815517567496,
+              0.006148588135616137,
+              0.0747986171003431
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward05": {
+            "command": [
+              0.5,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.4763054847717285,
+              0.031099587678909302,
+              0.025376858189702034
+            ],
+            "mae": [
+              0.02999774318933487,
+              0.03724860529541911,
+              0.07672635212402201
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward1": {
+            "command": [
+              1,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.9638462662696838,
+              0.043983351439237595,
+              0.005539266392588615
+            ],
+            "mae": [
+              0.05496120879054069,
+              0.07411427468492457,
+              0.06174860358395381
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward2": {
+            "command": [
+              2,
+              0,
+              0
+            ],
+            "mean_actual": [
+              1.9615339040756226,
+              -0.0020093158818781376,
+              -0.02570379339158535
+            ],
+            "mae": [
+              0.0565164909362793,
+              0.03507931406570424,
+              0.06983000622801046
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward3": {
+            "command": [
+              3,
+              0,
+              0
+            ],
+            "mean_actual": [
+              2.8874619007110596,
+              0.025743549689650536,
+              -0.05698079243302345
+            ],
+            "mae": [
+              0.11988777554035186,
+              0.05668998080957681,
+              0.08071826463512013
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 6.68072680127807e-05,
+            "recovery_route_percent": 0.0
+          },
+          "backward05": {
+            "command": [
+              -0.5,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.42261070013046265,
+              0.008776544593274593,
+              -0.01202144380658865
+            ],
+            "mae": [
+              0.08038897906243801,
+              0.05626433642522534,
+              0.07517216356158224
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "backward1": {
+            "command": [
+              -1,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.8451768755912781,
+              0.017461033537983894,
+              -0.008637063205242157
+            ],
+            "mae": [
+              0.15501832816004754,
+              0.05939378987087548,
+              0.07007146846188175
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "left05": {
+            "command": [
+              0,
+              0.5,
+              0
+            ],
+            "mean_actual": [
+              0.041557155549526215,
+              0.5188702344894409,
+              0.000795607513282448
+            ],
+            "mae": [
+              0.07423565470471839,
+              0.11928639216721058,
+              0.06969268765854213
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "right05": {
+            "command": [
+              0,
+              -0.5,
+              0
+            ],
+            "mean_actual": [
+              0.024436261504888535,
+              -0.46483442187309265,
+              -0.008353590033948421
+            ],
+            "mae": [
+              0.08539649420199931,
+              0.09619170809537173,
+              0.07062454470414377
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "yaw_left": {
+            "command": [
+              0,
+              0,
+              1
+            ],
+            "mean_actual": [
+              0.09831710904836655,
+              -0.03560258448123932,
+              0.8994650840759277
+            ],
+            "mae": [
+              0.0983170750606805,
+              0.04463228947520838,
+              0.1029063036441803
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "yaw_right": {
+            "command": [
+              0,
+              0,
+              -1
+            ],
+            "mean_actual": [
+              0.0278884619474411,
+              0.023951249197125435,
+              -0.974748969078064
+            ],
+            "mae": [
+              0.02941571887447208,
+              0.03626113238122707,
+              0.06604647216200829
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward_turn": {
+            "command": [
+              1,
+              0,
+              1
+            ],
+            "mean_actual": [
+              0.9573693871498108,
+              -0.12375086545944214,
+              1.0002928972244263
+            ],
+            "mae": [
+              0.06869869282841683,
+              0.12423517871397781,
+              0.06892294305562972
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          }
+        }
+      },
+      "checkpoint_sha256": "d2020c6d8dcf788609c370b145d9580f3defc9051dea8fa107c3cc09d8a08cd7",
+      "traces_finite": true
+    },
+    {
+      "name": "F-shared-seed42-100k",
+      "summary": {
+        "full_name": "AMP－分层 reset＋共享单判别器＋恢复均衡采样（F，随机种子42，100k）",
+        "success": 1267,
+        "n": 1268,
+        "success_percent": 99.9211356466877,
+        "procedural_low_time_s": 1.975264310836792,
+        "vx3_actual": 2.9840261936187744,
+        "vx3_upright_percent": 100.0,
+        "yaw_mae_rad_s": 0.15083325546979903,
+        "motion_quality": {
+          "first3s": {
+            "joint_acc_control_rms_rad_s2": 47.65053176879883,
+            "joint_speed_rms_rad_s": 1.799250841140747,
+            "root_ang_speed_rms_rad_s": 2.0838398933410645,
+            "root_vertical_speed_rms_m_s": 0.4174205958843231,
+            "feet_netforce_rms_N": 297.4710693359375,
+            "action_delta_rms_normalized": 0.22694502770900726
+          },
+          "last5s": {
+            "joint_acc_control_rms_rad_s2": 0.8119891285896301,
+            "joint_speed_rms_rad_s": 0.13056623935699463,
+            "root_ang_speed_rms_rad_s": 0.13187392055988312,
+            "root_vertical_speed_rms_m_s": 0.00308030191808939,
+            "action_delta_rms_normalized": 0.004369616042822599,
+            "feet_netforce_rms_N": 329.474609375
+          }
+        }
+      },
+      "recovery": {
+        "name": "F-shared-seed42-100k",
+        "checkpoint": "/root/workplace/lyd-eval-20261104/logs/eval_20261104/checkpoints/F-shared-seed42-100k.pt",
+        "initial_state_hash": "beb879b875c97bfa08c359f32a04f6f12d575f5e13b1da0e75e0822fd4b2da3b",
+        "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+        "protocol": "20s, no resets, deterministic policy, nominal dynamics; hroot>.65 and gz<-.9 for 1s; zero command for recovery; 128 standing trials commands 0/.5/1/2m/s every 5s",
+        "groups": {
+          "natural/low": {
+            "n": 376,
+            "success_1s_percent": 99.99999237060547,
+            "mean_success_time_s": 2.1448402404785156,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.26595744490623474,
+            "route_switches_mean": 1.0159573554992676,
+            "recovery_route_percent": 4.969148635864258
+          },
+          "natural/supine": {
+            "n": 314,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.1911466121673584,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.31847134232521057,
+            "route_switches_mean": 1.0191082954406738,
+            "recovery_route_percent": 5.1796183586120605
+          },
+          "natural/prone": {
+            "n": 36,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.81166672706604,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.5
+          },
+          "natural/left_side_down": {
+            "n": 13,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.0876922607421875,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 4.7153849601745605
+          },
+          "natural/right_side_down": {
+            "n": 13,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.0061538219451904,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 4.207692623138428
+          },
+          "natural/middle": {
+            "n": 328,
+            "success_1s_percent": 99.99999237060547,
+            "mean_success_time_s": 1.8262194395065308,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0304877758026123,
+            "recovery_route_percent": 3.325000047683716
+          },
+          "natural/late": {
+            "n": 52,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.5092307329177856,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 0.5961538553237915,
+            "recovery_route_percent": 1.8307695388793945
+          },
+          "procedural/low": {
+            "n": 512,
+            "success_1s_percent": 99.8046875,
+            "mean_success_time_s": 1.975264310836792,
+            "last5s_upright_percent": 99.80469512939453,
+            "ever_continuous_failure_5s_percent": 0.390625,
+            "route_switches_mean": 0.998046875,
+            "recovery_route_percent": 4.259570598602295
+          },
+          "procedural/supine": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.8223438262939453,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.2765626907348633
+          },
+          "procedural/prone": {
+            "n": 128,
+            "success_1s_percent": 99.21875,
+            "mean_success_time_s": 2.095275402069092,
+            "last5s_upright_percent": 99.21875762939453,
+            "ever_continuous_failure_5s_percent": 1.5625,
+            "route_switches_mean": 0.9921875,
+            "recovery_route_percent": 5.5390625
+          },
+          "procedural/left_side_down": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.8037500381469727,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.2710938453674316
+          },
+          "procedural/right_side_down": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.1806252002716064,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 4.951562881469727
+          }
+        },
+        "motion_quality": {
+          "first3s": {
+            "joint_acc_control_rms_rad_s2": 47.65053176879883,
+            "joint_speed_rms_rad_s": 1.799250841140747,
+            "root_ang_speed_rms_rad_s": 2.0838398933410645,
+            "root_vertical_speed_rms_m_s": 0.4174205958843231,
+            "feet_netforce_rms_N": 297.4710693359375,
+            "action_delta_rms_normalized": 0.22694502770900726
+          },
+          "last5s": {
+            "joint_acc_control_rms_rad_s2": 0.8119891285896301,
+            "joint_speed_rms_rad_s": 0.13056623935699463,
+            "root_ang_speed_rms_rad_s": 0.13187392055988312,
+            "root_vertical_speed_rms_m_s": 0.00308030191808939,
+            "action_delta_rms_normalized": 0.004369616042822599,
+            "feet_netforce_rms_N": 329.474609375
+          }
+        },
+        "motion_quality_notes": "Mean per-pose RMS over all recovery starts; fixed first 3s and last 5s. Joint acceleration is finite-difference at 50Hz. Foot force is summed foot net-force magnitudes sampled at control rate, NOT whole-body impact or peak physics-step force. Normalized action deltas depend on model output scale; compare physical joint measures first.",
+        "locomotion": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.0,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 0.0,
+          "recovery_route_percent": 0.0,
+          "vx_mae_by_5s": [
+            0.01178901456296444,
+            0.07923784106969833,
+            0.07675830274820328,
+            0.14423492550849915
+          ]
+        }
+      },
+      "commands": {
+        "name": "F-shared-seed42-100k",
+        "checkpoint": "/root/workplace/lyd-eval-20261104/logs/eval_20261104/checkpoints/F-shared-seed42-100k.pt",
+        "protocol": "8 matched initial joint perturbations per command, 2s standing then 10s command; no resets/push/DR/smoothing; torso yaw-frame xy velocity and world torso yaw rate; final5s means",
+        "cases": {
+          "stand": {
+            "command": [
+              0,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.0028461317997425795,
+              0.003248190274462104,
+              0.04991650953888893
+            ],
+            "mae": [
+              0.0035177637133338067,
+              0.004623866619070213,
+              0.06817241673683748
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward05": {
+            "command": [
+              0.5,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.47119462490081787,
+              0.03416822478175163,
+              0.021190384402871132
+            ],
+            "mae": [
+              0.05101009759306908,
+              0.07134636191366735,
+              0.07450065386295682
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward1": {
+            "command": [
+              1,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.9714840054512024,
+              0.024051129817962646,
+              0.014211537316441536
+            ],
+            "mae": [
+              0.058666580855846404,
+              0.07819795220882224,
+              0.07086618547387843
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward2": {
+            "command": [
+              2,
+              0,
+              0
+            ],
+            "mean_actual": [
+              1.966277003288269,
+              0.014338180422782898,
+              0.022691503167152405
+            ],
+            "mae": [
+              0.06297320145368576,
+              0.06278991888481687,
+              0.08772615111829145
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward3": {
+            "command": [
+              3,
+              0,
+              0
+            ],
+            "mean_actual": [
+              2.9840261936187744,
+              0.042980510741472244,
+              -0.05390495806932449
+            ],
+            "mae": [
+              0.05538933312892914,
+              0.06327007031394169,
+              0.13095841119540272
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "backward05": {
+            "command": [
+              -0.5,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.4755501449108124,
+              0.004713098518550396,
+              -0.027697071433067322
+            ],
+            "mae": [
+              0.04041351656615734,
+              0.06253704850329087,
+              0.06254653850879367
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "backward1": {
+            "command": [
+              -1,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.9016464352607727,
+              -0.03967524319887161,
+              0.021212581545114517
+            ],
+            "mae": [
+              0.10118346989154815,
+              0.06423252965161373,
+              0.08091857030318352
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "left05": {
+            "command": [
+              0,
+              0.5,
+              0
+            ],
+            "mean_actual": [
+              -0.04050678759813309,
+              0.4511621296405792,
+              0.07271887362003326
+            ],
+            "mae": [
+              0.048874811838846656,
+              0.09108816067874431,
+              0.103408957686559
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "right05": {
+            "command": [
+              0,
+              -0.5,
+              0
+            ],
+            "mean_actual": [
+              -0.033862434327602386,
+              -0.510564386844635,
+              -0.016997748985886574
+            ],
+            "mae": [
+              0.09663334209308959,
+              0.06636177636682987,
+              0.09161402752975255
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "yaw_left": {
+            "command": [
+              0,
+              0,
+              1
+            ],
+            "mean_actual": [
+              -0.02351321652531624,
+              -0.05573723837733269,
+              0.8624315857887268
+            ],
+            "mae": [
+              0.04020450911796433,
+              0.05982317526519182,
+              0.16102690804004668
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "yaw_right": {
+            "command": [
+              0,
+              0,
+              -1
+            ],
+            "mean_actual": [
+              0.001141025684773922,
+              0.027190130203962326,
+              -0.9358492493629456
+            ],
+            "mae": [
+              0.03756208309267822,
+              0.04614689882021776,
+              0.14063960289955138
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward_turn": {
+            "command": [
+              1,
+              0,
+              1
+            ],
+            "mean_actual": [
+              0.9740509986877441,
+              -0.03804401680827141,
+              0.9131190180778503
+            ],
+            "mae": [
+              0.05576620703935623,
+              0.0794299682318815,
+              0.1192708740234375
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          }
+        }
+      },
+      "checkpoint_sha256": "4f06f311c493f13467aca393e841654b3bb95d03557862dd5e012d12aceadf54",
+      "traces_finite": true
+    },
+    {
+      "name": "F-shared-seed43-100k",
+      "summary": {
+        "full_name": "AMP－分层 reset＋共享单判别器＋恢复均衡采样（F，随机种子43，100k）",
+        "success": 1267,
+        "n": 1268,
+        "success_percent": 99.9211356466877,
+        "procedural_low_time_s": 2.013124942779541,
+        "vx3_actual": 2.9607532024383545,
+        "vx3_upright_percent": 100.0,
+        "yaw_mae_rad_s": 0.14142179485410453,
+        "motion_quality": {
+          "first3s": {
+            "joint_acc_control_rms_rad_s2": 50.437416076660156,
+            "joint_speed_rms_rad_s": 1.9209136962890625,
+            "root_ang_speed_rms_rad_s": 2.2775306701660156,
+            "root_vertical_speed_rms_m_s": 0.44820892810821533,
+            "feet_netforce_rms_N": 304.3663024902344,
+            "action_delta_rms_normalized": 0.24454978108406067
+          },
+          "last5s": {
+            "joint_acc_control_rms_rad_s2": 0.6039735078811646,
+            "joint_speed_rms_rad_s": 0.12539343535900116,
+            "root_ang_speed_rms_rad_s": 0.13400670886039734,
+            "root_vertical_speed_rms_m_s": 0.002022258937358856,
+            "action_delta_rms_normalized": 0.0025282169226557016,
+            "feet_netforce_rms_N": 331.61004638671875
+          }
+        }
+      },
+      "recovery": {
+        "name": "F-shared-seed43-100k",
+        "checkpoint": "/root/workplace/lyd-eval-20261104/logs/eval_20261104/checkpoints/F-shared-seed43-100k.pt",
+        "initial_state_hash": "beb879b875c97bfa08c359f32a04f6f12d575f5e13b1da0e75e0822fd4b2da3b",
+        "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+        "protocol": "20s, no resets, deterministic policy, nominal dynamics; hroot>.65 and gz<-.9 for 1s; zero command for recovery; 128 standing trials commands 0/.5/1/2m/s every 5s",
+        "groups": {
+          "natural/low": {
+            "n": 376,
+            "success_1s_percent": 99.99999237060547,
+            "mean_success_time_s": 1.9759573936462402,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0053191184997559,
+            "recovery_route_percent": 3.848670482635498
+          },
+          "natural/supine": {
+            "n": 314,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.9917833805084229,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.886624336242676
+          },
+          "natural/prone": {
+            "n": 36,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.7372223138809204,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.0333335399627686
+          },
+          "natural/left_side_down": {
+            "n": 13,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.158461570739746,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 4.753846645355225
+          },
+          "natural/right_side_down": {
+            "n": 13,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.072307825088501,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.1538461446762085,
+            "recovery_route_percent": 4.284615993499756
+          },
+          "natural/middle": {
+            "n": 328,
+            "success_1s_percent": 99.69511413574219,
+            "mean_success_time_s": 1.8632417917251587,
+            "last5s_upright_percent": 99.69512176513672,
+            "ever_continuous_failure_5s_percent": 0.30487802624702454,
+            "route_switches_mean": 0.9908536076545715,
+            "recovery_route_percent": 3.7103657722473145
+          },
+          "natural/late": {
+            "n": 52,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.324615478515625,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 0.5384615659713745,
+            "recovery_route_percent": 0.9846154451370239
+          },
+          "procedural/low": {
+            "n": 512,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.013124942779541,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 4.092968940734863
+          },
+          "procedural/supine": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.967343807220459,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.7328128814697266
+          },
+          "procedural/prone": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.0531249046325684,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 4.436718940734863
+          },
+          "procedural/left_side_down": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.121406078338623,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 4.53515625
+          },
+          "procedural/right_side_down": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.9106251001358032,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.6671876907348633
+          }
+        },
+        "motion_quality": {
+          "first3s": {
+            "joint_acc_control_rms_rad_s2": 50.437416076660156,
+            "joint_speed_rms_rad_s": 1.9209136962890625,
+            "root_ang_speed_rms_rad_s": 2.2775306701660156,
+            "root_vertical_speed_rms_m_s": 0.44820892810821533,
+            "feet_netforce_rms_N": 304.3663024902344,
+            "action_delta_rms_normalized": 0.24454978108406067
+          },
+          "last5s": {
+            "joint_acc_control_rms_rad_s2": 0.6039735078811646,
+            "joint_speed_rms_rad_s": 0.12539343535900116,
+            "root_ang_speed_rms_rad_s": 0.13400670886039734,
+            "root_vertical_speed_rms_m_s": 0.002022258937358856,
+            "action_delta_rms_normalized": 0.0025282169226557016,
+            "feet_netforce_rms_N": 331.61004638671875
+          }
+        },
+        "motion_quality_notes": "Mean per-pose RMS over all recovery starts; fixed first 3s and last 5s. Joint acceleration is finite-difference at 50Hz. Foot force is summed foot net-force magnitudes sampled at control rate, NOT whole-body impact or peak physics-step force. Normalized action deltas depend on model output scale; compare physical joint measures first.",
+        "locomotion": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.0,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 0.0,
+          "recovery_route_percent": 0.0,
+          "vx_mae_by_5s": [
+            0.009475965052843094,
+            0.06501937657594681,
+            0.06323425471782684,
+            0.10445956885814667
+          ]
+        }
+      },
+      "commands": {
+        "name": "F-shared-seed43-100k",
+        "checkpoint": "/root/workplace/lyd-eval-20261104/logs/eval_20261104/checkpoints/F-shared-seed43-100k.pt",
+        "protocol": "8 matched initial joint perturbations per command, 2s standing then 10s command; no resets/push/DR/smoothing; torso yaw-frame xy velocity and world torso yaw rate; final5s means",
+        "cases": {
+          "stand": {
+            "command": [
+              0,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.006994022987782955,
+              0.005272628739476204,
+              -0.04862027242779732
+            ],
+            "mae": [
+              0.007396307602673801,
+              0.007998442219074604,
+              0.0669906879507671
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward05": {
+            "command": [
+              0.5,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.4623012840747833,
+              0.004331601317971945,
+              0.01743350550532341
+            ],
+            "mae": [
+              0.048957756474614145,
+              0.0625506767722436,
+              0.05759046431632305
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward1": {
+            "command": [
+              1,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.9964405298233032,
+              -0.02342115342617035,
+              0.021263405680656433
+            ],
+            "mae": [
+              0.041287705808877945,
+              0.07271615038086383,
+              0.07580673890440812
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward2": {
+            "command": [
+              2,
+              0,
+              0
+            ],
+            "mean_actual": [
+              2.0118863582611084,
+              0.02638736180961132,
+              0.006447034887969494
+            ],
+            "mae": [
+              0.0476499183177948,
+              0.05629439958365151,
+              0.09484514456639226
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward3": {
+            "command": [
+              3,
+              0,
+              0
+            ],
+            "mean_actual": [
+              2.9607532024383545,
+              -0.0031804360914975405,
+              -0.028190141543745995
+            ],
+            "mae": [
+              0.06475290620326996,
+              0.04499643023795943,
+              0.11478046746163
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0005191238014958799,
+            "recovery_route_percent": 0.0
+          },
+          "backward05": {
+            "command": [
+              -0.5,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.45099642872810364,
+              0.001860441523604095,
+              -0.012202603742480278
+            ],
+            "mae": [
+              0.06615129579603672,
+              0.06739784230658552,
+              0.05904113589023291
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "backward1": {
+            "command": [
+              -1,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.8872262239456177,
+              0.005955949891358614,
+              -0.018027154728770256
+            ],
+            "mae": [
+              0.11319325777888298,
+              0.05332352920417179,
+              0.07298426531675205
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "left05": {
+            "command": [
+              0,
+              0.5,
+              0
+            ],
+            "mean_actual": [
+              -0.07439911365509033,
+              0.49326542019844055,
+              0.009395753033459187
+            ],
+            "mae": [
+              0.08455798792162204,
+              0.0651630354821682,
+              0.07848189566630753
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "right05": {
+            "command": [
+              0,
+              -0.5,
+              0
+            ],
+            "mean_actual": [
+              -0.009464853443205357,
+              -0.4750250279903412,
+              -0.04331054538488388
+            ],
+            "mae": [
+              0.02800288383565203,
+              0.06618535234034062,
+              0.06541109894156852
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "yaw_left": {
+            "command": [
+              0,
+              0,
+              1
+            ],
+            "mean_actual": [
+              0.04625942185521126,
+              -0.05191624164581299,
+              0.8870591521263123
+            ],
+            "mae": [
+              0.056169796426489484,
+              0.059595593730977274,
+              0.13677612158656122
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "yaw_right": {
+            "command": [
+              0,
+              0,
+              -1
+            ],
+            "mean_actual": [
+              0.007630175910890102,
+              0.022220805287361145,
+              -0.8940269351005554
+            ],
+            "mae": [
+              0.0268147114098756,
+              0.0462120556243317,
+              0.14606746812164784
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward_turn": {
+            "command": [
+              1,
+              0,
+              1
+            ],
+            "mean_actual": [
+              0.9431208968162537,
+              -0.040958333760499954,
+              0.9010761380195618
+            ],
+            "mae": [
+              0.06211600723862648,
+              0.06827032367460197,
+              0.12417864525318145
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          }
+        }
+      },
+      "checkpoint_sha256": "3f37ff8d3328cbc4dcdce3b0a5d543b1a7959ef06fbe83316ece1785801ad8c1",
+      "traces_finite": true
+    },
+    {
+      "name": "G-unbalanced-seed42-100k",
+      "summary": {
+        "full_name": "AMP－分层 reset＋双判别器＋恢复不均衡采样（G，随机种子42，100k）",
+        "success": 1266,
+        "n": 1268,
+        "success_percent": 99.84227129337539,
+        "procedural_low_time_s": 1.8869531154632568,
+        "vx3_actual": 2.934746503829956,
+        "vx3_upright_percent": 100.0,
+        "yaw_mae_rad_s": 0.16981875369697808,
+        "motion_quality": {
+          "first3s": {
+            "joint_acc_control_rms_rad_s2": 50.04879379272461,
+            "joint_speed_rms_rad_s": 1.7872213125228882,
+            "root_ang_speed_rms_rad_s": 2.1009268760681152,
+            "root_vertical_speed_rms_m_s": 0.42746463418006897,
+            "feet_netforce_rms_N": 300.307861328125,
+            "action_delta_rms_normalized": 0.2303919792175293
+          },
+          "last5s": {
+            "joint_acc_control_rms_rad_s2": 0.5159078240394592,
+            "joint_speed_rms_rad_s": 0.12752526998519897,
+            "root_ang_speed_rms_rad_s": 0.13168194890022278,
+            "root_vertical_speed_rms_m_s": 0.0023582065477967262,
+            "action_delta_rms_normalized": 0.002257788321003318,
+            "feet_netforce_rms_N": 331.5099792480469
+          }
+        }
+      },
+      "recovery": {
+        "name": "G-unbalanced-seed42-100k",
+        "checkpoint": "/root/workplace/lyd-eval-20261104/logs/eval_20261104/checkpoints/G-unbalanced-seed42-100k.pt",
+        "initial_state_hash": "beb879b875c97bfa08c359f32a04f6f12d575f5e13b1da0e75e0822fd4b2da3b",
+        "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+        "protocol": "20s, no resets, deterministic policy, nominal dynamics; hroot>.65 and gz<-.9 for 1s; zero command for recovery; 128 standing trials commands 0/.5/1/2m/s every 5s",
+        "groups": {
+          "natural/low": {
+            "n": 376,
+            "success_1s_percent": 99.46807861328125,
+            "mean_success_time_s": 1.9959893226623535,
+            "last5s_upright_percent": 99.46808624267578,
+            "ever_continuous_failure_5s_percent": 1.5957447290420532,
+            "route_switches_mean": 0.9999999403953552,
+            "recovery_route_percent": 4.759840488433838
+          },
+          "natural/supine": {
+            "n": 314,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.0415287017822266,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 1.2738853693008423,
+            "route_switches_mean": 1.0063694715499878,
+            "recovery_route_percent": 4.471974849700928
+          },
+          "natural/prone": {
+            "n": 36,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.6872222423553467,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 2.7444446086883545
+          },
+          "natural/left_side_down": {
+            "n": 13,
+            "success_1s_percent": 84.61538696289062,
+            "mean_success_time_s": 1.5927273035049438,
+            "last5s_upright_percent": 84.61539459228516,
+            "ever_continuous_failure_5s_percent": 15.384615898132324,
+            "route_switches_mean": 0.8461538553237915,
+            "recovery_route_percent": 17.315385818481445
+          },
+          "natural/right_side_down": {
+            "n": 13,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.0923078060150146,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 4.738461971282959
+          },
+          "natural/middle": {
+            "n": 328,
+            "success_1s_percent": 99.99999237060547,
+            "mean_success_time_s": 1.7490853071212769,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.30487802624702454,
+            "route_switches_mean": 0.9999999403953552,
+            "recovery_route_percent": 3.0182929039001465
+          },
+          "natural/late": {
+            "n": 52,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.367692232131958,
+            "last5s_upright_percent": 100.00001525878906,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 0.6153846383094788,
+            "recovery_route_percent": 1.1134616136550903
+          },
+          "procedural/low": {
+            "n": 512,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.8869531154632568,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.7316408157348633
+          },
+          "procedural/supine": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.9014062881469727,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.707031488418579
+          },
+          "procedural/prone": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.8115625381469727,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.4406251907348633
+          },
+          "procedural/left_side_down": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 1.7726562023162842,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 3.188281536102295
+          },
+          "procedural/right_side_down": {
+            "n": 128,
+            "success_1s_percent": 100.0,
+            "mean_success_time_s": 2.062187433242798,
+            "last5s_upright_percent": 100.0,
+            "ever_continuous_failure_5s_percent": 0.0,
+            "route_switches_mean": 1.0,
+            "recovery_route_percent": 4.590625286102295
+          }
+        },
+        "motion_quality": {
+          "first3s": {
+            "joint_acc_control_rms_rad_s2": 50.04879379272461,
+            "joint_speed_rms_rad_s": 1.7872213125228882,
+            "root_ang_speed_rms_rad_s": 2.1009268760681152,
+            "root_vertical_speed_rms_m_s": 0.42746463418006897,
+            "feet_netforce_rms_N": 300.307861328125,
+            "action_delta_rms_normalized": 0.2303919792175293
+          },
+          "last5s": {
+            "joint_acc_control_rms_rad_s2": 0.5159078240394592,
+            "joint_speed_rms_rad_s": 0.12752526998519897,
+            "root_ang_speed_rms_rad_s": 0.13168194890022278,
+            "root_vertical_speed_rms_m_s": 0.0023582065477967262,
+            "action_delta_rms_normalized": 0.002257788321003318,
+            "feet_netforce_rms_N": 331.5099792480469
+          }
+        },
+        "motion_quality_notes": "Mean per-pose RMS over all recovery starts; fixed first 3s and last 5s. Joint acceleration is finite-difference at 50Hz. Foot force is summed foot net-force magnitudes sampled at control rate, NOT whole-body impact or peak physics-step force. Normalized action deltas depend on model output scale; compare physical joint measures first.",
+        "locomotion": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.0,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 0.0,
+          "recovery_route_percent": 0.0,
+          "vx_mae_by_5s": [
+            0.01534254476428032,
+            0.07374278455972672,
+            0.0957883670926094,
+            0.1597558557987213
+          ]
+        }
+      },
+      "commands": {
+        "name": "G-unbalanced-seed42-100k",
+        "checkpoint": "/root/workplace/lyd-eval-20261104/logs/eval_20261104/checkpoints/G-unbalanced-seed42-100k.pt",
+        "protocol": "8 matched initial joint perturbations per command, 2s standing then 10s command; no resets/push/DR/smoothing; torso yaw-frame xy velocity and world torso yaw rate; final5s means",
+        "cases": {
+          "stand": {
+            "command": [
+              0,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.0014914643252268434,
+              0.0008753881556913257,
+              -0.060747478157281876
+            ],
+            "mae": [
+              0.00291829025770312,
+              0.0030007356610668124,
+              0.08198250656971504
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward05": {
+            "command": [
+              0.5,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.47092488408088684,
+              0.033350344747304916,
+              0.03932921960949898
+            ],
+            "mae": [
+              0.04759929211437702,
+              0.049950386252370665,
+              0.07354681494363104
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward1": {
+            "command": [
+              1,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.9680367708206177,
+              -0.017936622723937035,
+              -0.028940925374627113
+            ],
+            "mae": [
+              0.05933588707447052,
+              0.060154622186400955,
+              0.08256559681578074
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward2": {
+            "command": [
+              2,
+              0,
+              0
+            ],
+            "mean_actual": [
+              1.958214521408081,
+              -0.012499936856329441,
+              0.009445599280297756
+            ],
+            "mae": [
+              0.0648557568192482,
+              0.04996110179723473,
+              0.07365098552593873
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward3": {
+            "command": [
+              3,
+              0,
+              0
+            ],
+            "mean_actual": [
+              2.934746503829956,
+              0.013538121245801449,
+              0.06463026255369186
+            ],
+            "mae": [
+              0.0691157683134079,
+              0.043166075337678196,
+              0.10600792346957315
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "backward05": {
+            "command": [
+              -0.5,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.4339838922023773,
+              0.033086568117141724,
+              -0.023008983582258224
+            ],
+            "mae": [
+              0.06902229835093021,
+              0.0828513331959166,
+              0.06498307075327711
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "backward1": {
+            "command": [
+              -1,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.9294233322143555,
+              0.004385806620121002,
+              0.05073506385087967
+            ],
+            "mae": [
+              0.0855935825407505,
+              0.06081201088428497,
+              0.09548456300527687
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "left05": {
+            "command": [
+              0,
+              0.5,
+              0
+            ],
+            "mean_actual": [
+              -0.06341315060853958,
+              0.4714723527431488,
+              0.021062979474663734
+            ],
+            "mae": [
+              0.06691848805733025,
+              0.09713509488105775,
+              0.06981261854873946
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "right05": {
+            "command": [
+              0,
+              -0.5,
+              0
+            ],
+            "mean_actual": [
+              -0.02253606542944908,
+              -0.49057191610336304,
+              -0.08702287822961807
+            ],
+            "mae": [
+              0.026930166291072966,
+              0.05707722763717175,
+              0.12497324539705733
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "yaw_left": {
+            "command": [
+              0,
+              0,
+              1
+            ],
+            "mean_actual": [
+              -0.002638991456478834,
+              -0.01750084199011326,
+              0.8000140190124512
+            ],
+            "mae": [
+              0.023703380563533757,
+              0.03398010770882683,
+              0.21203526274859905
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "yaw_right": {
+            "command": [
+              0,
+              0,
+              -1
+            ],
+            "mean_actual": [
+              0.014288102276623249,
+              0.03506804257631302,
+              -0.916286289691925
+            ],
+            "mae": [
+              0.029067832376676962,
+              0.04576481190550839,
+              0.12760224464535713
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward_turn": {
+            "command": [
+              1,
+              0,
+              1
+            ],
+            "mean_actual": [
+              0.9175677299499512,
+              -0.0016242736019194126,
+              0.938490092754364
+            ],
+            "mae": [
+              0.08886817324161529,
+              0.07288672421820229,
+              0.08878920808434486
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          }
+        }
+      },
+      "checkpoint_sha256": "abc73bea51edb9651aac7a76d318babc2caf04c3134a2bdcf21724ac76f79a91",
+      "traces_finite": true
+    },
+    {
+      "name": "H-full-seed42-100k",
+      "summary": {
+        "full_name": "AMP－分层 reset＋双判别器＋恢复均衡采样（H，随机种子42，100k）",
+        "success": 932,
+        "n": 1268,
+        "success_percent": 73.50157728706624,
+        "procedural_low_time_s": 5.3223748207092285,
+        "vx3_actual": 2.9734389781951904,
+        "vx3_upright_percent": 100.0,
+        "yaw_mae_rad_s": 0.2875816742666065,
+        "motion_quality": {
+          "first3s": {
+            "joint_acc_control_rms_rad_s2": 60.83199691772461,
+            "joint_speed_rms_rad_s": 2.3208425045013428,
+            "root_ang_speed_rms_rad_s": 2.8507518768310547,
+            "root_vertical_speed_rms_m_s": 0.642960786819458,
+            "feet_netforce_rms_N": 310.23968505859375,
+            "action_delta_rms_normalized": 0.2778805196285248
+          },
+          "last5s": {
+            "joint_acc_control_rms_rad_s2": 4.5041680335998535,
+            "joint_speed_rms_rad_s": 0.26655474305152893,
+            "root_ang_speed_rms_rad_s": 0.3038926124572754,
+            "root_vertical_speed_rms_m_s": 0.04231015592813492,
+            "action_delta_rms_normalized": 0.021387293934822083,
+            "feet_netforce_rms_N": 304.4488830566406
+          }
+        }
+      },
+      "recovery": {
+        "name": "H-full-seed42-100k",
+        "checkpoint": "/root/workplace/lyd-eval-20261104/logs/eval_20261104/checkpoints/H-full-seed42-100k.pt",
+        "initial_state_hash": "beb879b875c97bfa08c359f32a04f6f12d575f5e13b1da0e75e0822fd4b2da3b",
+        "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+        "protocol": "20s, no resets, deterministic policy, nominal dynamics; hroot>.65 and gz<-.9 for 1s; zero command for recovery; 128 standing trials commands 0/.5/1/2m/s every 5s",
+        "groups": {
+          "natural/low": {
+            "n": 376,
+            "success_1s_percent": 54.7872314453125,
+            "mean_success_time_s": 6.23640775680542,
+            "last5s_upright_percent": 53.34574508666992,
+            "ever_continuous_failure_5s_percent": 62.5,
+            "route_switches_mean": 0.5664893388748169,
+            "recovery_route_percent": 59.15930938720703
+          },
+          "natural/supine": {
+            "n": 314,
+            "success_1s_percent": 57.643310546875,
+            "mean_success_time_s": 6.055138111114502,
+            "last5s_upright_percent": 56.198726654052734,
+            "ever_continuous_failure_5s_percent": 59.23566818237305,
+            "route_switches_mean": 0.5955414175987244,
+            "recovery_route_percent": 56.510196685791016
+          },
+          "natural/prone": {
+            "n": 36,
+            "success_1s_percent": 11.111111640930176,
+            "mean_success_time_s": 11.90999984741211,
+            "last5s_upright_percent": 11.022222518920898,
+            "ever_continuous_failure_5s_percent": 100.0,
+            "route_switches_mean": 0.1111111119389534,
+            "recovery_route_percent": 94.90000915527344
+          },
+          "natural/left_side_down": {
+            "n": 13,
+            "success_1s_percent": 69.23077392578125,
+            "mean_success_time_s": 5.215555667877197,
+            "last5s_upright_percent": 69.32308197021484,
+            "ever_continuous_failure_5s_percent": 61.5384635925293,
+            "route_switches_mean": 0.7692307829856873,
+            "recovery_route_percent": 44.70769500732422
+          },
+          "natural/right_side_down": {
+            "n": 13,
+            "success_1s_percent": 92.30770111083984,
+            "mean_success_time_s": 7.845000267028809,
+            "last5s_upright_percent": 85.66154479980469,
+            "ever_continuous_failure_5s_percent": 38.46154022216797,
+            "route_switches_mean": 0.9230769872665405,
+            "recovery_route_percent": 38.62308120727539
+          },
+          "natural/middle": {
+            "n": 328,
+            "success_1s_percent": 90.243896484375,
+            "mean_success_time_s": 3.4397976398468018,
+            "last5s_upright_percent": 89.49512481689453,
+            "ever_continuous_failure_5s_percent": 20.731706619262695,
+            "route_switches_mean": 0.9024389982223511,
+            "recovery_route_percent": 20.143598556518555
+          },
+          "natural/late": {
+            "n": 52,
+            "success_1s_percent": 98.0769271850586,
+            "mean_success_time_s": 1.3011765480041504,
+            "last5s_upright_percent": 98.07693481445312,
+            "ever_continuous_failure_5s_percent": 1.9230769872665405,
+            "route_switches_mean": 0.5192307829856873,
+            "recovery_route_percent": 2.759615659713745
+          },
+          "procedural/low": {
+            "n": 512,
+            "success_1s_percent": 74.0234375,
+            "mean_success_time_s": 5.3223748207092285,
+            "last5s_upright_percent": 72.87344360351562,
+            "ever_continuous_failure_5s_percent": 42.578125,
+            "route_switches_mean": 0.775390625,
+            "recovery_route_percent": 41.46797180175781
+          },
+          "procedural/supine": {
+            "n": 128,
+            "success_1s_percent": 57.03125,
+            "mean_success_time_s": 6.230411052703857,
+            "last5s_upright_percent": 55.69062805175781,
+            "ever_continuous_failure_5s_percent": 60.15625,
+            "route_switches_mean": 0.6171875,
+            "recovery_route_percent": 57.39531707763672
+          },
+          "procedural/prone": {
+            "n": 128,
+            "success_1s_percent": 65.625,
+            "mean_success_time_s": 5.54880952835083,
+            "last5s_upright_percent": 65.0062484741211,
+            "ever_continuous_failure_5s_percent": 51.5625,
+            "route_switches_mean": 0.6875,
+            "recovery_route_percent": 48.771095275878906
+          },
+          "procedural/left_side_down": {
+            "n": 128,
+            "success_1s_percent": 96.09375,
+            "mean_success_time_s": 3.8172354698181152,
+            "last5s_upright_percent": 96.09375762939453,
+            "ever_continuous_failure_5s_percent": 13.28125,
+            "route_switches_mean": 0.9609375,
+            "recovery_route_percent": 17.027345657348633
+          },
+          "procedural/right_side_down": {
+            "n": 128,
+            "success_1s_percent": 77.34375,
+            "mean_success_time_s": 6.33070707321167,
+            "last5s_upright_percent": 74.703125,
+            "ever_continuous_failure_5s_percent": 45.3125,
+            "route_switches_mean": 0.8359375,
+            "recovery_route_percent": 42.67812728881836
+          }
+        },
+        "motion_quality": {
+          "first3s": {
+            "joint_acc_control_rms_rad_s2": 60.83199691772461,
+            "joint_speed_rms_rad_s": 2.3208425045013428,
+            "root_ang_speed_rms_rad_s": 2.8507518768310547,
+            "root_vertical_speed_rms_m_s": 0.642960786819458,
+            "feet_netforce_rms_N": 310.23968505859375,
+            "action_delta_rms_normalized": 0.2778805196285248
+          },
+          "last5s": {
+            "joint_acc_control_rms_rad_s2": 4.5041680335998535,
+            "joint_speed_rms_rad_s": 0.26655474305152893,
+            "root_ang_speed_rms_rad_s": 0.3038926124572754,
+            "root_vertical_speed_rms_m_s": 0.04231015592813492,
+            "action_delta_rms_normalized": 0.021387293934822083,
+            "feet_netforce_rms_N": 304.4488830566406
+          }
+        },
+        "motion_quality_notes": "Mean per-pose RMS over all recovery starts; fixed first 3s and last 5s. Joint acceleration is finite-difference at 50Hz. Foot force is summed foot net-force magnitudes sampled at control rate, NOT whole-body impact or peak physics-step force. Normalized action deltas depend on model output scale; compare physical joint measures first.",
+        "locomotion": {
+          "n": 128,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.0,
+          "last5s_upright_percent": 100.0,
+          "ever_continuous_failure_5s_percent": 0.0,
+          "route_switches_mean": 0.0,
+          "recovery_route_percent": 0.0,
+          "vx_mae_by_5s": [
+            0.012060179375112057,
+            0.06977034360170364,
+            0.07574009895324707,
+            0.11498131603002548
+          ]
+        }
+      },
+      "commands": {
+        "name": "H-full-seed42-100k",
+        "checkpoint": "/root/workplace/lyd-eval-20261104/logs/eval_20261104/checkpoints/H-full-seed42-100k.pt",
+        "protocol": "8 matched initial joint perturbations per command, 2s standing then 10s command; no resets/push/DR/smoothing; torso yaw-frame xy velocity and world torso yaw rate; final5s means",
+        "cases": {
+          "stand": {
+            "command": [
+              0,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.0013574737822636962,
+              -0.002085845684632659,
+              0.016555611044168472
+            ],
+            "mae": [
+              0.003248742942966601,
+              0.003848500849029733,
+              0.06465807201364078
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward05": {
+            "command": [
+              0.5,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.4278583824634552,
+              0.006154845934361219,
+              0.02308349497616291
+            ],
+            "mae": [
+              0.07526730698347092,
+              0.03865617479234425,
+              0.07457993364497088
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward1": {
+            "command": [
+              1,
+              0,
+              0
+            ],
+            "mean_actual": [
+              0.9646672010421753,
+              -0.006662898696959019,
+              0.014428040012717247
+            ],
+            "mae": [
+              0.05655248522758484,
+              0.06549647140645538,
+              0.07570758654619203
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward2": {
+            "command": [
+              2,
+              0,
+              0
+            ],
+            "mean_actual": [
+              1.9490834474563599,
+              -0.001840400043874979,
+              -0.0449422262609005
+            ],
+            "mae": [
+              0.0597867528796196,
+              0.050377666921122,
+              0.11720782943255018
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward3": {
+            "command": [
+              3,
+              0,
+              0
+            ],
+            "mean_actual": [
+              2.9734389781951904,
+              0.02982492186129093,
+              -0.02958059124648571
+            ],
+            "mae": [
+              0.05202720975875855,
+              0.037546272902662166,
+              0.10334653629089735
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "backward05": {
+            "command": [
+              -0.5,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.4614230692386627,
+              -0.010005145333707333,
+              0.018019860610365868
+            ],
+            "mae": [
+              0.04675782984495163,
+              0.06044780619244193,
+              0.07201261694074491
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "backward1": {
+            "command": [
+              -1,
+              0,
+              0
+            ],
+            "mean_actual": [
+              -0.8916327953338623,
+              -0.01601467654109001,
+              0.003786049084737897
+            ],
+            "mae": [
+              0.11274033007025719,
+              0.05299617193429003,
+              0.0726178346591023
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "left05": {
+            "command": [
+              0,
+              0.5,
+              0
+            ],
+            "mean_actual": [
+              -0.024615399539470673,
+              0.440885066986084,
+              0.06267507374286652
+            ],
+            "mae": [
+              0.03012639193184441,
+              0.10586757430434227,
+              0.08957137212756061
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "right05": {
+            "command": [
+              0,
+              -0.5,
+              0
+            ],
+            "mean_actual": [
+              -0.035804376006126404,
+              -0.5150410532951355,
+              -0.0615636371076107
+            ],
+            "mae": [
+              0.04318812513642479,
+              0.05794529388844967,
+              0.09820492788622687
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "yaw_left": {
+            "command": [
+              0,
+              0,
+              1
+            ],
+            "mean_actual": [
+              0.004235382657498121,
+              0.01652393490076065,
+              0.7735951542854309
+            ],
+            "mae": [
+              0.030623468521880567,
+              0.025152228991915764,
+              0.26045603819191454
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "yaw_right": {
+            "command": [
+              0,
+              0,
+              -1
+            ],
+            "mean_actual": [
+              -0.033678095787763596,
+              -0.029705800116062164,
+              -0.7111325860023499
+            ],
+            "mae": [
+              0.04369488344459387,
+              0.04629820864985231,
+              0.31470731034129856
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          },
+          "forward_turn": {
+            "command": [
+              1,
+              0,
+              1
+            ],
+            "mean_actual": [
+              0.9919650554656982,
+              -0.07147666811943054,
+              0.8710936903953552
+            ],
+            "mae": [
+              0.04219387400150299,
+              0.07550960947293789,
+              0.15390229690074922
+            ],
+            "upright_percent": 100.0,
+            "guidance_gate_mean": 0.0,
+            "recovery_route_percent": 0.0
+          }
+        }
+      },
+      "checkpoint_sha256": "b3b2db59245e7886e35ab98da3a878d378909651d0339af9901c1ddab9695612",
+      "traces_finite": true
+    }
+  ],
+  "matched_recovery_initial_states": true,
+  "checkpoint_notes": "AMP final model_99999.pt is the final checkpoint after 100000 training iterations.",
+  "limitations": [
+    "Nominal flat simulation, deterministic policy, no pushes/domain randomization/resets; not terrain recovery evaluation.",
+    "Recovery requires root height >0.65m and gz<-0.9 for 1s within 20s. Reported recovery time includes that 1s hold.",
+    "Motion-quality values average per-pose RMS in fixed first3s/last5s windows. 50Hz joint acceleration is not a complete measure of naturalness.",
+    "K47 vs L47 is one-seed same-progress ablation; cannot infer statistical significance across training seeds.",
+    "K/L train on terrain, AMP controls on flat; cross-family comparisons are task performance comparisons, not pure algorithm ablations."
+  ],
+  "H100k_local_repeat": {
+    "success": 941,
+    "n": 1268,
+    "result": {
+      "name": "H-full-seed42-100k-local-repeat",
+      "checkpoint": "logs/eval_20261104/checkpoints/H-full-seed42-100k.pt",
+      "initial_state_hash": "beb879b875c97bfa08c359f32a04f6f12d575f5e13b1da0e75e0822fd4b2da3b",
+      "bank_sha256": "bf63ae0e2b85ca5f41733b8b9915398226da327e58bb74e46437435b174c94ac",
+      "protocol": "20s, no resets, deterministic policy, nominal dynamics; hroot>.65 and gz<-.9 for 1s; zero command for recovery; 128 standing trials commands 0/.5/1/2m/s every 5s",
+      "groups": {
+        "natural/low": {
+          "n": 376,
+          "success_1s_percent": 55.585105895996094,
+          "mean_success_time_s": 5.980765342712402,
+          "last5s_upright_percent": 54.562767028808594,
+          "ever_continuous_failure_5s_percent": 60.37234115600586,
+          "route_switches_mean": 0.585106372833252,
+          "recovery_route_percent": 57.842288970947266
+        },
+        "natural/supine": {
+          "n": 314,
+          "success_1s_percent": 59.23566818237305,
+          "mean_success_time_s": 6.027312278747559,
+          "last5s_upright_percent": 58.011470794677734,
+          "ever_continuous_failure_5s_percent": 57.006370544433594,
+          "route_switches_mean": 0.6273885369300842,
+          "recovery_route_percent": 55.205101013183594
+        },
+        "natural/prone": {
+          "n": 36,
+          "success_1s_percent": 5.555555820465088,
+          "mean_success_time_s": 9.469999313354492,
+          "last5s_upright_percent": 5.555555820465088,
+          "ever_continuous_failure_5s_percent": 100.0,
+          "route_switches_mean": 0.0555555559694767,
+          "recovery_route_percent": 96.75833892822266
+        },
+        "natural/left_side_down": {
+          "n": 13,
+          "success_1s_percent": 76.92308044433594,
+          "mean_success_time_s": 5.368000030517578,
+          "last5s_upright_percent": 76.92308044433594,
+          "ever_continuous_failure_5s_percent": 61.5384635925293,
+          "route_switches_mean": 0.7692307829856873,
+          "recovery_route_percent": 39.4307746887207
+        },
+        "natural/right_side_down": {
+          "n": 13,
+          "success_1s_percent": 84.61538696289062,
+          "mean_success_time_s": 5.116363525390625,
+          "last5s_upright_percent": 84.61539459228516,
+          "ever_continuous_failure_5s_percent": 30.76923179626465,
+          "route_switches_mean": 0.8461538553237915,
+          "recovery_route_percent": 32.18461990356445
+        },
+        "natural/middle": {
+          "n": 328,
+          "success_1s_percent": 88.10975646972656,
+          "mean_success_time_s": 3.4143946170806885,
+          "last5s_upright_percent": 87.56951141357422,
+          "ever_continuous_failure_5s_percent": 23.170730590820312,
+          "route_switches_mean": 0.8871951103210449,
+          "recovery_route_percent": 21.922256469726562
+        },
+        "natural/late": {
+          "n": 52,
+          "success_1s_percent": 100.0,
+          "mean_success_time_s": 1.4242308139801025,
+          "last5s_upright_percent": 100.00001525878906,
+          "ever_continuous_failure_5s_percent": 1.9230769872665405,
+          "route_switches_mean": 0.5384615659713745,
+          "recovery_route_percent": 1.4653847217559814
+        },
+        "procedural/low": {
+          "n": 512,
+          "success_1s_percent": 76.3671875,
+          "mean_success_time_s": 5.190281391143799,
+          "last5s_upright_percent": 75.73828887939453,
+          "ever_continuous_failure_5s_percent": 40.234375,
+          "route_switches_mean": 0.79296875,
+          "recovery_route_percent": 39.126956939697266
+        },
+        "procedural/supine": {
+          "n": 128,
+          "success_1s_percent": 60.15625,
+          "mean_success_time_s": 6.2872724533081055,
+          "last5s_upright_percent": 59.00312805175781,
+          "ever_continuous_failure_5s_percent": 57.03125,
+          "route_switches_mean": 0.609375,
+          "recovery_route_percent": 55.31172180175781
+        },
+        "procedural/prone": {
+          "n": 128,
+          "success_1s_percent": 68.75,
+          "mean_success_time_s": 5.118636608123779,
+          "last5s_upright_percent": 68.26875305175781,
+          "ever_continuous_failure_5s_percent": 49.21875,
+          "route_switches_mean": 0.7109375,
+          "recovery_route_percent": 44.927345275878906
+        },
+        "procedural/left_side_down": {
+          "n": 128,
+          "success_1s_percent": 98.4375,
+          "mean_success_time_s": 3.7849206924438477,
+          "last5s_upright_percent": 98.58438110351562,
+          "ever_continuous_failure_5s_percent": 9.375,
+          "route_switches_mean": 1.0078125,
+          "recovery_route_percent": 14.746875762939453
+        },
+        "procedural/right_side_down": {
+          "n": 128,
+          "success_1s_percent": 78.125,
+          "mean_success_time_s": 6.179399490356445,
+          "last5s_upright_percent": 77.09687805175781,
+          "ever_continuous_failure_5s_percent": 45.3125,
+          "route_switches_mean": 0.84375,
+          "recovery_route_percent": 41.52187728881836
+        }
+      },
+      "motion_quality": {
+        "first3s": {
+          "joint_acc_control_rms_rad_s2": 60.776641845703125,
+          "joint_speed_rms_rad_s": 2.3188552856445312,
+          "root_ang_speed_rms_rad_s": 2.8475358486175537,
+          "root_vertical_speed_rms_m_s": 0.6418959498405457,
+          "feet_netforce_rms_N": 311.1431579589844,
+          "action_delta_rms_normalized": 0.2775481939315796
+        },
+        "last5s": {
+          "joint_acc_control_rms_rad_s2": 4.414156913757324,
+          "joint_speed_rms_rad_s": 0.2625424265861511,
+          "root_ang_speed_rms_rad_s": 0.29828137159347534,
+          "root_vertical_speed_rms_m_s": 0.04248146340250969,
+          "action_delta_rms_normalized": 0.02077888511121273,
+          "feet_netforce_rms_N": 304.87164306640625
+        }
+      },
+      "motion_quality_notes": "Mean per-pose RMS over all recovery starts; fixed first 3s and last 5s. Joint acceleration is finite-difference at 50Hz. Foot force is summed foot net-force magnitudes sampled at control rate, NOT whole-body impact or peak physics-step force. Normalized action deltas depend on model output scale; compare physical joint measures first.",
+      "locomotion": {
+        "n": 128,
+        "success_1s_percent": 100.0,
+        "mean_success_time_s": 1.0,
+        "last5s_upright_percent": 100.0,
+        "ever_continuous_failure_5s_percent": 0.0,
+        "route_switches_mean": 0.0,
+        "recovery_route_percent": 0.0,
+        "vx_mae_by_5s": [
+          0.012100671418011189,
+          0.06990078836679459,
+          0.07622522115707397,
+          0.1146077886223793
+        ]
+      }
+    }
+  },
+  "H50k_historical": {
+    "name": "H42",
+    "success": 1262,
+    "total": 1268,
+    "success_percent": 99.52681388012618,
+    "natural_low": {
+      "n": 376,
+      "success_1s_percent": 99.46807861328125,
+      "mean_success_time_s": 2.3213369846343994,
+      "last5s_upright_percent": 99.46808624267578,
+      "ever_continuous_failure_5s_percent": 1.063829779624939,
+      "route_switches_mean": 0.9999999403953552,
+      "recovery_route_percent": 6.195478916168213
+    },
+    "procedural_low": {
+      "n": 512,
+      "success_1s_percent": 99.4140625,
+      "mean_success_time_s": 2.4183497428894043,
+      "last5s_upright_percent": 99.44688415527344,
+      "ever_continuous_failure_5s_percent": 1.3671875,
+      "route_switches_mean": 0.99609375,
+      "recovery_route_percent": 6.860742568969727
+    },
+    "forward3": {
+      "command": [
+        3,
+        0,
+        0
+      ],
+      "mean_actual": [
+        2.9279613494873047,
+        -0.0038844216614961624,
+        -0.008710766211152077
+      ],
+      "mae": [
+        0.07972222030162811,
+        0.0491384912098074,
+        0.06881429259891501
+      ],
+      "upright_percent": 100.0,
+      "guidance_gate_mean": 0.0,
+      "recovery_route_percent": 0.0
+    },
+    "yaw_left": {
+      "command": [
+        0,
+        0,
+        1
+      ],
+      "mean_actual": [
+        -0.02462494932115078,
+        0.00327875348739326,
+        0.8424774408340454
+      ],
+      "mae": [
+        0.03456102993233071,
+        0.035952214704680956,
+        0.17896356016397477
+      ],
+      "upright_percent": 100.0,
+      "guidance_gate_mean": 0.0,
+      "recovery_route_percent": 0.0
+    },
+    "yaw_right": {
+      "command": [
+        0,
+        0,
+        -1
+      ],
+      "mean_actual": [
+        0.012346929870545864,
+        0.02912929654121399,
+        -0.9008001685142517
+      ],
+      "mae": [
+        0.031500639147066974,
+        0.03834295980581373,
+        0.15085006949305535
+      ],
+      "upright_percent": 100.0,
+      "guidance_gate_mean": 0.0,
+      "recovery_route_percent": 0.0
+    },
+    "command_min_upright_percent": 100.0,
+    "mean_yaw_turn_mae": 0.16490681482851505
+  },
+  "video": {
+    "path": "/home/luyd/workspace/AMP_mjlab/logs/eval_20261104/SuperMimic_original_vs_half_height_47k_recovery.mp4",
+    "left": "SuperMimic shared terrain original height reward K47k",
+    "right": "SuperMimic shared terrain half height reward L47k",
+    "speed": 0.5,
+    "order": [
+      "supine",
+      "prone",
+      "left_side_down",
+      "right_side_down"
+    ],
+    "probe": {
+      "programs": [],
+      "streams": [
+        {
+          "width": 1280,
+          "height": 464,
+          "r_frame_rate": "25/1"
+        }
+      ],
+      "format": {
+        "duration": "79.840000"
+      }
+    }
+  },
+  "script_sha256": {
+    "scripts/evaluate_amp_common.py": "472e2c0b200299a33e25d9b8c77da1f4416ffa7ef73f14434e2757576bed7cd7",
+    "scripts/evaluate_amp_commands_latest.py": "892eeb94f19f6efdaa65663db864151febba8c9f31513482aea355be1fdf4074",
+    "scripts/record_amp_stability.py": "93db91145924152ca2681210ab037209d9026c9d1145c962ab5a588e28b937b0"
+  },
+  "findings": [
+    "Matched47k: reducing height reward halves coefficient but reduces first3s joint acceleration RMS by only ~1.1%; recovery100% in both. Last5s joint acceleration RMS increases from0.597 to1.148rad/s².",
+    "Balanced dual AMP100k recovery932/1268; local repeat941/1268. Historical50k1262/1268. This checkpoint shows recovery regression despite high training episode length.",
+    "Shared AMP100k both seeds1267/1268; unbalanced dual1266/1268. No demonstrated overall balanced-dual advantage in these checkpoints.",
+    "Original-height SuperMimic89k recovery1268/1268, but forward3 command final5s upright93.5% and post-recovery joint acceleration RMS4.998rad/s². Latest checkpoint is not uniformly best."
+  ]
+}
