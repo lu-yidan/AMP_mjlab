@@ -30,7 +30,13 @@ def reset_eval(env,env_ids):
  r.write_root_link_pose_to_sim(root[:,:7],env_ids=ids);r.write_root_link_velocity_to_sim(torch.zeros(len(ids),6,device=env.device),env_ids=ids)
  r.write_joint_state_to_sim(joints,torch.zeros_like(joints),env_ids=ids)
 
-cfg=load_env_cfg('Unitree-G1-AMP-Flat',play=True);cfg.seed=12345;cfg.scene.num_envs=n
+cfg=load_env_cfg(a.task if 'TerrainCritic' in a.task else 'Unitree-G1-AMP-Flat',play=True)
+if 'TerrainCritic' in a.task:
+ # Preserve privileged critic scan dimensions while recording on a flat plane.
+ cfg.scene.terrain.terrain_type='plane';cfg.scene.terrain.terrain_generator=None
+ cfg.commands=load_env_cfg('Unitree-G1-AMP-Flat',play=True).commands
+ cfg.rewards={};cfg.metrics={}
+cfg.seed=12345;cfg.scene.num_envs=n
 cfg.terminations={};cfg.curriculum={};cfg.events={'matched_reset':EventTermCfg(func=reset_eval,mode='reset')};cfg.episode_length_s=30
 c=cfg.commands['twist'];c.heading_command=False;c.ranges.heading=None;c.rel_standing_envs=0.;c.rel_heading_envs=0.;c.resampling_time_range=(1000.,1000.)
 c.ranges.lin_vel_x=(0.,0.);c.ranges.lin_vel_y=(0.,0.);c.ranges.ang_vel_z=(0.,0.)
@@ -44,19 +50,8 @@ if a.backend=='supermimic':
  policy=load_policy(a.checkpoint,obs)
 else:
  runner=load_runner_cls(a.task)(w,asdict(agent),log_dir=None,device='cuda:0')
- # Inference may move an expert bank between hosts. Preserve all semantic
- # configuration checks, allowing only this unused-at-inference path to move.
- checkpoint=torch.load(a.checkpoint,map_location='cpu',weights_only=False)
- if runner.alg.multi_amp is not None and 'multi_amp' in checkpoint:
-  saved_cfg=checkpoint['multi_amp']['config']
-  comparable=dict(saved_cfg)
-  if 'expert_bank' in comparable:
-   comparable['expert_bank']=runner.alg.multi_amp.cfg.get('expert_bank')
-  if comparable != runner.alg.multi_amp.cfg:
-   raise ValueError('MultiAMP semantic configuration differs from checkpoint')
-  runner.alg.multi_amp.cfg=dict(saved_cfg)
- del checkpoint
- runner.load(a.checkpoint,load_optimizer=False)
+ from rsl_rl.utils.inference_checkpoint import load_inference_checkpoint
+ load_inference_checkpoint(runner,a.checkpoint)
  policy=runner.get_inference_policy(device='cuda:0')
 r=env.scene['robot'];body=list(r.body_names).index('torso_link')
 initial=torch.cat((r.data.root_link_pos_w-env.scene.env_origins,r.data.root_link_quat_w,r.data.joint_pos),-1).cpu().numpy()
