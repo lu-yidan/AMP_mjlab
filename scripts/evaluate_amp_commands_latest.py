@@ -21,7 +21,12 @@ def reset(env,env_ids):
  root=r.data.default_root_state[ids].clone();root[:,:3]+=env.scene.env_origins[ids]
  joint=r.data.default_joint_pos[ids].clone()+torch.tensor(np.tile(jitter,(len(cases),1)),device=env.device)[ids]
  r.write_root_link_pose_to_sim(root[:,:7],env_ids=ids);r.write_root_link_velocity_to_sim(torch.zeros(len(ids),6,device=env.device),env_ids=ids);r.write_joint_state_to_sim(joint,torch.zeros_like(joint),env_ids=ids)
-cfg=load_env_cfg('Unitree-G1-AMP-Flat',play=True);cfg.seed=12345;cfg.scene.num_envs=n;cfg.events={'reset':EventTermCfg(func=reset,mode='reset')};cfg.terminations={};cfg.curriculum={}
+cfg=load_env_cfg(a.task if 'TerrainCritic' in a.task else 'Unitree-G1-AMP-Flat',play=True)
+if 'TerrainCritic' in a.task:
+ cfg.scene.terrain.terrain_type='plane';cfg.scene.terrain.terrain_generator=None
+ cfg.commands=load_env_cfg('Unitree-G1-AMP-Flat',play=True).commands
+ cfg.rewards={};cfg.metrics={}
+cfg.seed=12345;cfg.scene.num_envs=n;cfg.events={'reset':EventTermCfg(func=reset,mode='reset')};cfg.terminations={};cfg.curriculum={}
 c=cfg.commands['twist'];c.heading_command=False;c.ranges.heading=None;c.rel_standing_envs=0.;c.rel_heading_envs=0.;c.resampling_time_range=(1000.,1000.)
 c.ranges.lin_vel_x=(0.,0.);c.ranges.lin_vel_y=(0.,0.);c.ranges.ang_vel_z=(0.,0.)
 agent=load_rl_cfg(a.task);agent.amp_num_preload_transitions=2048;env=ManagerBasedRlEnv(cfg=cfg,device='cuda:0');w=RslRlVecEnvWrapper(env,clip_actions=agent.clip_actions)

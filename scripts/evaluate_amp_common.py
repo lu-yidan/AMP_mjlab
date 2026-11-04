@@ -28,7 +28,12 @@ def reset_eval(env,env_ids):
  r.write_root_link_velocity_to_sim(torch.zeros(len(ids),6,device=env.device),env_ids=ids)
  r.write_joint_state_to_sim(joints,torch.zeros_like(joints),env_ids=ids)
 
-cfg=load_env_cfg('Unitree-G1-AMP-Flat',play=True);cfg.seed=12345;cfg.scene.num_envs=n
+cfg=load_env_cfg(a.task if 'TerrainCritic' in a.task else 'Unitree-G1-AMP-Flat',play=True)
+if 'TerrainCritic' in a.task:
+ cfg.scene.terrain.terrain_type='plane';cfg.scene.terrain.terrain_generator=None
+ cfg.commands=load_env_cfg('Unitree-G1-AMP-Flat',play=True).commands
+ cfg.rewards={};cfg.metrics={}
+cfg.seed=12345;cfg.scene.num_envs=n
 cfg.terminations={};cfg.curriculum={};cfg.events={'matched_reset':EventTermCfg(func=reset_eval,mode='reset')}
 cfg.episode_length_s=30
 cmdcfg=cfg.commands['twist'];cmdcfg.heading_command=False;cmdcfg.ranges.heading=None;cmdcfg.rel_standing_envs=0.;cmdcfg.rel_heading_envs=0.
@@ -98,6 +103,7 @@ for source in ['natural','procedural']:
 result['motion_quality']={window:{key:float((total[:nr]/count).sqrt().mean()) for key,(total,count) in metrics.items()} for window,metrics in quality.items()}
 result['motion_quality_notes']='Mean per-pose RMS over all recovery starts; fixed first 3s and last 5s. Joint acceleration is finite-difference at 50Hz. Foot force is summed foot net-force magnitudes sampled at control rate, NOT whole-body impact or peak physics-step force. Normalized action deltas depend on model output scale; compare physical joint measures first.'
 quality_arrays={window+'__'+key:(total/count).sqrt().cpu().numpy() for window,metrics in quality.items() for key,(total,count) in metrics.items()}
+result['recovery']=report(np.r_[np.ones(nr,dtype=bool),np.zeros(128,dtype=bool)])
 result['locomotion']=report(np.r_[np.zeros(nr,dtype=bool),np.ones(128,dtype=bool)])
 result['locomotion']['vx_mae_by_5s']=np.array(errors).reshape(4,250,128).mean((1,2)).tolist()
-out=Path(a.output);out.mkdir(parents=True,exist_ok=True);(out/(a.name+'.json')).write_text(json.dumps(result,indent=2));np.savez_compressed(out/(a.name+'_traces.npz'),height=np.array(height_trace),gravity_z=np.array(gravity_trace),**quality_arrays);print(json.dumps(result,indent=2));env.close()
+out=Path(a.output);out.mkdir(parents=True,exist_ok=True);(out/(a.name+'.json')).write_text(json.dumps(result,indent=2));np.savez_compressed(out/(a.name+'_traces.npz'),height=np.array(height_trace),gravity_z=np.array(gravity_trace),success=success.cpu().numpy(),first_success_s=first.cpu().numpy(),**quality_arrays);print(json.dumps(result,indent=2));env.close()

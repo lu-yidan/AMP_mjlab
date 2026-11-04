@@ -1,0 +1,1032 @@
+{
+  "evaluation_host": "ssh -p17535 root@192.168.11.91",
+  "checkpoint_audit": [
+    {
+      "name": "AMP-shared-terrain-10k",
+      "iteration": 10000,
+      "sha256": "ec1b1a704dc0b165dc26b29b69ccc5af2cba3b99bd821aec74b5365e1e37290e"
+    },
+    {
+      "name": "AMP-shared-terrain-20k",
+      "iteration": 20000,
+      "sha256": "5cd9f505edf86040021ad147329c3d38f26eb3e3b28f624629fe53e0a66a22d2"
+    },
+    {
+      "name": "AMP-shared-terrain-30k",
+      "iteration": 30000,
+      "sha256": "d4251b3ab4cd23e7d67e3efeb62e113cf36834de57b54aa18abffa0b2dc3cd73"
+    },
+    {
+      "name": "AMP-shared-terrain-40k",
+      "iteration": 40000,
+      "sha256": "868dc3300a873acfd2e191ef266a305176ec9dd834f1205d2ba606000f05ee8b"
+    },
+    {
+      "name": "SuperMimic-original-height-10k",
+      "iteration": 10000,
+      "sha256": "b490b54a847e771880ddefcde677db8a88ee89dd18f0bc1aaacd72080442c71a"
+    },
+    {
+      "name": "SuperMimic-original-height-20k",
+      "iteration": 20000,
+      "sha256": "f3667e687b2057b8dfe8efa052f4655b4b2c4088584e2f1a532eb1dc2d017ca8"
+    },
+    {
+      "name": "SuperMimic-original-height-30k",
+      "iteration": 30000,
+      "sha256": "fc33539300ff2f113985369a277beddf7e9b27232913064cfdd392972e90a3f2"
+    },
+    {
+      "name": "SuperMimic-original-height-40k",
+      "iteration": 40000,
+      "sha256": "fafc6a020d730d18f53bf6118a980726bbe994d8cbd67d6319f7fae107ba4afe"
+    },
+    {
+      "name": "SuperMimic-half-height-10k",
+      "iteration": 10000,
+      "sha256": "3602a6c4d58d53b866bad4d15047b0aee0adc445a956d44ea1cda68a2e45b522"
+    },
+    {
+      "name": "SuperMimic-half-height-20k",
+      "iteration": 20000,
+      "sha256": "8b879dfa4770b363bc0cd348eccc6adcbc75f9446c41ff87885fbdad45635413"
+    },
+    {
+      "name": "SuperMimic-half-height-30k",
+      "iteration": 30000,
+      "sha256": "87b4cb1563dcaddd5c8e2e601e96bfd092a9778a2f69b288bfa725df1bcf9a31"
+    },
+    {
+      "name": "SuperMimic-half-height-40k",
+      "iteration": 40000,
+      "sha256": "6d42706aeaa6a5ad56ea3972813c97bf711f798b3e83c37f24c5cedaac255c5c"
+    }
+  ],
+  "training_times": {
+    "SuperMimic-original-height-10k": {
+      "training_loop_hours": 6.700611595445209,
+      "wall_clock_hours": 7.284593009948731,
+      "environment_steps": 983040000
+    },
+    "SuperMimic-original-height-20k": {
+      "training_loop_hours": 13.522912936872906,
+      "wall_clock_hours": 14.664990487297375,
+      "environment_steps": 1966080000
+    },
+    "SuperMimic-original-height-30k": {
+      "training_loop_hours": 20.421120088100434,
+      "wall_clock_hours": 22.11431425717142,
+      "environment_steps": 2949120000
+    },
+    "SuperMimic-original-height-40k": {
+      "training_loop_hours": 27.426059782703717,
+      "wall_clock_hours": 29.585950592954955,
+      "environment_steps": 3932160000
+    },
+    "SuperMimic-half-height-10k": {
+      "training_loop_hours": 6.619147037466367,
+      "wall_clock_hours": 7.210468275083436,
+      "environment_steps": 983040000
+    },
+    "SuperMimic-half-height-20k": {
+      "training_loop_hours": 13.412198701434665,
+      "wall_clock_hours": 14.593129415776994,
+      "environment_steps": 1966080000
+    },
+    "SuperMimic-half-height-30k": {
+      "training_loop_hours": 20.314282608230908,
+      "wall_clock_hours": 22.014770759344103,
+      "environment_steps": 2949120000
+    },
+    "SuperMimic-half-height-40k": {
+      "training_loop_hours": 27.244902840190463,
+      "wall_clock_hours": 29.406652418639926,
+      "environment_steps": 3932160000
+    },
+    "AMP-shared-terrain-10k": {
+      "training_loop_hours": 5.723611111111111,
+      "wall_clock_hours": 5.889127396477593,
+      "environment_steps": 983138304
+    },
+    "AMP-shared-terrain-20k": {
+      "training_loop_hours": 11.543055555555556,
+      "wall_clock_hours": 11.867239177690612,
+      "environment_steps": 1966178304
+    },
+    "AMP-shared-terrain-30k": {
+      "training_loop_hours": 17.25888888888889,
+      "wall_clock_hours": 17.740012490153312,
+      "environment_steps": 2949218304
+    },
+    "AMP-shared-terrain-40k": {
+      "training_loop_hours": 22.96388888888889,
+      "wall_clock_hours": 23.60405303630564,
+      "environment_steps": 3932258304
+    }
+  },
+  "experiment_names": {
+    "AMP-shared-terrain": "AMP－分层reset＋共享单判别器＋恢复均衡采样＋复杂地形高程critic",
+    "SuperMimic-original-height": "SuperMimic－共享单判别器＋复杂地形＋原高度奖励",
+    "SuperMimic-half-height": "SuperMimic－共享单判别器＋复杂地形＋半强度高度奖励"
+  },
+  "protocol": "12 checkpoints, seed42; flat1268 fixed recovery poses,12 command cases with8 standing jitters each; terrain15/20/25deg paired with10/15/20cm stairs, both upright/inverted,1/2m/s,8 trials per case.",
+  "limitations": [
+    "Single training seed and fixed evaluation map; descriptive comparisons, not algorithm-level statistical significance.",
+    "Training used easier terrain (max11.3deg,7.5cm), so harder terrain is an out-of-distribution stress test.",
+    "Actual wall-clock includes setup/export/logging and shared-machine contention; not an exclusive-GPU timing benchmark.",
+    "AMP saved index includes one extra rollout vs SuperMimic, difference0.01% at10k.",
+    "Joint acceleration is a physical smoothness proxy, not a sufficient measure of naturalness; failure to move can also lower it.",
+    "Only10k-spaced checkpoints: earliest observed attainment is not exact convergence time; connecting plot lines are visual guides, not measured interpolation.",
+    "All12 checkpoints were rerun on the17535 RTX4090 server; results are not mixed with prior local4070Ti trials. GPU/runtime floating-point differences can change individual contact-rich rollouts."
+  ],
+  "rows": [
+    {
+      "name": "AMP-shared-terrain-10k",
+      "iteration": 10000,
+      "training_loop_hours": 5.723611111111111,
+      "wall_clock_hours": 5.889127396477593,
+      "environment_steps": 983138304,
+      "recovery_success_percent": 6.0725555419921875,
+      "recovery_within5s_percent": 6.072555205047318,
+      "recovery_mean_success_time_s": 1.2849351167678833,
+      "recovery_last5s_upright_percent": 6.0725555419921875,
+      "recovery_first3s_joint_acc": 20.516321182250977,
+      "recovery_last5s_joint_acc": 1.3278226852416992,
+      "command_xy_mae": 0.257898253534612,
+      "command_yaw_mae": 0.21384568407954052,
+      "command_min_upright_percent": 0.0,
+      "command_forward3": {
+        "command": [
+          3,
+          0,
+          0
+        ],
+        "mean_actual": [
+          -0.01188949216157198,
+          -0.013460555113852024,
+          -0.03958478569984436
+        ],
+        "mae": [
+          3.01188949300431,
+          0.025499138176510314,
+          0.21866950262833051
+        ],
+        "upright_percent": 0.0,
+        "guidance_gate_mean": 1.0,
+        "recovery_route_percent": 100.0
+      },
+      "terrain": {
+        "15": {
+          "slope": {
+            "sustained_falls": 3,
+            "trials": 32,
+            "vx_mae": 0.2865373365412197
+          },
+          "stairs": {
+            "sustained_falls": 17,
+            "trials": 32,
+            "vx_mae": 1.0777706241752567
+          }
+        },
+        "20": {
+          "slope": {
+            "sustained_falls": 15,
+            "trials": 32,
+            "vx_mae": 0.9869901213001395
+          },
+          "stairs": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.4748718896380373
+          }
+        },
+        "25": {
+          "slope": {
+            "sustained_falls": 18,
+            "trials": 32,
+            "vx_mae": 1.2057335559693092
+          },
+          "stairs": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.5020348709713671
+          }
+        }
+      }
+    },
+    {
+      "name": "AMP-shared-terrain-20k",
+      "iteration": 20000,
+      "training_loop_hours": 11.543055555555556,
+      "wall_clock_hours": 11.867239177690612,
+      "environment_steps": 1966178304,
+      "recovery_success_percent": 85.17350769042969,
+      "recovery_within5s_percent": 80.3627760252366,
+      "recovery_mean_success_time_s": 3.06251859664917,
+      "recovery_last5s_upright_percent": 85.1009521484375,
+      "recovery_first3s_joint_acc": 40.61577606201172,
+      "recovery_last5s_joint_acc": 0.9136320948600769,
+      "command_xy_mae": 0.0978858276821989,
+      "command_yaw_mae": 0.14745447120910224,
+      "command_min_upright_percent": 100.0,
+      "command_forward3": {
+        "command": [
+          3,
+          0,
+          0
+        ],
+        "mean_actual": [
+          2.466351270675659,
+          -0.08961169421672821,
+          -0.08244362473487854
+        ],
+        "mae": [
+          0.5336487439870834,
+          0.09520250119827688,
+          0.222070971062436
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 2.03299532586243e-06,
+        "recovery_route_percent": 0.0
+      },
+      "terrain": {
+        "15": {
+          "slope": {
+            "sustained_falls": 0,
+            "trials": 32,
+            "vx_mae": 0.11991645737178624
+          },
+          "stairs": {
+            "sustained_falls": 5,
+            "trials": 32,
+            "vx_mae": 0.3287829858040322
+          }
+        },
+        "20": {
+          "slope": {
+            "sustained_falls": 1,
+            "trials": 32,
+            "vx_mae": 0.18053397788715667
+          },
+          "stairs": {
+            "sustained_falls": 26,
+            "trials": 32,
+            "vx_mae": 1.154205149484157
+          }
+        },
+        "25": {
+          "slope": {
+            "sustained_falls": 5,
+            "trials": 32,
+            "vx_mae": 0.6308135547547395
+          },
+          "stairs": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.486331465584331
+          }
+        }
+      }
+    },
+    {
+      "name": "AMP-shared-terrain-30k",
+      "iteration": 30000,
+      "training_loop_hours": 17.25888888888889,
+      "wall_clock_hours": 17.740012490153312,
+      "environment_steps": 2949218304,
+      "recovery_success_percent": 99.44795227050781,
+      "recovery_within5s_percent": 96.05678233438486,
+      "recovery_mean_success_time_s": 2.6253767013549805,
+      "recovery_last5s_upright_percent": 99.41893005371094,
+      "recovery_first3s_joint_acc": 43.629173278808594,
+      "recovery_last5s_joint_acc": 0.3955964744091034,
+      "command_xy_mae": 0.07356705234627972,
+      "command_yaw_mae": 0.13810556665796545,
+      "command_min_upright_percent": 100.0,
+      "command_forward3": {
+        "command": [
+          3,
+          0,
+          0
+        ],
+        "mean_actual": [
+          3.0041821002960205,
+          0.05074326694011688,
+          -0.023878656327724457
+        ],
+        "mae": [
+          0.09570007026195526,
+          0.06931397735830615,
+          0.2028311552462401
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0,
+        "recovery_route_percent": 0.0
+      },
+      "terrain": {
+        "15": {
+          "slope": {
+            "sustained_falls": 0,
+            "trials": 32,
+            "vx_mae": 0.12330767676606774
+          },
+          "stairs": {
+            "sustained_falls": 6,
+            "trials": 32,
+            "vx_mae": 0.49312294671977
+          }
+        },
+        "20": {
+          "slope": {
+            "sustained_falls": 3,
+            "trials": 32,
+            "vx_mae": 0.29085220896238023
+          },
+          "stairs": {
+            "sustained_falls": 23,
+            "trials": 32,
+            "vx_mae": 1.1816452027260858
+          }
+        },
+        "25": {
+          "slope": {
+            "sustained_falls": 15,
+            "trials": 32,
+            "vx_mae": 1.1883495230379486
+          },
+          "stairs": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.4873459070967785
+          }
+        }
+      }
+    },
+    {
+      "name": "AMP-shared-terrain-40k",
+      "iteration": 40000,
+      "training_loop_hours": 22.96388888888889,
+      "wall_clock_hours": 23.60405303630564,
+      "environment_steps": 3932258304,
+      "recovery_success_percent": 99.84227752685547,
+      "recovery_within5s_percent": 94.71608832807571,
+      "recovery_mean_success_time_s": 2.534597396850586,
+      "recovery_last5s_upright_percent": 99.84227752685547,
+      "recovery_first3s_joint_acc": 48.79911422729492,
+      "recovery_last5s_joint_acc": 0.8155565857887268,
+      "command_xy_mae": 0.0694165460777893,
+      "command_yaw_mae": 0.11892368318245554,
+      "command_min_upright_percent": 100.0,
+      "command_forward3": {
+        "command": [
+          3,
+          0,
+          0
+        ],
+        "mean_actual": [
+          2.9320759773254395,
+          -0.01465671882033348,
+          0.01851007342338562
+        ],
+        "mae": [
+          0.09002160167694091,
+          0.033092219288038904,
+          0.1163716536793363
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0,
+        "recovery_route_percent": 0.0
+      },
+      "terrain": {
+        "15": {
+          "slope": {
+            "sustained_falls": 0,
+            "trials": 32,
+            "vx_mae": 0.1066396832522005
+          },
+          "stairs": {
+            "sustained_falls": 10,
+            "trials": 32,
+            "vx_mae": 0.4818714123437858
+          }
+        },
+        "20": {
+          "slope": {
+            "sustained_falls": 0,
+            "trials": 32,
+            "vx_mae": 0.14041082320110582
+          },
+          "stairs": {
+            "sustained_falls": 31,
+            "trials": 32,
+            "vx_mae": 1.2743848336819381
+          }
+        },
+        "25": {
+          "slope": {
+            "sustained_falls": 11,
+            "trials": 32,
+            "vx_mae": 0.8173725561388419
+          },
+          "stairs": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.5011367909062747
+          }
+        }
+      }
+    },
+    {
+      "name": "SuperMimic-original-height-10k",
+      "iteration": 10000,
+      "training_loop_hours": 6.700611595445209,
+      "wall_clock_hours": 7.284593009948731,
+      "environment_steps": 983040000,
+      "recovery_success_percent": 4.968454360961914,
+      "recovery_within5s_percent": 4.968454258675079,
+      "recovery_mean_success_time_s": 1.4009524583816528,
+      "recovery_last5s_upright_percent": 4.968454837799072,
+      "recovery_first3s_joint_acc": 46.72502899169922,
+      "recovery_last5s_joint_acc": 20.857101440429688,
+      "command_xy_mae": 0.40932023380232624,
+      "command_yaw_mae": 0.11164194544598322,
+      "command_min_upright_percent": 0.0,
+      "command_forward3": {
+        "command": [
+          3,
+          0,
+          0
+        ],
+        "mean_actual": [
+          0.005845716223120689,
+          0.0024938646238297224,
+          0.013759557157754898
+        ],
+        "mae": [
+          2.994154285443132,
+          0.003580633312696591,
+          0.013777864570781163
+        ],
+        "upright_percent": 0.0,
+        "guidance_gate_mean": 1.0,
+        "recovery_route_percent": 100.0
+      },
+      "terrain": {
+        "15": {
+          "slope": {
+            "sustained_falls": 20,
+            "trials": 32,
+            "vx_mae": 1.1684993662685903
+          },
+          "stairs": {
+            "sustained_falls": 29,
+            "trials": 32,
+            "vx_mae": 1.3958963159192228
+          }
+        },
+        "20": {
+          "slope": {
+            "sustained_falls": 27,
+            "trials": 32,
+            "vx_mae": 1.3692419444592798
+          },
+          "stairs": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.4964871910691666
+          }
+        },
+        "25": {
+          "slope": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.5042818980676496
+          },
+          "stairs": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.5070460435966107
+          }
+        }
+      }
+    },
+    {
+      "name": "SuperMimic-original-height-20k",
+      "iteration": 20000,
+      "training_loop_hours": 13.522912936872906,
+      "wall_clock_hours": 14.664990487297375,
+      "environment_steps": 1966080000,
+      "recovery_success_percent": 99.92113494873047,
+      "recovery_within5s_percent": 97.94952681388013,
+      "recovery_mean_success_time_s": 2.677079439163208,
+      "recovery_last5s_upright_percent": 99.921142578125,
+      "recovery_first3s_joint_acc": 131.5095672607422,
+      "recovery_last5s_joint_acc": 0.7920073866844177,
+      "command_xy_mae": 0.07513247531718287,
+      "command_yaw_mae": 0.09884344135419738,
+      "command_min_upright_percent": 100.0,
+      "command_forward3": {
+        "command": [
+          3,
+          0,
+          0
+        ],
+        "mean_actual": [
+          2.7819204330444336,
+          -0.029207710176706314,
+          -0.10549227148294449
+        ],
+        "mae": [
+          0.2208701308965683,
+          0.0852676723152399,
+          0.14662270036269184
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0013490879209712148,
+        "recovery_route_percent": 0.0
+      },
+      "terrain": {
+        "15": {
+          "slope": {
+            "sustained_falls": 4,
+            "trials": 32,
+            "vx_mae": 0.3424063202975376
+          },
+          "stairs": {
+            "sustained_falls": 22,
+            "trials": 32,
+            "vx_mae": 1.2140913175990318
+          }
+        },
+        "20": {
+          "slope": {
+            "sustained_falls": 18,
+            "trials": 32,
+            "vx_mae": 1.0656524885661975
+          },
+          "stairs": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.4252713527349041
+          }
+        },
+        "25": {
+          "slope": {
+            "sustained_falls": 29,
+            "trials": 32,
+            "vx_mae": 1.3436777290625468
+          },
+          "stairs": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.4368366198189095
+          }
+        }
+      }
+    },
+    {
+      "name": "SuperMimic-original-height-30k",
+      "iteration": 30000,
+      "training_loop_hours": 20.421120088100434,
+      "wall_clock_hours": 22.11431425717142,
+      "environment_steps": 2949120000,
+      "recovery_success_percent": 99.84227752685547,
+      "recovery_within5s_percent": 98.26498422712933,
+      "recovery_mean_success_time_s": 2.5553712844848633,
+      "recovery_last5s_upright_percent": 99.84227752685547,
+      "recovery_first3s_joint_acc": 113.92224884033203,
+      "recovery_last5s_joint_acc": 1.8995964527130127,
+      "command_xy_mae": 0.08997734544792939,
+      "command_yaw_mae": 0.08058207925273557,
+      "command_min_upright_percent": 100.0,
+      "command_forward3": {
+        "command": [
+          3,
+          0,
+          0
+        ],
+        "mean_actual": [
+          2.894651412963867,
+          0.2457299828529358,
+          -0.03000337816774845
+        ],
+        "mae": [
+          0.11202417635917664,
+          0.24573131280578672,
+          0.13517392837918304
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0,
+        "recovery_route_percent": 0.0
+      },
+      "terrain": {
+        "15": {
+          "slope": {
+            "sustained_falls": 1,
+            "trials": 32,
+            "vx_mae": 0.12459286146704109
+          },
+          "stairs": {
+            "sustained_falls": 23,
+            "trials": 32,
+            "vx_mae": 0.9938316136451613
+          }
+        },
+        "20": {
+          "slope": {
+            "sustained_falls": 8,
+            "trials": 32,
+            "vx_mae": 0.3805530565625522
+          },
+          "stairs": {
+            "sustained_falls": 28,
+            "trials": 32,
+            "vx_mae": 1.2437706019607604
+          }
+        },
+        "25": {
+          "slope": {
+            "sustained_falls": 24,
+            "trials": 32,
+            "vx_mae": 1.0532518729437141
+          },
+          "stairs": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.2813235992285772
+          }
+        }
+      }
+    },
+    {
+      "name": "SuperMimic-original-height-40k",
+      "iteration": 40000,
+      "training_loop_hours": 27.426059782703717,
+      "wall_clock_hours": 29.585950592954955,
+      "environment_steps": 3932160000,
+      "recovery_success_percent": 100.0,
+      "recovery_within5s_percent": 99.05362776025235,
+      "recovery_mean_success_time_s": 2.16619873046875,
+      "recovery_last5s_upright_percent": 100.0,
+      "recovery_first3s_joint_acc": 130.53504943847656,
+      "recovery_last5s_joint_acc": 0.42740803956985474,
+      "command_xy_mae": 0.06898746664131915,
+      "command_yaw_mae": 0.07261054688761537,
+      "command_min_upright_percent": 100.0,
+      "command_forward3": {
+        "command": [
+          3,
+          0,
+          0
+        ],
+        "mean_actual": [
+          2.9277942180633545,
+          -0.057524994015693665,
+          -0.0197752695530653
+        ],
+        "mae": [
+          0.08698257088661193,
+          0.06933637381508015,
+          0.09176976535976224
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0,
+        "recovery_route_percent": 0.0
+      },
+      "terrain": {
+        "15": {
+          "slope": {
+            "sustained_falls": 0,
+            "trials": 32,
+            "vx_mae": 0.09824149982631207
+          },
+          "stairs": {
+            "sustained_falls": 19,
+            "trials": 32,
+            "vx_mae": 0.8068602653293493
+          }
+        },
+        "20": {
+          "slope": {
+            "sustained_falls": 6,
+            "trials": 32,
+            "vx_mae": 0.26534544597886267
+          },
+          "stairs": {
+            "sustained_falls": 31,
+            "trials": 32,
+            "vx_mae": 1.2717760394002506
+          }
+        },
+        "25": {
+          "slope": {
+            "sustained_falls": 26,
+            "trials": 32,
+            "vx_mae": 1.0301481912554153
+          },
+          "stairs": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.2854080612694234
+          }
+        }
+      }
+    },
+    {
+      "name": "SuperMimic-half-height-10k",
+      "iteration": 10000,
+      "training_loop_hours": 6.619147037466367,
+      "wall_clock_hours": 7.210468275083436,
+      "environment_steps": 983040000,
+      "recovery_success_percent": 7.413249492645264,
+      "recovery_within5s_percent": 7.413249211356467,
+      "recovery_mean_success_time_s": 1.495319128036499,
+      "recovery_last5s_upright_percent": 7.413249492645264,
+      "recovery_first3s_joint_acc": 43.460968017578125,
+      "recovery_last5s_joint_acc": 14.824719429016113,
+      "command_xy_mae": 0.3817039683247722,
+      "command_yaw_mae": 0.1891599350347941,
+      "command_min_upright_percent": 0.0,
+      "command_forward3": {
+        "command": [
+          3,
+          0,
+          0
+        ],
+        "mean_actual": [
+          -0.049685653299093246,
+          0.09032966941595078,
+          0.6011641025543213
+        ],
+        "mae": [
+          3.0496856432196218,
+          0.12216129006820847,
+          0.8114113981650153
+        ],
+        "upright_percent": 0.0,
+        "guidance_gate_mean": 1.0,
+        "recovery_route_percent": 100.0
+      },
+      "terrain": {
+        "15": {
+          "slope": {
+            "sustained_falls": 16,
+            "trials": 32,
+            "vx_mae": 1.092614493460529
+          },
+          "stairs": {
+            "sustained_falls": 30,
+            "trials": 32,
+            "vx_mae": 1.4831348908042017
+          }
+        },
+        "20": {
+          "slope": {
+            "sustained_falls": 27,
+            "trials": 32,
+            "vx_mae": 1.413304589817708
+          },
+          "stairs": {
+            "sustained_falls": 31,
+            "trials": 32,
+            "vx_mae": 1.5082964676321782
+          }
+        },
+        "25": {
+          "slope": {
+            "sustained_falls": 31,
+            "trials": 32,
+            "vx_mae": 1.5175274305969406
+          },
+          "stairs": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.528401827132977
+          }
+        }
+      }
+    },
+    {
+      "name": "SuperMimic-half-height-20k",
+      "iteration": 20000,
+      "training_loop_hours": 13.412198701434665,
+      "wall_clock_hours": 14.593129415776994,
+      "environment_steps": 1966080000,
+      "recovery_success_percent": 7.413249492645264,
+      "recovery_within5s_percent": 7.413249211356467,
+      "recovery_mean_success_time_s": 1.3627660274505615,
+      "recovery_last5s_upright_percent": 7.413249492645264,
+      "recovery_first3s_joint_acc": 50.69391632080078,
+      "recovery_last5s_joint_acc": 21.573198318481445,
+      "command_xy_mae": 0.2722276309099688,
+      "command_yaw_mae": 0.12458934428784212,
+      "command_min_upright_percent": 0.0,
+      "command_forward3": {
+        "command": [
+          3,
+          0,
+          0
+        ],
+        "mean_actual": [
+          0.0030325595289468765,
+          0.00040887948125600815,
+          -0.006336521822959185
+        ],
+        "mae": [
+          2.9969674414411256,
+          0.002475129653357726,
+          0.01570249445746475
+        ],
+        "upright_percent": 0.0,
+        "guidance_gate_mean": 1.0,
+        "recovery_route_percent": 100.0
+      },
+      "terrain": {
+        "15": {
+          "slope": {
+            "sustained_falls": 16,
+            "trials": 32,
+            "vx_mae": 1.080887409733892
+          },
+          "stairs": {
+            "sustained_falls": 22,
+            "trials": 32,
+            "vx_mae": 1.2271401901965957
+          }
+        },
+        "20": {
+          "slope": {
+            "sustained_falls": 20,
+            "trials": 32,
+            "vx_mae": 1.275520342349898
+          },
+          "stairs": {
+            "sustained_falls": 30,
+            "trials": 32,
+            "vx_mae": 1.4319903300199934
+          }
+        },
+        "25": {
+          "slope": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.538810676930741
+          },
+          "stairs": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.5170216996497494
+          }
+        }
+      }
+    },
+    {
+      "name": "SuperMimic-half-height-30k",
+      "iteration": 30000,
+      "training_loop_hours": 20.314282608230908,
+      "wall_clock_hours": 22.014770759344103,
+      "environment_steps": 2949120000,
+      "recovery_success_percent": 99.84227752685547,
+      "recovery_within5s_percent": 99.29022082018928,
+      "recovery_mean_success_time_s": 2.304154872894287,
+      "recovery_last5s_upright_percent": 99.85868072509766,
+      "recovery_first3s_joint_acc": 105.43599700927734,
+      "recovery_last5s_joint_acc": 1.9657196998596191,
+      "command_xy_mae": 0.07915733801027394,
+      "command_yaw_mae": 0.08514576968729361,
+      "command_min_upright_percent": 100.0,
+      "command_forward3": {
+        "command": [
+          3,
+          0,
+          0
+        ],
+        "mean_actual": [
+          2.9017999172210693,
+          -0.05656631290912628,
+          -0.07387623935937881
+        ],
+        "mae": [
+          0.13209138214588165,
+          0.06588895925693214,
+          0.1445717197513586
+        ],
+        "upright_percent": 100.0,
+        "guidance_gate_mean": 0.0002979922282975167,
+        "recovery_route_percent": 0.0
+      },
+      "terrain": {
+        "15": {
+          "slope": {
+            "sustained_falls": 0,
+            "trials": 32,
+            "vx_mae": 0.11686721243627834
+          },
+          "stairs": {
+            "sustained_falls": 20,
+            "trials": 32,
+            "vx_mae": 0.7234469563121819
+          }
+        },
+        "20": {
+          "slope": {
+            "sustained_falls": 13,
+            "trials": 32,
+            "vx_mae": 0.603014872241707
+          },
+          "stairs": {
+            "sustained_falls": 31,
+            "trials": 32,
+            "vx_mae": 1.1067773645151506
+          }
+        },
+        "25": {
+          "slope": {
+            "sustained_falls": 25,
+            "trials": 32,
+            "vx_mae": 1.073670878030025
+          },
+          "stairs": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.1245536017756512
+          }
+        }
+      }
+    },
+    {
+      "name": "SuperMimic-half-height-40k",
+      "iteration": 40000,
+      "training_loop_hours": 27.244902840190463,
+      "wall_clock_hours": 29.406652418639926,
+      "environment_steps": 3932160000,
+      "recovery_success_percent": 100.0,
+      "recovery_within5s_percent": 99.9211356466877,
+      "recovery_mean_success_time_s": 2.0748424530029297,
+      "recovery_last5s_upright_percent": 100.0,
+      "recovery_first3s_joint_acc": 96.28388214111328,
+      "recovery_last5s_joint_acc": 3.0080432891845703,
+      "command_xy_mae": 0.08789914182077337,
+      "command_yaw_mae": 0.07560246364581845,
+      "command_min_upright_percent": 87.7,
+      "command_forward3": {
+        "command": [
+          3,
+          0,
+          0
+        ],
+        "mean_actual": [
+          2.8684325218200684,
+          -0.12959705293178558,
+          0.01417691819369793
+        ],
+        "mae": [
+          0.13811013996601104,
+          0.12977801418164744,
+          0.10671823856423725
+        ],
+        "upright_percent": 87.7,
+        "guidance_gate_mean": 0.11968054622411728,
+        "recovery_route_percent": 0.0
+      },
+      "terrain": {
+        "15": {
+          "slope": {
+            "sustained_falls": 0,
+            "trials": 32,
+            "vx_mae": 0.10632612435892225
+          },
+          "stairs": {
+            "sustained_falls": 12,
+            "trials": 32,
+            "vx_mae": 0.6504656926452371
+          }
+        },
+        "20": {
+          "slope": {
+            "sustained_falls": 12,
+            "trials": 32,
+            "vx_mae": 0.7681322932664116
+          },
+          "stairs": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.4529117566082206
+          }
+        },
+        "25": {
+          "slope": {
+            "sustained_falls": 29,
+            "trials": 32,
+            "vx_mae": 1.3642877179792776
+          },
+          "stairs": {
+            "sustained_falls": 32,
+            "trials": 32,
+            "vx_mae": 1.4948865268270137
+          }
+        }
+      }
+    }
+  ]
+}
