@@ -3,6 +3,16 @@
 Branch: `lyd-supermimic-efficiency-blind-actor`.
 Implementation: `d61bbd5`. All new execution uses `192.168.11.91:17535`.
 
+## Execution update (16:22, server time)
+
+The upstream locked-wheel download remained pending after roughly 50 minutes.
+The original gate orchestrator and its waiting installer were stopped; the
+original download process was left running. The four validated AMP-runtime
+ablations were dispatched independently on GPUs 2–5, with no changes to their
+training recipes. This supersedes the native-first execution dependency below.
+Native fidelity remains unverified and must not be inferred from these runs.
+Remote `records/ablation-jobs.json` records exact commands and PIDs.
+
 ## Observation contract
 
 Our task Actor keeps the existing **384-dimensional proprioceptive input**.
