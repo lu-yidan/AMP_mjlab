@@ -1,0 +1,60 @@
+{
+  "source_sha256": "9c056f85dfe3541801bc86990e7228e956a30d06af0ea07d8e9d9010ad0220e8",
+  "split_rule": "test=reset-v1 hash mod5; validation=curriculum-val-v1 hash mod5 among remainder; mirror pairs stay together",
+  "static_history": "zero velocities, repeated deployment FK state",
+  "moved_whole_groups_for_validation_coverage": [
+    "fallAndGetUp1_subject1__recovery_017"
+  ],
+  "partitions": {
+    "train": {
+      "n": 3046,
+      "groups": 48,
+      "stages": {
+        "middle": 1445,
+        "low": 1306,
+        "late": 295
+      },
+      "low_directions": {
+        "right_side_down": 167,
+        "left_side_down": 167,
+        "supine": 900,
+        "prone": 72
+      },
+      "sha256": "e9f94540520d7927dee01150a0f0bae39ad2aad5ae008b1c7c71f521650e44b9"
+    },
+    "validation": {
+      "n": 804,
+      "groups": 11,
+      "stages": {
+        "middle": 344,
+        "late": 52,
+        "low": 408
+      },
+      "low_directions": {
+        "supine": 340,
+        "right_side_down": 16,
+        "left_side_down": 16,
+        "prone": 36
+      },
+      "sha256": "7c0f10a217f05673cf987e7094d6be449228f5546756f11d1424f428bff0dfaf"
+    },
+    "test": {
+      "n": 1299,
+      "groups": 17,
+      "stages": {
+        "middle": 544,
+        "low": 645,
+        "late": 110
+      },
+      "low_directions": {
+        "supine": 346,
+        "right_side_down": 36,
+        "left_side_down": 37,
+        "prone": 226
+      },
+      "sha256": "e466b27833497747df9ff69d8ede0e31b9409b6b8e22647e64bb5f6686acf125"
+    }
+  },
+  "min_contact": -0.0019991295864020403,
+  "validation_used_for_curriculum": true
+}

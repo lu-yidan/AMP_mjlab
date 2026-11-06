@@ -1,0 +1,36 @@
+{
+  "artifact": "host29_recovery_20261001",
+  "selected_checkpoint": "model_10000.pt",
+  "selected_checkpoint_sha256": "577c3cd14e7c5e85670108d8827a14c2ef590ec7ba1a5523f514be52d7928092",
+  "final_checkpoint": "model_11999.pt",
+  "final_checkpoint_sha256": "7d8244430dcfa7d5184c4acaae4fcf0d844028faaef5bfd821110833ca17c2c7",
+  "runtime_commit": "8fbb9256ec2442a753b451948616a3ff6112fde1",
+  "training_schedule_commit": "212872c",
+  "source_run": "logs/host29_mixedforce_fix_seed42_4096_20260930",
+  "seed": 42,
+  "num_envs": 4096,
+  "selected_iteration": 10000,
+  "training_final_iteration": 11999,
+  "evaluation": {
+    "num_envs_per_posture": 256,
+    "steps": 500,
+    "control_dt": 0.02,
+    "hold_steps": 50,
+    "pull_force_n": 0,
+    "action_scale": 0.9401794672012329,
+    "held_fraction_mean": 1.0,
+    "final_standing_fraction_mean": 1.0,
+    "final_upright_fraction_mean": 1.0,
+    "final_root_linear_speed_mean": 0.4455031300555153,
+    "final_joint_speed_rms_mean": 5.191315650939941,
+    "first_hold_seconds_median_mean": 1.2049999833106995,
+    "termination_fraction": 0.0
+  },
+  "hashes": {
+    "eval_model10000_unassisted.json": "2e8af58aa6dc410764f950859394c8183b609ac817dad7706aa2e4aa5a8b6e41",
+    "eval_model11999_unassisted.json": "004fab68ec77b0ba926bd05bfe27ecd99c300338268476b1973b26d50d2fa0b6",
+    "env.yaml": "d9755eebf6ed20b0a959d64fe61daed0f066b2a529aedf6f4523f312c0489b20",
+    "agent.yaml": "91acff409efbc8050e358698f95ff1674de042e8ddfe6d9bc62274cbdc73314d",
+    "launch.json": "dbd8c59762c82556ecd54cc7e7592024e19bc545fdb8e3c7e021bf82ce31965d"
+  }
+}

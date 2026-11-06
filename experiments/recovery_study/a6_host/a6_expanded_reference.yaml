@@ -1,0 +1,121 @@
+# Resolved historical A6 reference extracted from the user-supplied config.
+# This is an audit/reference artifact, not a runnable HoST configuration.
+# SMP function paths are intentionally preserved as provenance.
+
+source_role: frozen_expanded_reference
+source_commit: 1b6d7e61ddbcd2caf9ea17b02160dd1cf0d119d2
+control_dt_s: 0.02
+decimation: 10
+physics_dt_s: 0.002
+num_envs: 4096
+episode_length_s: 10.0
+scale_rewards_by_dt: true
+
+simulation:
+  nconmax: 256
+  njmax: 4000
+  ls_parallel: true
+  contact_sensor_maxmatch: 64
+  integrator: euler
+  impratio: 1.0
+  cone: pyramidal
+  jacobian: auto
+  solver: newton
+  iterations: 100
+  tolerance: 1.0e-8
+  ls_iterations: 50
+  ls_tolerance: 0.01
+  ccd_iterations: 50
+  gravity: [0.0, 0.0, -9.81]
+  nan_guard:
+    enabled: false
+    buffer_size: 100
+    output_dir: /tmp/mjlab/nan_dumps
+    max_envs_to_dump: 5
+
+reward_expansion:
+  task_product:
+    function: smp.rl.tasks.getup.multiterrain.task
+    weight: 1.0
+    terms:
+      - {function: smp.rl.tasks.getup.v33_reward_transfer.task, index: 0, weight: 0.22, name: stage_pose}
+      - {function: smp.rl.tasks.getup.v33_reward_transfer.task, index: 1, weight: 0.18, name: head_velocity}
+      - {function: smp.rl.tasks.getup.v33_reward_transfer.task, index: 2, weight: 0.10, name: height}
+      - {function: smp.rl.tasks.getup.v33_reward_transfer.task, index: 3, weight: 0.15, name: upright}
+      - {function: smp.rl.tasks.getup.v33_reward_transfer.task, index: 4, weight: 0.08, name: feet_quiet}
+      - {function: smp.rl.tasks.getup.v33_reward_transfer.task, index: 5, weight: 0.07, name: base_quiet}
+      - {function: smp.rl.tasks.getup.v33_reward_transfer.task, index: 6, weight: 0.07, name: angular_quiet}
+      - {function: smp.rl.tasks.getup.v33_reward_transfer.task, index: 7, weight: 0.06, name: joint_quiet}
+      - {function: smp.rl.tasks.getup.v33_reward_transfer.task, index: 8, weight: 0.07, name: action_quiet}
+  common_costs:
+    - {function: smp.rl.tasks.getup.v33_reward_transfer.cost, index: 0, weight: -0.0015, name: action_rate}
+    - {function: smp.rl.tasks.getup.v33_reward_transfer.cost, index: 1, weight: -0.0012, name: action_acceleration}
+    - {function: smp.rl.tasks.getup.v33_reward_transfer.cost, index: 2, weight: -5.0e-8, name: joint_acceleration}
+    - {function: smp.rl.tasks.getup.v33_reward_transfer.cost, index: 3, weight: -1.0e-6, name: torque}
+    - {function: smp.rl.tasks.getup.v33_reward_transfer.cost, index: 4, weight: -0.02, name: joint_overspeed}
+    - {function: smp.rl.tasks.getup.v33_reward_transfer.cost, index: 5, weight: -2.0e-6, name: joint_overpower}
+    - {function: smp.rl.tasks.getup.v33_reward_transfer.cost, index: 6, weight: -1.0, name: head_overspeed}
+    - {function: smp.rl.tasks.getup.v33_reward_transfer.cost, index: 7, weight: -0.05, name: sustained_effort}
+    - {function: mjlab.envs.mdp.rewards.joint_pos_limits, weight: -0.10, name: soft_joint_limits}
+  obstacle_terms:
+    - {function: smp.rl.tasks.getup.v33_path_ablation.reward, index: 0, weight: 0.45, name: supported_progress_G}
+    - {function: smp.rl.tasks.getup.v33_path_ablation.reward, index: 1, weight: 0.08, name: dense_clearance}
+    - {function: smp.rl.tasks.getup.multiterrain.escape_reward, index: 2, weight: 0.60, name: escape_completion}
+    - {function: smp.rl.tasks.getup.multiterrain.escape_reward, index: 3, weight: -0.03, name: excess_plate_force}
+    - {function: smp.rl.tasks.getup.multiterrain.escape_reward, index: 4, weight: 0.01, name: separation_progress}
+    - {function: smp.rl.tasks.getup.v33_path_ablation.reward, index: 2, weight: -0.03, name: foot_motion_Q}
+    - {function: smp.rl.tasks.getup.v33_path_ablation.reward, index: 3, weight: -0.20, name: joint_stall_Lprime}
+  disabled_reference_terms:
+    - {name: quiet_stand, function: smp.rl.tasks.getup.scratch_tradeoffs.quiet_reward, weight: 0.0}
+    - {name: effort_top3, function: smp.rl.tasks.getup.scratch_tradeoffs.safety_cost, index: 0, weight: 0.0}
+    - {name: speed_top3, function: smp.rl.tasks.getup.scratch_tradeoffs.safety_cost, index: 1, weight: 0.0}
+    - {name: target_slew, function: smp.rl.tasks.getup.scratch_tradeoffs.safety_cost, index: 2, weight: 0.0}
+    - {name: head_impact, function: smp.rl.tasks.getup.scratch_tradeoffs.safety_cost, index: 3, weight: 0.0}
+
+events:
+  startup:
+    init_smp_state:
+      function: smp.rl.events.init_smp_state
+      params: {ckpt_path: datasets/pretrain_ckpt/pretrained_getup_f2s2.pt, gsi_buffer_size: 0, gsi_batch_size: 1024, compile_model: true, compile_mode: max-autotune}
+    foot_friction: {function: mjlab.envs.mdp.dr.geom.geom_friction, range: [0.3, 1.2], shared_random: true}
+    encoder_bias: {function: mjlab.envs.mdp.dr.joint.encoder_bias, bias_range: [-0.015, 0.015]}
+    base_com: {function: mjlab.envs.mdp.dr.body.body_com_offset, ranges: [[-0.025, 0.025], [-0.025, 0.025], [-0.03, 0.03]]}
+    deployment_pair_friction: {function: train_master_comparison.mirror_foot_friction_to_pairs}
+  reset:
+    gsi_reset:
+      function: smp.rl.tasks.getup.v33_path_ablation.reset
+      params: {arm: A6, bank_path: outputs/multiterrain_bank/train.npz, dynamics: true, evaluation: false}
+    reset_stand_counter: {function: smp.rl.tasks.getup.mdp.events.reset_stand_counter}
+    v33_stage_reset: {function: smp.rl.tasks.getup.v33_reward_transfer.reset}
+  interval:
+    push_robot:
+      function: mjlab.envs.mdp.events.push_by_setting_velocity
+      interval_s: [1.0, 3.0]
+      velocity_range: {x: [-0.5, 0.5], y: [-0.5, 0.5], z: [-0.4, 0.4], roll: [-0.52, 0.52], pitch: [-0.52, 0.52], yaw: [-0.78, 0.78]}
+  step:
+    multiterrain_phase: {function: smp.rl.tasks.getup.multiterrain.update}
+
+terminations:
+  time_out: {function: mjlab.envs.mdp.terminations.time_out, time_out: true}
+  stood_up:
+    function: smp.rl.tasks.getup.scratch_tradeoffs.no_stand_termination
+    params: {head_height: 1.2, max_speed: 0.5, hold_steps: 25}
+    time_out: true
+  unstable_sim_state: {function: smp.rl.tasks.getup.continuous_recovery.unstable_sim_state, time_out: false}
+  invalid_plate: {function: smp.rl.tasks.getup.multiterrain.invalid, time_out: false}
+
+metrics:
+  per_substep:
+    - {name: quality_substep, function: smp.rl.tasks.getup.scratch_tradeoffs.sample_substep, reduce: mean}
+    - {name: v33_substep, function: smp.rl.tasks.getup.v33_reward_transfer.sample_substep, reduce: mean}
+    - {name: r2_load_substep, function: smp.rl.tasks.getup.v33_path_ablation.sample_substep, reduce: mean}
+  per_control_step:
+    - {name: quality_cache, function: smp.rl.tasks.getup.scratch_tradeoffs.cache_control, reduce: mean}
+    - {name: v33_cache, function: smp.rl.tasks.getup.v33_reward_transfer.metric, reduce: mean}
+    - {name: r2_standing, function: smp.rl.tasks.getup.v33_path_ablation.metric, reduce: mean}
+
+adaptation_notes:
+  - Historical reference uses compile_model=true; current smoke/preflight must override it to false.
+  - Historical reference uses physics_dt=0.002 and decimation=10; the current HoST baseline is 0.005/4 and needs an explicit decision before execution.
+  - SMP function paths are evidence of the source configuration, not importable HoST runtime dependencies.
+  - Negative costs are outside the alpha-gated task product and must not be scaled by alpha.

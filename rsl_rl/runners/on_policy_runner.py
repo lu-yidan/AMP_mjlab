@@ -51,11 +51,13 @@ def _migrate_train_cfg(train_cfg: dict) -> None:
             "actor_hidden_dims": list(actor_cfg.get("hidden_dims", [256, 256, 256])),
             "critic_hidden_dims": list(critic_cfg.get("hidden_dims", [256, 256, 256])),
             "activation": actor_cfg.get("activation", "elu"),
+            "action_output_activation": actor_cfg.get("action_output_activation", "none"),
         }
         dist_cfg = actor_cfg.get("distribution_cfg") or {}
         if dist_cfg:
             policy_cfg["init_noise_std"] = dist_cfg.get("init_std", 1.0)
             policy_cfg["noise_std_type"] = dist_cfg.get("std_type", "scalar")
+            policy_cfg["max_noise_std"] = dist_cfg.get("max_std", 0.5)
         train_cfg["policy"] = policy_cfg
         train_cfg.setdefault("empirical_normalization", actor_cfg.get("obs_normalization", False))
     if "empirical_normalization" not in train_cfg:

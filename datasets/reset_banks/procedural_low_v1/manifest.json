@@ -1,0 +1,30 @@
+{
+  "generator": "four orientation families; roll/pitch +-0.12 rad, random yaw; joint +-0.15, knees +[0,.6], shoulder roll outward .35, hip roll +-0.06; zero velocity",
+  "validation": "deployment collision correction, joint limits, penetration >= -2mm, root height < .30; disjoint independent seeds, IID fresh perturbations not OOD",
+  "partitions": {
+    "train": {
+      "seed": 2026091301,
+      "n": 4096,
+      "per_direction": 1024,
+      "attempts": 166082,
+      "min_contact": 0.0,
+      "sha256": "e289bed8d1c93e87fbdcf969fc5fc741f2d8500a0908ed145d2a4e02e7fe116d"
+    },
+    "validation": {
+      "seed": 2026091302,
+      "n": 512,
+      "per_direction": 128,
+      "attempts": 20085,
+      "min_contact": 0.0,
+      "sha256": "eb0d2d2ab1131386c21f70d10dc5be36444728bb0581c452fdc3bb3551bb6d31"
+    },
+    "test": {
+      "seed": 2026091303,
+      "n": 1024,
+      "per_direction": 256,
+      "attempts": 40807,
+      "min_contact": 0.0,
+      "sha256": "a9269ff4343eaa4a33b91816a0da552d551d1cdfc831170339d8d00abef25b98"
+    }
+  }
+}
