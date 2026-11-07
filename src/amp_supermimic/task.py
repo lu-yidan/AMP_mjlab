@@ -21,6 +21,13 @@ def inv(R, v):
 
 
 class AMPTask(MjlabTrackingTask):
+    def build_world_model(self, blink_structured=False, **kwargs):
+        if blink_structured:
+            from .blink_core import BlinkStructuredWorldModel
+            return BlinkStructuredWorldModel(self.layout,self.num_actions,self.xi_dim,self.aux_dim,dt=self.step_dt,**kwargs)
+        from supermimic.modules.world_model import WorldModel
+        return WorldModel(self.layout,self.num_actions,self.xi_dim,self.aux_dim,**kwargs)
+
     # Override the motion-tracking-specific constructor and imagination, reuse
     # the library's verified reset capture, teleport detection and DR readers.
     aux_names = ('joint_acc_l2', 'foot_slip', 'self_collisions')

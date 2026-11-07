@@ -186,7 +186,7 @@ class SuperMimic:
         def loss(s, a, xi, s1, aux_t, mask):
             """k-step window loss: state error in the target's local frames over the running-norm std, masked."""
             S = layout.unflatten(s[:, 0])
-            std = wm.out_norm.std()
+            std = getattr(wm, 'inc_norm', wm.out_norm).std()
             loss_s = loss_aux = torch.zeros((), device=s.device)
             for j in range(c.wm_window):
                 S, aux = step(S, a[:, j], xi[:, j])
