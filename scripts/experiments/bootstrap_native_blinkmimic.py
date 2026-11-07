@@ -13,7 +13,7 @@ try:
  status('check-native-versions')
  subprocess.run(['ssh','-p','17535','root@192.168.11.91',"cd /root/workplace/blinkmimic-d264658 && PYTHONPATH=src .venv/bin/python -c 'import torch,warp,mjlab; assert torch.__version__==\"2.9.0+cu128\"; assert warp.__version__==\"1.16.0\"; print(torch.__version__,warp.__version__,mjlab.__file__)'"],check=True)
  status('start-native-sanity-training-evaluation')
- subprocess.run(['ssh','-p','17535','root@192.168.11.91',"cd /root/workplace/blinkmimic-d264658 && nohup env WANDB_MODE=offline .venv/bin/python -u native_blink_run.py > native_pipeline.log 2>&1 < /dev/null &"],check=True,timeout=30)
+ subprocess.run(['ssh','-p','17535','root@192.168.11.91',"(cd /root/workplace/blinkmimic-d264658 && nohup env WANDB_MODE=offline .venv/bin/python -u native_blink_run.py > native_pipeline.log 2>&1 < /dev/null & ) >/dev/null 2>&1"],check=True,timeout=30)
  status('native-process-dispatched-check-remote-log')
 except Exception as e:
  status('failed: '+repr(e));raise
