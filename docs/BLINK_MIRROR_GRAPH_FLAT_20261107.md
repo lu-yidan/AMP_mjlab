@@ -52,13 +52,16 @@ native simulator-collection graph is claimed.
   error was 9.91e-6 m; rotation-matrix error was zero.
 - 256-env 12-iteration smoke passed with both graphs captured and replayed.
 - Five existing controlled-discriminator regression tests pass.
-- Launcher requires a fresh 4096-env smoke run to finish before starting 40k.
+- 4096-env 12-iteration smoke also passed, with both captured flags equal to 1.
+  The launcher then started a separate fresh 40k run (normal 300-iteration WM warmup).
 
 Server: `ssh -p 17535 root@192.168.11.91`, GPU 5.
 Snapshot: `/root/workplace/lyd-blink-mirror-graph-flat-20261107`.
 Launcher: `scripts/experiments/launch_blink_mirror_graph_flat.py`.
 Records: `<snapshot>/records/<full-experiment-name>`.
 Server W&B remains offline; local relay uploads the same JSONL metrics.
+W&B: https://wandb.ai/tabletennis/lyd-multi-amp/runs/eosxln9r
+Code branch: `lyd-supermimic-flat-speed-controls`; implementation commit `7de049a`.
 
 This combined arm measures the package's learning and throughput. It cannot
 separately attribute a quality change to mirror versus graph; that would require

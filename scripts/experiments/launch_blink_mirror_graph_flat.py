@@ -15,4 +15,3 @@ for smoke in [True,False]:
   rows=[json.loads(x) for x in (d/'supermimic_log.jsonl').read_text().splitlines()]
   if not any(r.get('graph/wm_captured',0)==1 and r.get('graph/policy_captured',0)==1 for r in rows):
    raise RuntimeError('Smoke ended without both custom update graphs captured')
-
