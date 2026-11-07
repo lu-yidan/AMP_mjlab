@@ -32,7 +32,7 @@ class UpdateGraph:
         self.graph.replay()
         return clone_tree(self.out)
 
-def install_mirror_graph(runner,task):
+def install_mirror_graph(runner,task,mirror_enabled=True):
     a=runner.alg;c=a.cfg
     from supermimic.utils.distributed import world_size
     if world_size()!=1:raise ValueError("This graph adapter is single-GPU only")
@@ -59,7 +59,7 @@ def install_mirror_graph(runner,task):
     rot_error=(Bm-mirror.M@B[:,ids]@mirror.M).abs().max().item()
     if pos_error>1e-4 or rot_error>1e-4:
         raise ValueError(f'Robot mirror FK mismatch: position={pos_error}, rotation={rot_error}')
-    print('[Mirror50] context',task.context_terms,'q0/action scale symmetry verified',
+    print('[Mirror50]' if mirror_enabled else '[GraphOnly: mirror disabled]', 'context',task.context_terms,'q0/action scale symmetry verified',
           'FK max errors',pos_error,rot_error,flush=True)
     # Capturable fused critic Adam; actor and WM use upstream capturable MuonAdam.
     a.opt_v=torch.optim.Adam(a.critic_params,lr=torch.tensor(c.critic_learning_rate,device=task.device),fused=True,capturable=True)
@@ -85,7 +85,8 @@ def install_mirror_graph(runner,task):
             a._capture_finite.logical_and_(ok);a.opt_wm.step(ok)
             return {'wm/loss':ls.detach()/c.wm_window,'wm/aux_loss':la.detach()/c.wm_window,'wm/err_last':last}
         for _ in range(c.wm_updates):
-            w=mirror.windows(a.replay.sample_windows(c.wm_batch,c.wm_window))
+            w=a.replay.sample_windows(c.wm_batch,c.wm_window)
+            if mirror_enabled:w=mirror.windows(w)
             if wm_static is None:
                 wm_static=clone_tree(w);wm_graph=UpdateGraph(step,'world-model forward/backward/optimizer')
             else:copy_tree(wm_static,w)
