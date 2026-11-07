@@ -2,7 +2,7 @@
 import json,os,shlex,subprocess,sys,time
 import wandb
 name=sys.argv[1]
-root='/root/workplace/lyd-supermimic-flat-20261107/records/'+name
+root=(sys.argv[2] if len(sys.argv)>2 else '/root/workplace/lyd-supermimic-flat-20261107/records')+'/'+name
 run=wandb.init(entity='tabletennis',project='lyd-multi-amp',name=name+'-scratch-4096-40k-seed42-LogRelay',config={'source_directory':root,'logging':'local relay of server JSONL; same training, not a new experiment'})
 print('RELAY_URL',run.url,flush=True)
 last=-1
