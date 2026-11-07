@@ -7,9 +7,11 @@ import torch
 from rsl_rl.modules.stable_multi_amp import StableMultiAMP
 
 
-def require_finite(label, *values):
+def require_finite(label, *values, asynchronous=False):
     for i, value in enumerate(values):
-        if not torch.isfinite(value).all():
+        if asynchronous:
+            torch._assert_async(torch.isfinite(value).all(), f"{label}[{i}]: non-finite tensor")
+        elif not torch.isfinite(value).all():
             raise FloatingPointError(f'{label}[{i}]: non-finite tensor, shape={tuple(value.shape)}')
 
 
@@ -26,11 +28,11 @@ class ControlledAMP(StableMultiAMP):
             self.optimizers['rec'] = self.optimizers['loco']
 
     def _input(self, kind, a, b, condition):
-        require_finite('discriminator input', a, b, condition)
+        require_finite('discriminator input', a, b, condition, asynchronous=getattr(self,'graph_safe_checks',False))
         x = super()._input(kind, a, b, condition)
         if kind == 'rec' and self.cfg.get('shared_discriminator'):
             x = torch.cat((x, torch.zeros(len(a), 3, device=a.device, dtype=a.dtype)), -1)
-        require_finite('normalized discriminator input', x)
+        require_finite('normalized discriminator input', x, asynchronous=getattr(self,'graph_safe_checks',False))
         return x
 
     def _recovery_expert(self, geometry):

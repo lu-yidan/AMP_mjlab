@@ -38,6 +38,7 @@ def main():
     p.add_argument('--flat-discriminator',choices=['shared','dual'])
     p.add_argument('--iteration-speed-curriculum',action='store_true')
     p.add_argument('--blink-core',action='store_true')
+    p.add_argument('--blink-mirror-graph',action='store_true')
     p.add_argument('--recovery-height-weight',type=float,default=1.0)
     p.add_argument('--no-compile',action='store_true');p.add_argument('--wandb',action='store_true')
     p.add_argument('--experiment-name')
@@ -48,6 +49,7 @@ def main():
     p.add_argument('--save-interval',type=int,default=1000)
     a=p.parse_args()
     if a.flat_discriminator and a.terrain:p.error('flat-discriminator requires flat terrain')
+    if a.blink_mirror_graph and not a.blink_core:p.error('mirror-graph requires blink-core')
     if a.blink_core and (a.terrain or not a.flat_discriminator or not a.experiment_name):p.error('blink-core requires named flat discriminator experiment')
     if a.sim_steps<1 or a.world_model_width<1 or a.wm_updates<1 or a.save_interval<1:p.error('Invalid workload')
     if not 0<=a.ema_decay<1:p.error('ema-decay must be in [0,1)')
@@ -114,6 +116,8 @@ def main():
         train['world_model']['blink_structured']=True
         train['algorithm'].update(learning_rate=4e-4,wm_learning_rate=4e-4)
         train['blink_core']={'structured_drift':.625,'optimizer':'Muon hidden matrices + Adam','mirror':False,'reference_skip':False,'custom_cuda_graph':False}
+    if a.blink_mirror_graph:
+        train['blink_core'].update(mirror=.5,custom_cuda_graph='WM and actor/critic updates; eager collection')
     if a.terrain:
         train['terrain_map_sha256']=task.terrain_map.fingerprint
         train['algorithm']['fail_on_nonfinite']=True
@@ -136,7 +140,10 @@ def main():
     runner=Runner(task,train,str(out),'cuda:0',callbacks=[after_iteration])
     if a.blink_core:
         from src.amp_supermimic.blink_core import configure_blink_optimizers
-        configure_blink_optimizers(runner)
+        configure_blink_optimizers(runner,capturable=a.blink_mirror_graph)
+    if a.blink_mirror_graph:
+        from src.amp_supermimic.blink_graph import install_mirror_graph
+        install_mirror_graph(runner,task)
     from src.amp_supermimic.ema import PolicyEMA
     runner.policy_ema=PolicyEMA(runner.policy,a.ema_decay) if a.ema_decay else None
     if a.wandb:

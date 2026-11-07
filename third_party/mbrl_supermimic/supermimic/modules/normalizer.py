@@ -24,8 +24,8 @@ class RunningNorm(nn.Module):
         tot = self.count + n
         delta = m - self.mean
         self.mean += delta * n / tot
-        self.var = (self.var * self.count + v * n + delta**2 * self.count * n / tot) / tot
-        self.count = tot
+        self.var.copy_((self.var * self.count + v * n + delta**2 * self.count * n / tot) / tot)
+        self.count.copy_(tot)
 
     def forward(self, x):
         return (x - self.mean) / torch.sqrt(self.var + self.eps**2)

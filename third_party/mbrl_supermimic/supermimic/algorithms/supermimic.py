@@ -97,7 +97,9 @@ def _adam(params, lr, device, **kw):
 def _step_if_finite(opt, ok):
     """opt.step() unless ``ok`` (a device bool) is False, without a host sync: fused Adam reads ``found_inf`` on the
     device (the GradScaler mechanism); otherwise fall back to a synced check."""
-    if opt.defaults.get("fused"):
+    if getattr(opt, "capturable", False):
+        opt.step(ok)
+    elif opt.defaults.get("fused"):
         opt.found_inf = (~ok).float()
         opt.step()
         del opt.found_inf
@@ -287,7 +289,10 @@ class SuperMimic:
         c, wm, pol = self.cfg, self.wm, self.policy
         t0 = time.time()
         self._mark_step()
-        if c.imagine_from == "replay" and self.replay is not None and self.replay.startable > 0:
+        if getattr(self, "_prepared_policy", None) is not None:
+            s0, xi, rollout = self._prepared_policy
+            S = task.layout.unflatten(s0)
+        elif c.imagine_from == "replay" and self.replay is not None and self.replay.startable > 0:
             s0, xi, side, past = self.replay.sample_starts(getattr(task, "history_length", 0))
             if xi.shape[-1] > 0:
                 side = {**side, "xi": xi}
@@ -349,6 +354,8 @@ class SuperMimic:
         t_bwd = time.time()
         allreduce_grads(self.actor_params)
         gn = nn.utils.clip_grad_norm_(self.actor_params, c.max_grad_norm)
+        if hasattr(self, "_capture_finite"):
+            self._capture_finite.logical_and_(torch.isfinite(loss) & torch.isfinite(gn))
         if c.fail_on_nonfinite and not bool(torch.isfinite(loss) & torch.isfinite(gn)):
             raise FloatingPointError("Non-finite imagined policy update")
         nn.utils.clip_grad_value_(self.actor_params, c.max_grad_value)
@@ -425,6 +432,8 @@ class SuperMimic:
                 v_loss.backward()
                 allreduce_grads(self.critic_params)
                 v_gn = nn.utils.clip_grad_norm_(self.critic_params, c.max_grad_norm)
+                if hasattr(self, "_capture_finite"):
+                    self._capture_finite.logical_and_(torch.isfinite(v_loss) & torch.isfinite(v_gn))
                 if c.fail_on_nonfinite and not bool(torch.isfinite(v_loss) & torch.isfinite(v_gn)):
                     raise FloatingPointError("Non-finite critic update")
                 _step_if_finite(self.opt_v, torch.isfinite(v_loss))
@@ -438,7 +447,10 @@ class SuperMimic:
         f = c.lr_min_ratio if it >= c.lr_decay_iters else c.lr_min_ratio + (1 - c.lr_min_ratio) * 0.5 * (1 + math.cos(math.pi * it / c.lr_decay_iters))
         for opt, lr in ((self.opt_pi, c.learning_rate), (self.opt_v, c.critic_learning_rate), (self.opt_wm, c.wm_learning_rate)):
             for g in opt.param_groups:
-                g["lr"] = lr * f * self.lr_scale
+                if torch.is_tensor(g["lr"]):
+                    g["lr"].fill_(lr * f * self.lr_scale)
+                else:
+                    g["lr"] = lr * f * self.lr_scale
 
     def state_dict(self) -> dict:
         return {"policy": self.policy.state_dict(), "world_model": self.wm.state_dict(), "opt_pi": self.opt_pi.state_dict(),

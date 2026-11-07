@@ -52,10 +52,10 @@ class BlinkStructuredWorldModel(WorldModel):
         return self.integrate(S,d),aux
 
 
-def configure_blink_optimizers(runner):
+def configure_blink_optimizers(runner, capturable=False):
     from third_party.blinkmimic_core.optim import MuonAdam
     # Use actor-only module: do not inadvertently give MuonAdam critic parameters.
     a=runner.alg
-    a.opt_pi=MuonAdam(runner.policy.actor,[runner.policy.actor],lr=a.cfg.learning_rate,betas=(.9,.95))
+    a.opt_pi=MuonAdam(runner.policy.actor,[runner.policy.actor],lr=a.cfg.learning_rate,betas=(.9,.95),capturable=capturable)
     a.opt_pi.defaults={'fused':False}
-    a.opt_wm=MuonAdam(a.wm,[a.wm.net],lr=a.cfg.wm_learning_rate,betas=(.9,.999))
+    a.opt_wm=MuonAdam(a.wm,[a.wm.net],lr=a.cfg.wm_learning_rate,betas=(.9,.999),capturable=capturable)
