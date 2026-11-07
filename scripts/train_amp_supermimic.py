@@ -35,6 +35,8 @@ def main():
     p.add_argument('--sim-steps',type=float,default=24);p.add_argument('--output',required=True)
     p.add_argument('--verify-only',action='store_true');p.add_argument('--smoke',action='store_true')
     p.add_argument('--terrain',action='store_true')
+    p.add_argument('--flat-discriminator',choices=['shared','dual'])
+    p.add_argument('--iteration-speed-curriculum',action='store_true')
     p.add_argument('--recovery-height-weight',type=float,default=1.0)
     p.add_argument('--no-compile',action='store_true');p.add_argument('--wandb',action='store_true')
     p.add_argument('--experiment-name')
@@ -44,11 +46,14 @@ def main():
     p.add_argument('--ema-decay',type=float,default=0.)
     p.add_argument('--save-interval',type=int,default=1000)
     a=p.parse_args()
+    if a.flat_discriminator and a.terrain:p.error('flat-discriminator requires flat terrain')
     if a.sim_steps<1 or a.world_model_width<1 or a.wm_updates<1 or a.save_interval<1:p.error('Invalid workload')
     if not 0<=a.ema_decay<1:p.error('ema-decay must be in [0,1)')
     if not 0 <= a.recovery_height_weight <= 1: p.error('--recovery-height-weight must be between 0 and 1')
     out=Path(a.output);out.mkdir(parents=True,exist_ok=True)
     task_id='Unitree-G1-AMP-I-Shared-TerrainCritic' if a.terrain else 'Unitree-G1-MultiAMP-Phase-Tracking-Flat'
+    if a.flat_discriminator:
+        task_id='Unitree-G1-AMP-Controlled-'+('F-Shared' if a.flat_discriminator=='shared' else 'H-Full')+'-Flat'
     experiment='K-SuperMimic-Shared-Terrain' if a.terrain else 'AMP-E'
     if a.recovery_height_weight != 1.0:
         if not a.terrain or a.recovery_height_weight != .5: p.error('Only the terrain half-height ablation is currently named')
@@ -56,6 +61,9 @@ def main():
     if a.experiment_name:experiment=a.experiment_name
     elif a.ema_decay or a.world_model_width!=2048 or a.wm_updates!=10:p.error('Modified recipes require --experiment-name')
     cfg=load_env_cfg(task_id);cfg.scene.num_envs=a.num_envs;cfg.seed=a.seed
+    if a.iteration_speed_curriculum:
+        cfg.commands['twist'].automatic_curriculum=False
+        cfg.commands['twist'].full_speed=False
     cfg.rewards['track_root_height'].weight=a.recovery_height_weight
     if a.verify_only:
         cfg.observations['actor'].enable_corruption=False
@@ -93,18 +101,31 @@ def main():
         policy=dict(actor_hidden_dims=[512,256,128],critic_hidden_dims=[512,256,128]),
         world_model=dict(hidden_dims=[a.world_model_width]*3),algorithm=dict(horizon=32,
         termination='hard',wm_updates=a.wm_updates,wm_warmup_iters=300,buffer_steps=128,lr_decay_iters=100000,
-        compile=not a.no_compile,amp='bf16'))
+        compile=not a.no_compile,amp='bf16',fail_on_nonfinite=True))
     if a.smoke:
         train['algorithm'].update(wm_warmup_iters=1)
         train['log_interval']=1
     train.update(experiment=experiment,max_iterations=a.iterations,task=task_id,expert_sha256=expected,
         recovery_height_weight=a.recovery_height_weight,ema_decay=a.ema_decay,actor_input='proprioception_only',actor_observation_width=actor_width)
+    train.update(flat_discriminator=a.flat_discriminator,speed_curriculum_iterations=[5000,15000] if a.iteration_speed_curriculum else None)
     if a.terrain:
         train['terrain_map_sha256']=task.terrain_map.fingerprint
         train['algorithm']['fail_on_nonfinite']=True
     (out/'config.json').write_text(json.dumps(train,indent=2))
     def after_iteration(r,it):
+        if a.iteration_speed_curriculum:
+            stage=int(it>=5000)+int(it>=15000)
+            if task.command.stage!=stage:
+                task.command.stage=stage
+                print(f'[IterationSpeedCurriculum] iteration={it} stage={stage}',flush=True)
         task.update_discriminators()
+        if a.iteration_speed_curriculum and it%10==0:
+            c=task.command.command
+            metrics={'Curriculum/stage':task.command.stage,
+                'Curriculum/command_vx_above_1':float((c[:,0]>1.).float().mean()),
+                'Curriculum/command_vx_above_2':float((c[:,0]>2.).float().mean()),
+                'Curriculum/target_vx_above_2':float((task.command.target[:,0]>2.).float().mean())}
+            if getattr(r,'wandb_run',None):r.wandb_run.log(metrics,step=it)
         if r.policy_ema is not None:r.policy_ema.update(r.policy)
     runner=Runner(task,train,str(out),'cuda:0',callbacks=[after_iteration])
     from src.amp_supermimic.ema import PolicyEMA

@@ -110,7 +110,7 @@ class TrackingCommand(UniformVelocityCommand):
                 for j,k in enumerate(('xy_mae','yaw_mae','upright')):self.metrics[f'{m}_{k}'][:]=means[i,j]
             min_steps=(120000,360000)
             good=(self.count>5000).all()&(means[:,0]<.3).all()&(means[:,1]<.35).all()&(means[:,2]>.95).all()&(self.recovery_sum/self.window_steps<.15)
-            if not self.cfg.full_speed and self.stage<2 and self._env.common_step_counter>=min_steps[self.stage] and bool(good):
+            if self.cfg.automatic_curriculum and not self.cfg.full_speed and self.stage<2 and self._env.common_step_counter>=min_steps[self.stage] and bool(good):
                 self.stage+=1
                 print(f'[TrackingCurriculum] stage={self.stage} limits={LIMITS[self.stage]} step={self._env.common_step_counter}',flush=True)
             self.count.zero_();self.sums.zero_();self.recovery_sum.zero_();self.window_steps=0
@@ -120,6 +120,7 @@ class TrackingCommand(UniformVelocityCommand):
 class TrackingCommandCfg(UniformVelocityCommandCfg):
     acceleration: float = 1.5
     full_speed: bool = False
+    automatic_curriculum: bool = True
     def build(self,env):return TrackingCommand(self,env)
 
 
