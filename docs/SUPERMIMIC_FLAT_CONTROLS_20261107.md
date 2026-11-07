@@ -52,3 +52,25 @@ training and 4-replica checkpoint evaluation are required before claiming fideli
 `scripts/experiments/run_native_blinkmimic.py` records this process to W&B.
 The reference-conditioned native Actor must not be relabeled as our blind,
 velocity-command Actor. Same-task BlinkMimic integration remains separate work.
+
+## Runtime update
+
+All three 4096-env smoke checks passed. Server W&B returned HTTP 403 during
+shared-2.5 initialization; that failed attempt was preserved with suffix
+`-wandb-init-failed`, and training was restarted from scratch in offline mode.
+The other two runs continued. Persistent local JSONL relays provide cloud plots:
+
+- Shared 2.5: https://wandb.ai/tabletennis/lyd-multi-amp/runs/wi17hgmk
+- Shared 5: https://wandb.ai/tabletennis/lyd-multi-amp/runs/s3uovdar
+- Dual 2.5: https://wandb.ai/tabletennis/lyd-multi-amp/runs/yi6ssjdc
+
+LogRelay denotes the same server training, not a fourth experiment. Relays poll
+once per minute and require this local host and SSH connectivity to stay available.
+
+Native BlinkMimic pinned download remains bandwidth-limited (a 1 MiB Torch range
+probe measured approximately 170 kB/s). `bootstrap_native_blinkmimic.py` installs
+locally, transfers the exact site-packages, asserts Torch/Warp versions remotely,
+and dispatches native sanity/train/evaluation. Native W&B uses offline logging to
+avoid server 403 failures. Dispatch does not establish successful validation;
+read remote native_pipeline.log and logs/native-main-seed0/complete.json.
+Same-task BlinkMimic integration is not complete.
